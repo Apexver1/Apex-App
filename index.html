@@ -66,7 +66,7 @@
 <script>
 var SU="https://midyxvjfoggchbugxzkd.supabase.co";
 var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pZHl4dmpmb2dnY2hidWd4emtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NzQ5ODQsImV4cCI6MjA5MTM1MDk4NH0.VLsaYxByQC2s4jLpcETNx3sYykp-x3azyC0v1q0dqmo";
-var T="",budget=null,bRequests=[],scoresMap={},sortBy="model",aiQuery="",aiResults=null,aiMode="rules",aiLoading=false,pickerSearch="",pickerPos="ALL",roster=[],prospects=[],strategy=null,schols=[],pStats={},crmLogs={},tab="dash",sq="",pf="ALL",sf="ALL",fPPG=0,fRPG=0,f3P=0,fP="ALL";
+var T="",budget=null,bRequests=[],scoresMap={},familyMap={},sortBy="model",aiQuery="",aiResults=null,aiMode="rules",aiLoading=false,pickerSearch="",pickerPos="ALL",roster=[],prospects=[],strategy=null,schols=[],pStats={},crmLogs={},tab="dash",sq="",pf="ALL",sf="ALL",fPPG=0,fRPG=0,f3P=0,fP="ALL";
 
 
 
@@ -153,6 +153,121 @@ window.aiSearch=function(){
   render();
 }
 
+
+
+
+window.openCRM=function(pid){
+  var p=prospects.filter(function(x){return x.id===pid;})[0];if(!p)return;
+  var fam=familyMap[pid]||[];
+  var h='<div class="mbg" onclick="if(event.target===this)closeM()"><div class="mdl">';
+  h+='<button class="x" onclick="closeM()">X</button>';
+  h+='<h2 style="font-size:18px;margin-bottom:4px">'+p.player_name+'</h2>';
+  h+='<div style="font-size:11px;color:var(--dim);margin-bottom:12px">CRM / CONTACT INFO</div>';
+  h+='<div style="display:flex;gap:6px;margin-bottom:10px"><label class="btn" style="flex:1;text-align:center;background:var(--navy);color:var(--y);border:1px solid var(--y);cursor:pointer">IMPORT VCARD<input type="file" accept=".vcf,text/vcard" onchange="importVCard(\''+pid+'\',this)" style="display:none"></label><button class="btn" style="flex:1;background:var(--navy);color:var(--y);border:1px solid var(--y)" onclick="exportVCard(\''+pid+'\')">EXPORT VCARD</button></div>';
+  h+='<div style="font-size:10px;color:var(--y);letter-spacing:1px;margin:10px 0 4px">PRIORITY TIER</div>';
+  h+='<select id="cr-tier" class="inp">';
+  ["","A","B","C","D"].forEach(function(t){h+='<option value="'+t+'"'+(p.priority_tier===t?" selected":"")+'>'+(t||"--")+'</option>';});
+  h+='</select>';
+  h+='<div style="font-size:10px;color:var(--y);letter-spacing:1px;margin:10px 0 4px">CONTACT</div>';
+  var fields=[["cell_phone","Cell Phone","tel"],["home_phone","Home Phone","tel"],["email","Email","email"],["home_address","Home Address","text"],["hs_address","HS Address","text"]];
+  fields.forEach(function(f){h+='<input id="cr-'+f[0]+'" class="inp" type="'+f[2]+'" placeholder="'+f[1]+'" value="'+(p[f[0]]||"")+'">';});
+  h+='<div style="font-size:10px;color:var(--y);letter-spacing:1px;margin:10px 0 4px">SOCIAL</div>';
+  ["instagram","twitter","tiktok","hudl_url"].forEach(function(k){h+='<input id="cr-'+k+'" class="inp" placeholder="'+k.toUpperCase().replace("_"," ")+'" value="'+(p[k]||"")+'">';});
+  h+='<div style="font-size:10px;color:var(--y);letter-spacing:1px;margin:10px 0 4px">AAU & HS COACHES</div>';
+  ["aau_team","aau_coach_name","aau_coach_phone","hs_coach_name","hs_coach_phone"].forEach(function(k){h+='<input id="cr-'+k+'" class="inp" placeholder="'+k.replace(/_/g," ").toUpperCase()+'" value="'+(p[k]||"")+'">';});
+  h+='<div style="font-size:10px;color:var(--y);letter-spacing:1px;margin:10px 0 4px">FAMILY ('+fam.length+')</div>';
+  fam.forEach(function(f,i){h+='<div style="background:var(--bg);border-radius:6px;padding:8px;margin-bottom:6px"><div style="font-size:11px;color:var(--y);font-weight:700">'+f.relationship.toUpperCase()+(f.is_primary_contact?" PRIMARY":"")+'</div><div style="font-size:13px">'+(f.full_name||"")+'</div><div style="font-size:11px;color:var(--dim)">'+(f.phone||"")+(f.email?" "+f.email:"")+'</div><button onclick="delFamily(\''+f.id+'\',\''+pid+'\')" style="background:none;border:1px solid var(--red);color:var(--red);font-size:9px;padding:3px 8px;border-radius:3px;cursor:pointer;margin-top:4px">REMOVE</button></div>';});
+  h+='<button class="btn" style="background:var(--navy);color:var(--white);border:1px dashed var(--b);margin-bottom:10px" onclick="addFamilyForm(\''+pid+'\')">+ ADD FAMILY CONTACT</button>';
+  h+='<button class="btn" onclick="saveCRM(\''+pid+'\')">SAVE CONTACT INFO</button>';
+  h+='</div></div>';
+  document.getElementById("mc").innerHTML=h;
+}
+
+window.saveCRM=function(pid){
+  var data={};
+  ["cell_phone","home_phone","email","home_address","hs_address","instagram","twitter","tiktok","hudl_url","aau_team","aau_coach_name","aau_coach_phone","hs_coach_name","hs_coach_phone"].forEach(function(k){data[k]=document.getElementById("cr-"+k).value||null;});
+  data.priority_tier=document.getElementById("cr-tier").value||null;
+  api("/rest/v1/prospect_shortlist?id=eq."+pid,{method:"PATCH",body:JSON.stringify(data),prefer:"return=minimal"}).then(function(){
+    prospects.forEach(function(p){if(p.id===pid)Object.keys(data).forEach(function(k){p[k]=data[k];});});
+    closeM();render();
+  });
+}
+
+window.addFamilyForm=function(pid){
+  var h='<div class="mbg" onclick="if(event.target===this)closeM()"><div class="mdl">';
+  h+='<button class="x" onclick="openCRM(\''+pid+'\')">X</button>';
+  h+='<h2 style="font-size:18px;margin-bottom:12px">ADD FAMILY CONTACT</h2>';
+  h+='<select id="fm-rel" class="inp"><option value="father">Father</option><option value="mother">Mother</option><option value="stepfather">Stepfather</option><option value="stepmother">Stepmother</option><option value="guardian">Guardian</option><option value="grandparent">Grandparent</option><option value="sibling">Sibling</option><option value="agent">Agent</option><option value="other">Other</option></select>';
+  h+='<input id="fm-name" class="inp" placeholder="Full Name">';
+  h+='<input id="fm-phone" class="inp" type="tel" placeholder="Phone">';
+  h+='<input id="fm-email" class="inp" type="email" placeholder="Email">';
+  h+='<textarea id="fm-notes" class="inp" rows="2" placeholder="Notes"></textarea>';
+  h+='<label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--dim);margin-bottom:10px"><input id="fm-primary" type="checkbox"> Primary contact</label>';
+  h+='<button class="btn" onclick="saveFamily(\''+pid+'\')">SAVE</button>';
+  h+='</div></div>';
+  document.getElementById("mc").innerHTML=h;
+}
+
+window.saveFamily=function(pid){
+  var data={prospect_id:pid,relationship:document.getElementById("fm-rel").value,full_name:document.getElementById("fm-name").value,phone:document.getElementById("fm-phone").value,email:document.getElementById("fm-email").value,notes:document.getElementById("fm-notes").value,is_primary_contact:document.getElementById("fm-primary").checked};
+  api("/rest/v1/prospect_family",{method:"POST",body:JSON.stringify(data),prefer:"return=representation"}).then(function(r){
+    if(r&&r[0]){if(!familyMap[pid])familyMap[pid]=[];familyMap[pid].push(r[0]);}
+    openCRM(pid);
+  });
+}
+
+window.delFamily=function(fid,pid){
+  api("/rest/v1/prospect_family?id=eq."+fid,{method:"DELETE",prefer:"return=minimal"}).then(function(){
+    if(familyMap[pid])familyMap[pid]=familyMap[pid].filter(function(f){return f.id!==fid;});
+    openCRM(pid);
+  });
+}
+
+window.importVCard=function(pid,inp){
+  var file=inp.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var txt=e.target.result;
+    var get=function(field){var m=txt.match(new RegExp(field+"[^:]*:([^\\r\\n]+)","i"));return m?m[1].trim():"";};
+    var phone=get("TEL");
+    var email=get("EMAIL");
+    var addr=get("ADR").replace(/;/g," ").trim();
+    if(phone)document.getElementById("cr-cell_phone").value=phone;
+    if(email)document.getElementById("cr-email").value=email;
+    if(addr)document.getElementById("cr-home_address").value=addr;
+    alert("vCard parsed. Review and Save.");
+  };
+  reader.readAsText(file);
+}
+
+window.exportVCard=function(pid){
+  var p=prospects.filter(function(x){return x.id===pid;})[0];if(!p)return;
+  var fam=familyMap[pid]||[];
+  var vcards=[];
+  var v="BEGIN:VCARD\nVERSION:3.0\nFN:"+p.player_name+"\n";
+  if(p.cell_phone)v+="TEL;TYPE=CELL:"+p.cell_phone+"\n";
+  if(p.home_phone)v+="TEL;TYPE=HOME:"+p.home_phone+"\n";
+  if(p.email)v+="EMAIL:"+p.email+"\n";
+  if(p.home_address)v+="ADR;TYPE=HOME:;;"+p.home_address+";;;;\n";
+  v+="ORG:"+(p.current_school||"")+"\n";
+  v+="TITLE:"+(p.position||"")+" Prospect\n";
+  v+="NOTE:Apex Intel - "+(p.position||"")+" - "+(p.fit_notes||"").replace(/\n/g," ")+"\n";
+  v+="END:VCARD";
+  vcards.push(v);
+  fam.forEach(function(f){
+    var fv="BEGIN:VCARD\nVERSION:3.0\nFN:"+(f.full_name||f.relationship)+"\n";
+    if(f.phone)fv+="TEL:"+f.phone+"\n";
+    if(f.email)fv+="EMAIL:"+f.email+"\n";
+    fv+="ORG:"+p.player_name+" ("+f.relationship+")\n";
+    fv+="NOTE:"+(f.notes||"")+"\n";
+    fv+="END:VCARD";
+    vcards.push(fv);
+  });
+  var blob=new Blob([vcards.join("\n")],{type:"text/vcard"});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement("a");a.href=url;a.download=p.player_name.replace(/ /g,"_")+".vcf";a.click();
+  URL.revokeObjectURL(url);
+}
 
 
 window.aiVoice=function(){
@@ -359,10 +474,11 @@ window.loadData=function(){
     api("/rest/v1/crm_log?select=*&order=contact_date.desc"),
 api("/rest/v1/nil_budget?select=*&is_seed_data=eq.true&limit=1"),
 api("/rest/v1/nil_budget_requests?select=*&order=requested_at.desc"),
-api("/rest/v1/prospect_scores?select=*")
+api("/rest/v1/prospect_scores?select=*"),
+api("/rest/v1/prospect_family?select=*")
   ]).then(function(r){
     roster=r[0]||[];prospects=r[1]||[];strategy=(r[2]&&r[2][0])||null;schols=r[3]||[];
-    var ps=r[4]||[];var logs=r[5]||[];budget=(r[6]&&r[6][0])||null;bRequests=r[7]||[];scoresMap={};(r[8]||[]).forEach(function(s){scoresMap[s.prospect_id]=s;});
+    var ps=r[4]||[];var logs=r[5]||[];budget=(r[6]&&r[6][0])||null;bRequests=r[7]||[];scoresMap={};(r[8]||[]).forEach(function(s){scoresMap[s.prospect_id]=s;});familyMap={};(r[9]||[]).forEach(function(f){if(!familyMap[f.prospect_id])familyMap[f.prospect_id]=[];familyMap[f.prospect_id].push(f);});
     var idMap={};prospects.forEach(function(p){idMap[p.id]=p.player_name;});
     pStats={};ps.forEach(function(s){var n=idMap[s.prospect_id];if(n){if(!pStats[n])pStats[n]={};pStats[n][s.stat_name]=s.stat_value;}});
     crmLogs={};logs.forEach(function(l){if(!crmLogs[l.prospect_id])crmLogs[l.prospect_id]=[];crmLogs[l.prospect_id].push(l);});
