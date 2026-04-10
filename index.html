@@ -66,7 +66,7 @@
 <script>
 var SU="https://midyxvjfoggchbugxzkd.supabase.co";
 var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pZHl4dmpmb2dnY2hidWd4emtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NzQ5ODQsImV4cCI6MjA5MTM1MDk4NH0.VLsaYxByQC2s4jLpcETNx3sYykp-x3azyC0v1q0dqmo";
-var T="",budget=null,bRequests=[],scoresMap={},familyMap={},recSrc="portal",sortBy="model",aiQuery="",aiResults=null,aiMode="rules",aiLoading=false,pickerSearch="",pickerPos="ALL",roster=[],prospects=[],strategy=null,schols=[],pStats={},crmLogs={},tab="dash",sq="",pf="ALL",sf="ALL",fPPG=0,fRPG=0,f3P=0,fP="ALL";
+var T="",budget=null,bRequests=[],scoresMap={},familyMap={},reminders=[],recSrc="portal",sortBy="model",aiQuery="",aiResults=null,aiMode="rules",aiLoading=false,pickerSearch="",pickerPos="ALL",roster=[],prospects=[],strategy=null,schols=[],pStats={},crmLogs={},tab="dash",sq="",pf="ALL",sf="ALL",fPPG=0,fRPG=0,f3P=0,fP="ALL";
 
 
 
@@ -154,6 +154,74 @@ window.aiSearch=function(){
 }
 
 
+
+
+
+window.tierCadence=function(t){return t==="A"?3:t==="B"?7:t==="C"?14:t==="D"?30:7;}
+
+window.toggleStar=function(pid,ev){
+  if(ev)ev.stopPropagation();
+  var p=prospects.filter(function(x){return x.id===pid;})[0];if(!p)return;
+  var newStar=!p.is_starred;
+  api("/rest/v1/prospect_shortlist?id=eq."+pid,{method:"PATCH",body:JSON.stringify({is_starred:newStar}),prefer:"return=minimal"}).then(function(){
+    p.is_starred=newStar;
+    if(newStar&&p.auto_cadence_enabled!==false){
+      var days=p.cadence_days||tierCadence(p.priority_tier);
+      var when=new Date();when.setDate(when.getDate()+1);
+      api("/rest/v1/contact_reminders",{method:"POST",body:JSON.stringify({prospect_id:pid,assigned_to:UID,created_by:UID,method:"call",scheduled_for:when.toISOString(),notes:"Auto-scheduled ("+days+" day cadence)",is_auto_generated:true}),prefer:"return=representation"}).then(function(r){if(r&&r[0])reminders.push(r[0]);render();});
+    } else {
+      render();
+    }
+  });
+}
+
+window.setReminder=function(pid){
+  var h='<div class="mbg" onclick="if(event.target===this)closeM()"><div class="mdl">';
+  h+='<button class="x" onclick="closeM()">X</button>';
+  h+='<h2 style="font-size:18px;margin-bottom:12px">SET REMINDER</h2>';
+  h+='<select id="rm-method" class="inp"><option value="call">Phone Call</option><option value="text">Text Message</option><option value="email">Email</option><option value="in_person">In Person</option><option value="video_call">Video Call</option><option value="dm">DM/Social</option></select>';
+  h+='<label style="font-size:11px;color:var(--dim);letter-spacing:1px">WHEN</label>';
+  h+='<select id="rm-when" class="inp"><option value="0">Today</option><option value="1" selected>Tomorrow</option><option value="3">In 3 days</option><option value="7">In 1 week</option><option value="14">In 2 weeks</option></select>';
+  h+='<textarea id="rm-notes" class="inp" rows="3" placeholder="What to talk about..."></textarea>';
+  h+='<button class="btn" onclick="saveReminder(\''+pid+'\')">CREATE REMINDER</button>';
+  h+='</div></div>';
+  document.getElementById("mc").innerHTML=h;
+}
+
+window.saveReminder=function(pid){
+  var days=parseInt(document.getElementById("rm-when").value);
+  var when=new Date();when.setDate(when.getDate()+days);when.setHours(9,0,0);
+  var data={prospect_id:pid,assigned_to:UID,created_by:UID,method:document.getElementById("rm-method").value,scheduled_for:when.toISOString(),notes:document.getElementById("rm-notes").value,is_auto_generated:false};
+  api("/rest/v1/contact_reminders",{method:"POST",body:JSON.stringify(data),prefer:"return=representation"}).then(function(r){
+    if(r&&r[0])reminders.push(r[0]);
+    closeM();render();
+  });
+}
+
+window.completeReminder=function(rid,ev){
+  if(ev)ev.stopPropagation();
+  var r=reminders.filter(function(x){return x.id===rid;})[0];if(!r)return;
+  var p=prospects.filter(function(x){return x.id===r.prospect_id;})[0];
+  api("/rest/v1/contact_reminders?id=eq."+rid,{method:"PATCH",body:JSON.stringify({status:"completed",completed_at:new Date().toISOString()}),prefer:"return=minimal"}).then(function(){
+    return api("/rest/v1/crm_log",{method:"POST",body:JSON.stringify({prospect_id:r.prospect_id,contact_date:new Date().toISOString(),method:r.method,content:"Completed scheduled "+r.method}),prefer:"return=minimal"});
+  }).then(function(){
+    reminders=reminders.filter(function(x){return x.id!==rid;});
+    if(p&&p.is_starred&&p.auto_cadence_enabled!==false){
+      var days=p.cadence_days||tierCadence(p.priority_tier);
+      var when=new Date();when.setDate(when.getDate()+days);when.setHours(9,0,0);
+      return api("/rest/v1/contact_reminders",{method:"POST",body:JSON.stringify({prospect_id:r.prospect_id,assigned_to:UID,created_by:UID,method:"call",scheduled_for:when.toISOString(),notes:"Auto-scheduled next ("+days+" day cadence)",is_auto_generated:true}),prefer:"return=representation"}).then(function(nr){if(nr&&nr[0])reminders.push(nr[0]);});
+    }
+  }).then(function(){render();});
+}
+
+window.snoozeReminder=function(rid,days,ev){
+  if(ev)ev.stopPropagation();
+  var when=new Date();when.setDate(when.getDate()+days);
+  api("/rest/v1/contact_reminders?id=eq."+rid,{method:"PATCH",body:JSON.stringify({scheduled_for:when.toISOString()}),prefer:"return=minimal"}).then(function(){
+    reminders.forEach(function(r){if(r.id===rid)r.scheduled_for=when.toISOString();});
+    render();
+  });
+}
 
 
 window.openCRM=function(pid){
@@ -476,10 +544,11 @@ window.loadData=function(){
 api("/rest/v1/nil_budget?select=*&is_seed_data=eq.true&limit=1"),
 api("/rest/v1/nil_budget_requests?select=*&order=requested_at.desc"),
 api("/rest/v1/prospect_scores?select=*"),
-api("/rest/v1/prospect_family?select=*")
+api("/rest/v1/prospect_family?select=*"),
+api("/rest/v1/contact_reminders?select=*&status=eq.pending&order=scheduled_for.asc")
   ]).then(function(r){
     roster=r[0]||[];prospects=r[1]||[];strategy=(r[2]&&r[2][0])||null;schols=r[3]||[];
-    var ps=r[4]||[];var logs=r[5]||[];budget=(r[6]&&r[6][0])||null;bRequests=r[7]||[];scoresMap={};(r[8]||[]).forEach(function(s){scoresMap[s.prospect_id]=s;});familyMap={};(r[9]||[]).forEach(function(f){if(!familyMap[f.prospect_id])familyMap[f.prospect_id]=[];familyMap[f.prospect_id].push(f);});
+    var ps=r[4]||[];var logs=r[5]||[];budget=(r[6]&&r[6][0])||null;bRequests=r[7]||[];scoresMap={};(r[8]||[]).forEach(function(s){scoresMap[s.prospect_id]=s;});familyMap={};(r[9]||[]).forEach(function(f){if(!familyMap[f.prospect_id])familyMap[f.prospect_id]=[];familyMap[f.prospect_id].push(f);});reminders=r[10]||[];
     var idMap={};prospects.forEach(function(p){idMap[p.id]=p.player_name;});
     pStats={};ps.forEach(function(s){var n=idMap[s.prospect_id];if(n){if(!pStats[n])pStats[n]={};pStats[n][s.stat_name]=s.stat_value;}});
     crmLogs={};logs.forEach(function(l){if(!crmLogs[l.prospect_id])crmLogs[l.prospect_id]=[];crmLogs[l.prospect_id].push(l);});
