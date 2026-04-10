@@ -65,7 +65,7 @@
 <script>
 var SU="https://midyxvjfoggchbugxzkd.supabase.co";
 var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pZHl4dmpmb2dnY2hidWd4emtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NzQ5ODQsImV4cCI6MjA5MTM1MDk4NH0.VLsaYxByQC2s4jLpcETNx3sYykp-x3azyC0v1q0dqmo";
-var T="",budget=null,bRequests=[],pickerSearch="",pickerPos="ALL",roster=[],prospects=[],strategy=null,schols=[],pStats={},crmLogs={},tab="dash",sq="",pf="ALL",sf="ALL",fPPG=0,fRPG=0,f3P=0,fP="ALL";
+var T="",budget=null,bRequests=[],scoresMap={},sortBy="model",pickerSearch="",pickerPos="ALL",roster=[],prospects=[],strategy=null,schols=[],pStats={},crmLogs={},tab="dash",sq="",pf="ALL",sf="ALL",fPPG=0,fRPG=0,f3P=0,fP="ALL";
 
 
 
@@ -105,6 +105,42 @@ window.decideReq=function(reqId,decision){
     }
   }).then(function(){loadData().then(function(){render();});});
 }
+
+
+window.calcComposite=function(s,w){return Math.round((s.shooting_score*w.shooting+s.defense_score*w.defense+s.iq_score*w.iq+s.fit_score*w.fit)*10)/10;}
+window.getWeights=function(preset,custom){
+  if(preset==="equal")return{shooting:0.25,defense:0.25,iq:0.25,fit:0.25};
+  if(preset==="production")return{shooting:0.4,defense:0.25,iq:0.2,fit:0.15};
+  if(preset==="fit")return{shooting:0.2,defense:0.2,iq:0.2,fit:0.4};
+  return custom||{shooting:0.25,defense:0.25,iq:0.25,fit:0.25};
+}
+window.openScore=function(pid){
+  var existing=scoresMap[pid]||{shooting_score:5,defense_score:5,iq_score:5,fit_score:5,weighting_preset:"equal",notes:""};
+  var p=prospects.filter(function(x){return x.id===pid;})[0];if(!p)return;
+  var h='<div class="mbg" onclick="if(event.target===this)closeM()"><div class="mdl">';
+  h+='<button class="x" onclick="closeM()">✕</button>';
+  h+='<h2 style="font-size:18px;margin-bottom:4px">SCORE: '+p.player_name+'</h2>';
+  h+='<div style="font-size:11px;color:var(--dim);margin-bottom:12px">Rate 1-10 on each dimension</div>';
+  ["shooting","defense","iq","fit"].forEach(function(k){
+    var label=k.toUpperCase();
+    h+='<div style="margin-bottom:10px"><label style="font-size:10px;color:var(--dim);letter-spacing:1px">'+label+' <span id="lbl-'+k+'" style="color:var(--y);font-weight:700;float:right">'+existing[k+"_score"]+'</span></label><input id="sc-'+k+'" type="range" min="1" max="10" step="0.5" value="'+existing[k+"_score"]+'" oninput="document.getElementById(\'lbl-'+k+'\').textContent=this.value" style="width:100%;accent-color:var(--y)"></div>';
+  });
+  h+='<label style="font-size:10px;color:var(--dim);letter-spacing:1px">WEIGHTING</label>';
+  h+='<select id="sc-preset" class="inp"><option value="equal"'+(existing.weighting_preset==="equal"?" selected":"")+'>Equal (25/25/25/25)</option><option value="production"'+(existing.weighting_preset==="production"?" selected":"")+'>Production (40/25/20/15)</option><option value="fit"'+(existing.weighting_preset==="fit"?" selected":"")+'>Fit-heavy (20/20/20/40)</option></select>';
+  h+='<textarea id="sc-notes" class="inp" rows="2" placeholder="Notes...">'+(existing.notes||"")+'</textarea>';
+  h+='<button class="btn" onclick="saveScore(\''+pid+'\')">SAVE SCORE</button>';
+  h+='</div></div>';
+  document.getElementById("mc").innerHTML=h;
+}
+window.saveScore=function(pid){
+  var s={prospect_id:pid,scored_by:UID,shooting_score:parseFloat(document.getElementById("sc-shooting").value),defense_score:parseFloat(document.getElementById("sc-defense").value),iq_score:parseFloat(document.getElementById("sc-iq").value),fit_score:parseFloat(document.getElementById("sc-fit").value),weighting_preset:document.getElementById("sc-preset").value,notes:document.getElementById("sc-notes").value};
+  var w=getWeights(s.weighting_preset);
+  s.composite_score=calcComposite(s,w);
+  api("/rest/v1/prospect_scores?on_conflict=prospect_id,scored_by",{method:"POST",body:JSON.stringify(s),prefer:"return=minimal,resolution=merge-duplicates"}).then(function(){
+    scoresMap[pid]=s;closeM();render();
+  });
+}
+
 
 window.valueNil=function(p,ps){
   var ppg=(ps&&ps.ppg)||p.ppg||0;
@@ -235,10 +271,11 @@ window.loadData=function(){
     api("/rest/v1/prospect_stats?select=stat_name,stat_value,prospect_id&is_seed_data=eq.true"),
     api("/rest/v1/crm_log?select=*&order=contact_date.desc"),
 api("/rest/v1/nil_budget?select=*&is_seed_data=eq.true&limit=1"),
-api("/rest/v1/nil_budget_requests?select=*&order=requested_at.desc")
+api("/rest/v1/nil_budget_requests?select=*&order=requested_at.desc"),
+api("/rest/v1/prospect_scores?select=*")
   ]).then(function(r){
     roster=r[0]||[];prospects=r[1]||[];strategy=(r[2]&&r[2][0])||null;schols=r[3]||[];
-    var ps=r[4]||[];var logs=r[5]||[];budget=(r[6]&&r[6][0])||null;bRequests=r[7]||[];
+    var ps=r[4]||[];var logs=r[5]||[];budget=(r[6]&&r[6][0])||null;bRequests=r[7]||[];scoresMap={};(r[8]||[]).forEach(function(s){scoresMap[s.prospect_id]=s;});
     var idMap={};prospects.forEach(function(p){idMap[p.id]=p.player_name;});
     pStats={};ps.forEach(function(s){var n=idMap[s.prospect_id];if(n){if(!pStats[n])pStats[n]={};pStats[n][s.stat_name]=s.stat_value;}});
     crmLogs={};logs.forEach(function(l){if(!crmLogs[l.prospect_id])crmLogs[l.prospect_id]=[];crmLogs[l.prospect_id].push(l);});
@@ -368,14 +405,18 @@ window.render=function(){
   }
 
   if(tab==="portal"){
-    var fl=filt(portal);
-    var h='<input class="si" placeholder="Search portal..." oninput="onSearch(this.value)">';
+    var sortHTML='<select class="inp" style="margin-bottom:8px" onchange="sortBy=this.value;render()"><option value="model"'+(sortBy==="model"?" selected":"")+'>Sort: Model Value</option><option value="delta"'+(sortBy==="delta"?" selected":"")+'>Sort: Value Delta</option><option value="composite"'+(sortBy==="composite"?" selected":"")+'>Sort: Coach Score</option></select>';
+    var fl=filt(portal).map(function(p){p._mv=valueNil(p,pStats[p.player_name]||{}).mid;return p;});
+    if(sortBy==="model")fl.sort(function(a,b){return b._mv-a._mv;});
+    else if(sortBy==="delta")fl.sort(function(a,b){return(b._mv-(b.nil_estimate||0))-(a._mv-(a.nil_estimate||0));});
+    else if(sortBy==="composite")fl.sort(function(a,b){var sa=scoresMap[a.id],sb=scoresMap[b.id];return(sb&&sb.composite_score||0)-(sa&&sa.composite_score||0);});
+    var h=sortHTML+'<input class="si" placeholder="Search portal..." oninput="onSearch(this.value)">';
     h+='<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">'+posBtns()+'<span style="width:6px"></span>'+stBtns()+'</div>';
     h+='<div style="font-size:10px;letter-spacing:2px;color:var(--dim);margin-bottom:8px">'+fl.length+' TARGETS</div>';
     fl.forEach(function(p){var ps=pStats[p.player_name]||{};var lg=crmLogs[p.id]||[];
       h+='<div class="card" style="cursor:pointer" onclick="openP(\''+p.id+"','p')\">";
       h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px"><div><div style="font-size:15px;font-weight:700">'+p.player_name+'</div><div style="display:flex;gap:6px;margin-top:3px">'+pill(p.position)+pill(p['class_year'],"var(--dim)")+pill(p.status.toUpperCase(),sc(p.status))+(lg.length?pill(lg.length+" logs","var(--bright)"):"")+'</div></div>';
-      if(p.nil_estimate)h+='<div style="text-align:right"><div style="font-size:14px;font-weight:700;color:var(--green);font-family:Bebas Neue">$'+(p.nil_estimate/1000).toFixed(0)+'K</div></div>';
+      var mv=p._mv||0;var market=p.nil_estimate||0;var delta=mv-market;var deltaCol=delta>0?"var(--green)":"var(--red)";var sc=scoresMap[p.id];h+='<div style="text-align:right"><div style="font-size:14px;font-weight:700;color:var(--y);font-family:Bebas Neue">$'+(mv/1000).toFixed(0)+'K</div><div style="font-size:9px;color:var(--dim)">MODEL</div>'+(market?'<div style="font-size:10px;color:var(--dim)">mkt $'+(market/1000).toFixed(0)+'K <span style="color:'+deltaCol+'">'+(delta>0?"+":"")+(delta/1000).toFixed(0)+'K</span></div>':'')+(sc?'<div style="font-size:10px;color:var(--bright);margin-top:2px">★'+sc.composite_score+'</div>':'')+'</div>';
       h+='</div><div style="font-size:11px;color:var(--dim);margin-bottom:3px">'+p.current_school+(p.current_conference?" · "+p.current_conference:"")+'</div>';
       if(ps.ppg){h+='<div style="display:flex;gap:10px">';if(ps.ppg)h+='<span style="font-size:11px"><b style="color:var(--y)">'+ps.ppg+'</b> ppg</span>';if(ps.rpg)h+='<span style="font-size:11px"><b style="color:var(--y)">'+ps.rpg+'</b> rpg</span>';if(ps.three_pct)h+='<span style="font-size:11px"><b style="color:var(--y)">'+(ps.three_pct*100).toFixed(0)+'%</b> 3PT</span>';h+='</div>';}
       h+='</div>';});
