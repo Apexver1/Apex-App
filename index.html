@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -67,214 +66,213 @@ var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1
 var T="",roster=[],prospects=[],strategy=null,schols=[],pStats={},crmLogs={},tab="dash",sq="",pf="ALL",sf="ALL",fPPG=0,fRPG=0,f3P=0,fP="ALL";
 
 window.api=function(path,opt){
-opt=opt||{};
-return fetch(SU+path,{headers:{apikey:SK,Authorization:“Bearer “+T,“Content-Type”:“application/json”,Prefer:opt.prefer||””},method:opt.method||“GET”,body:opt.body||undefined}).then(function(r){if(!r.ok)throw new Error(r.status);return r.text();}).then(function(t){return t?JSON.parse(t):null;});
+  opt=opt||{};
+  return fetch(SU+path,{headers:{apikey:SK,Authorization:"Bearer "+T,"Content-Type":"application/json",Prefer:opt.prefer||""},method:opt.method||"GET",body:opt.body||undefined}).then(function(r){if(!r.ok)throw new Error(r.status);return r.text();}).then(function(t){return t?JSON.parse(t):null;});
 }
 
 window.doLogin=function(){
-var em=document.getElementById(“em”).value;
-var pw=document.getElementById(“pw”).value;
-document.getElementById(“loginErr”).textContent=””;
-fetch(SU+”/auth/v1/token?grant_type=password”,{method:“POST”,headers:{apikey:SK,“Content-Type”:“application/json”},body:JSON.stringify({email:em,password:pw})}).then(function(r){if(!r.ok)return r.json().then(function(e){throw new Error(e.error_description||“Login failed”);});return r.json();}).then(function(d){
-T=d.access_token;
-document.getElementById(“ue”).textContent=d.user.email;
-document.getElementById(“login”).className=“hide”;
-document.getElementById(“app”).className=””;
-return loadData();
-}).then(function(){render();}).catch(function(e){document.getElementById(“loginErr”).textContent=e.message;});
+  var em=document.getElementById("em").value;
+  var pw=document.getElementById("pw").value;
+  document.getElementById("loginErr").textContent="";
+  fetch(SU+"/auth/v1/token?grant_type=password",{method:"POST",headers:{apikey:SK,"Content-Type":"application/json"},body:JSON.stringify({email:em,password:pw})}).then(function(r){if(!r.ok)return r.json().then(function(e){throw new Error(e.error_description||"Login failed");});return r.json();}).then(function(d){
+    T=d.access_token;
+    document.getElementById("ue").textContent=d.user.email;
+    document.getElementById("login").className="hide";
+    document.getElementById("app").className="";
+    return loadData();
+  }).then(function(){render();}).catch(function(e){document.getElementById("loginErr").textContent=e.message;});
 }
-document.getElementById(“pw”).onkeydown=function(e){if(e.key===“Enter”)doLogin();};
+document.getElementById("pw").onkeydown=function(e){if(e.key==="Enter")doLogin();};
 
 window.loadData=function(){
-return Promise.all([
-api(”/rest/v1/my_roster?select=*&season=eq.2025-26&order=ppg.desc.nullslast”),
-api(”/rest/v1/prospect_shortlist?select=*&is_seed_data=eq.true&order=nil_estimate.desc.nullslast”),
-api(”/rest/v1/team_strategy?select=*&is_seed_data=eq.true&limit=1”),
-api(”/rest/v1/scholarships?select=*&is_seed_data=eq.true&order=season.asc”),
-api(”/rest/v1/prospect_stats?select=stat_name,stat_value,prospect_id&is_seed_data=eq.true”),
-api(”/rest/v1/crm_log?select=*&order=contact_date.desc”)
-]).then(function(r){
-roster=r[0]||[];prospects=r[1]||[];strategy=(r[2]&&r[2][0])||null;schols=r[3]||[];
-var ps=r[4]||[];var logs=r[5]||[];
-var idMap={};prospects.forEach(function(p){idMap[p.id]=p.player_name;});
-pStats={};ps.forEach(function(s){var n=idMap[s.prospect_id];if(n){if(!pStats[n])pStats[n]={};pStats[n][s.stat_name]=s.stat_value;}});
-crmLogs={};logs.forEach(function(l){if(!crmLogs[l.prospect_id])crmLogs[l.prospect_id]=[];crmLogs[l.prospect_id].push(l);});
-});
+  return Promise.all([
+    api("/rest/v1/my_roster?select=*&season=eq.2025-26&order=ppg.desc.nullslast"),
+    api("/rest/v1/prospect_shortlist?select=*&is_seed_data=eq.true&order=nil_estimate.desc.nullslast"),
+    api("/rest/v1/team_strategy?select=*&is_seed_data=eq.true&limit=1"),
+    api("/rest/v1/scholarships?select=*&is_seed_data=eq.true&order=season.asc"),
+    api("/rest/v1/prospect_stats?select=stat_name,stat_value,prospect_id&is_seed_data=eq.true"),
+    api("/rest/v1/crm_log?select=*&order=contact_date.desc")
+  ]).then(function(r){
+    roster=r[0]||[];prospects=r[1]||[];strategy=(r[2]&&r[2][0])||null;schols=r[3]||[];
+    var ps=r[4]||[];var logs=r[5]||[];
+    var idMap={};prospects.forEach(function(p){idMap[p.id]=p.player_name;});
+    pStats={};ps.forEach(function(s){var n=idMap[s.prospect_id];if(n){if(!pStats[n])pStats[n]={};pStats[n][s.stat_name]=s.stat_value;}});
+    crmLogs={};logs.forEach(function(l){if(!crmLogs[l.prospect_id])crmLogs[l.prospect_id]=[];crmLogs[l.prospect_id].push(l);});
+  });
 }
 
-window.go=function(t){tab=t;sq=””;pf=“ALL”;sf=“ALL”;document.querySelectorAll(”.nav button”).forEach(function(b){b.className=b.id===“t-”+t?“a”:””;});render();}
-window.pill=function(t,c){c=c||“var(–y)”;return ‘<span class="pill" style="color:'+c+';border-color:'+c+'33">’+t+’</span>’;}
-window.jp=function(v){return typeof v===“string”?JSON.parse(v):v;}
-window.sc=function(s){return s===“contacted”?“var(–gold)”:s===“offered”?“var(–green)”:s===“visited”?“var(–orange,#f97316)”:“var(–dim)”;}
+window.go=function(t){tab=t;sq="";pf="ALL";sf="ALL";document.querySelectorAll(".nav button").forEach(function(b){b.className=b.id==="t-"+t?"a":"";});render();}
+window.pill=function(t,c){c=c||"var(--y)";return '<span class="pill" style="color:'+c+';border-color:'+c+'33">'+t+'</span>';}
+window.jp=function(v){return typeof v==="string"?JSON.parse(v):v;}
+window.sc=function(s){return s==="contacted"?"var(--gold)":s==="offered"?"var(--green)":s==="visited"?"var(--orange,#f97316)":"var(--dim)";}
 window.onSearch=function(v){sq=v.toLowerCase();render();}
 window.onPF=function(p){pf=p;render();}
 window.onSF=function(s){sf=s;render();}
-window.uf=function(k,v){if(k===“ppg”)fPPG=+v;if(k===“rpg”)fRPG=+v;if(k===“3p”)f3P=+v;if(k===“pos”)fP=v;render();}
+window.uf=function(k,v){if(k==="ppg")fPPG=+v;if(k==="rpg")fRPG=+v;if(k==="3p")f3P=+v;if(k==="pos")fP=v;render();}
 
 window.filt=function(list){
-var f=list;
-if(sq)f=f.filter(function(p){return(p.player_name||””).toLowerCase().indexOf(sq)>=0||(p.current_school||””).toLowerCase().indexOf(sq)>=0;});
-if(pf!==“ALL”)f=f.filter(function(p){return p.position===pf;});
-if(sf!==“ALL”)f=f.filter(function(p){return p.status===sf;});
-return f;
+  var f=list;
+  if(sq)f=f.filter(function(p){return(p.player_name||"").toLowerCase().indexOf(sq)>=0||(p.current_school||"").toLowerCase().indexOf(sq)>=0;});
+  if(pf!=="ALL")f=f.filter(function(p){return p.position===pf;});
+  if(sf!=="ALL")f=f.filter(function(p){return p.status===sf;});
+  return f;
 }
 
-window.posBtns=function(){return [“ALL”,“PG”,“SG”,“SF”,“PF”,“C”].map(function(p){return ‘<button class=“fb’+(pf===p?” a”:””)+’” onclick=“onPF('’+p+’')”>’+p+’</button>’;}).join(””);}
-window.stBtns=function(){return [“ALL”,“watching”,“contacted”,“offered”].map(function(s){return ‘<button class=“fb’+(sf===s?” a”:””)+’” onclick=“onSF('’+s+’')”>’+(s===“ALL”?“ALL”:s.toUpperCase())+’</button>’;}).join(””);}
+window.posBtns=function(){return ["ALL","PG","SG","SF","PF","C"].map(function(p){return '<button class="fb'+(pf===p?" a":"")+'" onclick="onPF(\''+p+'\')">'+p+'</button>';}).join("");}
+window.stBtns=function(){return ["ALL","watching","contacted","offered"].map(function(s){return '<button class="fb'+(sf===s?" a":"")+'" onclick="onSF(\''+s+'\')">'+(s==="ALL"?"ALL":s.toUpperCase())+'</button>';}).join("");}
 
 window.openP=function(id,type){
-var p;
-if(type===“r”){p=roster.filter(function(x){return x.id===id;})[0];}
-else{p=prospects.filter(function(x){return x.id===id;})[0];}
-if(!p)return;
-var ps=pStats[p.player_name]||{};
-var logs=crmLogs[p.id]||[];
-var isPr=type!==“r”;
-var cy=p[‘class_year’]||””;
-var ht=p.height_inches?Math.floor(p.height_inches/12)+”’”+p.height_inches%12+’”’:””;
-var stats=””;
-if(p.ppg!=null)stats+=’<div style="text-align:center;min-width:50px"><div style="font-size:20px;font-weight:700;color:var(--y);font-family:Bebas Neue">’+p.ppg+’</div><div style="font-size:9px;color:var(--dim)">PPG</div></div>’;
-if(p.rpg!=null)stats+=’<div style="text-align:center;min-width:50px"><div style="font-size:20px;font-weight:700;color:var(--y);font-family:Bebas Neue">’+p.rpg+’</div><div style="font-size:9px;color:var(--dim)">RPG</div></div>’;
-if(p.apg!=null)stats+=’<div style="text-align:center;min-width:50px"><div style="font-size:20px;font-weight:700;color:var(--y);font-family:Bebas Neue">’+p.apg+’</div><div style="font-size:9px;color:var(--dim)">APG</div></div>’;
-if(ps.ppg)stats+=’<div style="text-align:center;min-width:50px"><div style="font-size:20px;font-weight:700;color:var(--y);font-family:Bebas Neue">’+ps.ppg+’</div><div style="font-size:9px;color:var(--dim)">PPG</div></div>’;
-if(ps.rpg)stats+=’<div style="text-align:center;min-width:50px"><div style="font-size:20px;font-weight:700;color:var(--y);font-family:Bebas Neue">’+ps.rpg+’</div><div style="font-size:9px;color:var(--dim)">RPG</div></div>’;
-if(ps.bpg)stats+=’<div style="text-align:center;min-width:50px"><div style="font-size:20px;font-weight:700;color:var(--y);font-family:Bebas Neue">’+ps.bpg+’</div><div style="font-size:9px;color:var(--dim)">BPG</div></div>’;
-if(ps.three_pct)stats+=’<div style="text-align:center;min-width:50px"><div style="font-size:20px;font-weight:700;color:var(--y);font-family:Bebas Neue">’+(ps.three_pct*100).toFixed(1)+’%</div><div style="font-size:9px;color:var(--dim)">3PT%</div></div>’;
+  var p;
+  if(type==="r"){p=roster.filter(function(x){return x.id===id;})[0];}
+  else{p=prospects.filter(function(x){return x.id===id;})[0];}
+  if(!p)return;
+  var ps=pStats[p.player_name]||{};
+  var logs=crmLogs[p.id]||[];
+  var isPr=type!=="r";
+  var cy=p['class_year']||"";
+  var ht=p.height_inches?Math.floor(p.height_inches/12)+"'"+p.height_inches%12+'"':"";
+  var stats="";
+  if(p.ppg!=null)stats+='<div style="text-align:center;min-width:50px"><div style="font-size:20px;font-weight:700;color:var(--y);font-family:Bebas Neue">'+p.ppg+'</div><div style="font-size:9px;color:var(--dim)">PPG</div></div>';
+  if(p.rpg!=null)stats+='<div style="text-align:center;min-width:50px"><div style="font-size:20px;font-weight:700;color:var(--y);font-family:Bebas Neue">'+p.rpg+'</div><div style="font-size:9px;color:var(--dim)">RPG</div></div>';
+  if(p.apg!=null)stats+='<div style="text-align:center;min-width:50px"><div style="font-size:20px;font-weight:700;color:var(--y);font-family:Bebas Neue">'+p.apg+'</div><div style="font-size:9px;color:var(--dim)">APG</div></div>';
+  if(ps.ppg)stats+='<div style="text-align:center;min-width:50px"><div style="font-size:20px;font-weight:700;color:var(--y);font-family:Bebas Neue">'+ps.ppg+'</div><div style="font-size:9px;color:var(--dim)">PPG</div></div>';
+  if(ps.rpg)stats+='<div style="text-align:center;min-width:50px"><div style="font-size:20px;font-weight:700;color:var(--y);font-family:Bebas Neue">'+ps.rpg+'</div><div style="font-size:9px;color:var(--dim)">RPG</div></div>';
+  if(ps.bpg)stats+='<div style="text-align:center;min-width:50px"><div style="font-size:20px;font-weight:700;color:var(--y);font-family:Bebas Neue">'+ps.bpg+'</div><div style="font-size:9px;color:var(--dim)">BPG</div></div>';
+  if(ps.three_pct)stats+='<div style="text-align:center;min-width:50px"><div style="font-size:20px;font-weight:700;color:var(--y);font-family:Bebas Neue">'+(ps.three_pct*100).toFixed(1)+'%</div><div style="font-size:9px;color:var(--dim)">3PT%</div></div>';
 
-var statusBtns=””;
-if(isPr){[“watching”,“contacted”,“visited”,“offered”].forEach(function(s){statusBtns+=’<button class=“stb’+(p.status===s?” a”:””)+’” onclick=“updS('’+p.id+”’,’”+s+”’)">”+s.toUpperCase()+”</button> “;});}
+  var statusBtns="";
+  if(isPr){["watching","contacted","visited","offered"].forEach(function(s){statusBtns+='<button class="stb'+(p.status===s?" a":"")+'" onclick="updS(\''+p.id+"','"+s+"')\">"+s.toUpperCase()+"</button> ";});}
 
-var logForm=””;
-if(isPr){
-logForm=’<div style="margin-top:12px"><div style="font-size:10px;letter-spacing:2px;color:var(--y);margin-bottom:6px">LOG CONTACT</div><select id="cm" class="inp"><option value="phone">Phone</option><option value="text">Text</option><option value="email">Email</option><option value="in_person">In Person</option></select><textarea id="cn" class="inp" rows="3" placeholder="Notes..."></textarea><button class="btn" onclick="logC(\''+p.id+'\')">LOG CONTACT</button></div>’;
-logForm+=’<div style="margin-top:12px"><div style="font-size:10px;letter-spacing:2px;color:var(--y);margin-bottom:6px">HISTORY (’+logs.length+’)</div>’;
-if(logs.length){logs.forEach(function(l){logForm+=’<div class="le"><div style="display:flex;justify-content:space-between"><span style="font-size:10px;color:var(--y)">’+(l.method||””).toUpperCase()+’</span><span style="font-size:10px;color:var(--dim)">’+new Date(l.contact_date).toLocaleDateString()+’</span></div>’+(l.content?’<div style="font-size:12px;color:var(--bright);margin-top:4px">’+l.content+’</div>’:’’)+’</div>’;});}
-else{logForm+=’<div style="font-size:11px;color:var(--dim)">No contacts yet</div>’;}
-logForm+=’</div>’;
+  var logForm="";
+  if(isPr){
+    logForm='<div style="margin-top:12px"><div style="font-size:10px;letter-spacing:2px;color:var(--y);margin-bottom:6px">LOG CONTACT</div><select id="cm" class="inp"><option value="phone">Phone</option><option value="text">Text</option><option value="email">Email</option><option value="in_person">In Person</option></select><textarea id="cn" class="inp" rows="3" placeholder="Notes..."></textarea><button class="btn" onclick="logC(\''+p.id+'\')">LOG CONTACT</button></div>';
+    logForm+='<div style="margin-top:12px"><div style="font-size:10px;letter-spacing:2px;color:var(--y);margin-bottom:6px">HISTORY ('+logs.length+')</div>';
+    if(logs.length){logs.forEach(function(l){logForm+='<div class="le"><div style="display:flex;justify-content:space-between"><span style="font-size:10px;color:var(--y)">'+(l.method||"").toUpperCase()+'</span><span style="font-size:10px;color:var(--dim)">'+new Date(l.contact_date).toLocaleDateString()+'</span></div>'+(l.content?'<div style="font-size:12px;color:var(--bright);margin-top:4px">'+l.content+'</div>':'')+'</div>';});}
+    else{logForm+='<div style="font-size:11px;color:var(--dim)">No contacts yet</div>';}
+    logForm+='</div>';
+  }
+
+  var schools="";
+  if(p.competing_schools){p.competing_schools.split(",").forEach(function(s){schools+='<span style="font-size:11px;color:var(--dim);background:var(--navy);padding:3px 8px;border-radius:4px;display:inline-block;margin:2px">'+s.trim()+'</span>';});}
+
+  var h='<div class="mbg" onclick="if(event.target===this)closeM()"><div class="mdl">';
+  h+='<button class="x" onclick="closeM()">✕</button>';
+  h+='<h2 style="font-size:18px;margin-bottom:4px">'+p.player_name+'</h2>';
+  h+='<div style="font-size:11px;color:var(--dim);margin-bottom:12px">'+(p.position||"")+" · "+cy+(ht?" · "+ht:"")+(isPr&&p.current_school?" · "+p.current_school:" · Oregon")+'</div>';
+  if(statusBtns)h+='<div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">'+statusBtns+'</div>';
+  if(stats)h+='<div style="font-size:10px;letter-spacing:2px;color:var(--y);margin-bottom:6px">STATS</div><div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px">'+stats+'</div>';
+  if(p.nil_estimate)h+='<div style="font-size:18px;font-weight:700;color:var(--green);font-family:Bebas Neue;margin-bottom:12px">$'+(p.nil_estimate/1000).toFixed(0)+'K NIL EST</div>';
+  if(p.fit_notes||p.role_description)h+='<div style="font-size:10px;letter-spacing:2px;color:var(--y);margin-bottom:6px">'+(isPr?"SCOUTING":"ROLE")+'</div><div style="font-size:12px;color:var(--bright);line-height:1.5;margin-bottom:12px">'+(p.fit_notes||p.role_description||"")+'</div>';
+  if(p.transfer_risk_notes)h+='<div style="font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:6px">TRANSFER RISK</div><div style="font-size:12px;color:var(--gold);margin-bottom:12px">'+p.transfer_risk_notes+'</div>';
+  if(schools)h+='<div style="font-size:10px;letter-spacing:2px;color:var(--y);margin-bottom:6px">COMPETING SCHOOLS</div><div style="margin-bottom:12px">'+schools+'</div>';
+  h+=logForm;
+  h+='</div></div>';
+  document.getElementById("mc").innerHTML=h;
 }
 
-var schools=””;
-if(p.competing_schools){p.competing_schools.split(”,”).forEach(function(s){schools+=’<span style="font-size:11px;color:var(--dim);background:var(--navy);padding:3px 8px;border-radius:4px;display:inline-block;margin:2px">’+s.trim()+’</span>’;});}
-
-var h=’<div class="mbg" onclick="if(event.target===this)closeM()"><div class="mdl">’;
-h+=’<button class="x" onclick="closeM()">✕</button>’;
-h+=’<h2 style="font-size:18px;margin-bottom:4px">’+p.player_name+’</h2>’;
-h+=’<div style="font-size:11px;color:var(--dim);margin-bottom:12px">’+(p.position||””)+” · “+cy+(ht?” · “+ht:””)+(isPr&&p.current_school?” · “+p.current_school:” · Oregon”)+’</div>’;
-if(statusBtns)h+=’<div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">’+statusBtns+’</div>’;
-if(stats)h+=’<div style="font-size:10px;letter-spacing:2px;color:var(--y);margin-bottom:6px">STATS</div><div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px">’+stats+’</div>’;
-if(p.nil_estimate)h+=’<div style="font-size:18px;font-weight:700;color:var(--green);font-family:Bebas Neue;margin-bottom:12px">$’+(p.nil_estimate/1000).toFixed(0)+‘K NIL EST</div>’;
-if(p.fit_notes||p.role_description)h+=’<div style="font-size:10px;letter-spacing:2px;color:var(--y);margin-bottom:6px">’+(isPr?“SCOUTING”:“ROLE”)+’</div><div style="font-size:12px;color:var(--bright);line-height:1.5;margin-bottom:12px">’+(p.fit_notes||p.role_description||””)+’</div>’;
-if(p.transfer_risk_notes)h+=’<div style="font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:6px">TRANSFER RISK</div><div style="font-size:12px;color:var(--gold);margin-bottom:12px">’+p.transfer_risk_notes+’</div>’;
-if(schools)h+=’<div style="font-size:10px;letter-spacing:2px;color:var(--y);margin-bottom:6px">COMPETING SCHOOLS</div><div style="margin-bottom:12px">’+schools+’</div>’;
-h+=logForm;
-h+=’</div></div>’;
-document.getElementById(“mc”).innerHTML=h;
-}
-
-window.closeM=function(){document.getElementById(“mc”).innerHTML=””;}
+window.closeM=function(){document.getElementById("mc").innerHTML="";}
 
 window.updS=function(pid,st){
-api(”/rest/v1/prospect_shortlist?id=eq.”+pid,{method:“PATCH”,body:JSON.stringify({status:st}),prefer:“return=minimal”}).then(function(){
-prospects.forEach(function(p){if(p.id===pid)p.status=st;});
-openP(pid,“p”);render();
-});
+  api("/rest/v1/prospect_shortlist?id=eq."+pid,{method:"PATCH",body:JSON.stringify({status:st}),prefer:"return=minimal"}).then(function(){
+    prospects.forEach(function(p){if(p.id===pid)p.status=st;});
+    openP(pid,"p");render();
+  });
 }
 
 window.logC=function(pid){
-var m=document.getElementById(“cm”).value;
-var n=document.getElementById(“cn”).value;
-if(!n.trim())return;
-api(”/rest/v1/crm_log”,{method:“POST”,body:JSON.stringify({prospect_id:pid,contact_date:new Date().toISOString(),method:m,content:n}),prefer:“return=minimal”}).then(function(){
-if(!crmLogs[pid])crmLogs[pid]=[];
-crmLogs[pid].unshift({prospect_id:pid,contact_date:new Date().toISOString(),method:m,content:n});
-openP(pid,“p”);
-});
+  var m=document.getElementById("cm").value;
+  var n=document.getElementById("cn").value;
+  if(!n.trim())return;
+  api("/rest/v1/crm_log",{method:"POST",body:JSON.stringify({prospect_id:pid,contact_date:new Date().toISOString(),method:m,content:n}),prefer:"return=minimal"}).then(function(){
+    if(!crmLogs[pid])crmLogs[pid]=[];
+    crmLogs[pid].unshift({prospect_id:pid,contact_date:new Date().toISOString(),method:m,content:n});
+    openP(pid,"p");
+  });
 }
 
 window.render=function(){
-var c=document.getElementById(“ct”);
-var portal=prospects.filter(function(p){return p.source===“portal”;});
-var hs=prospects.filter(function(p){return p.source===“high_school”;});
-var starters=roster.filter(function(r){return r.depth_chart_position===1;});
-var os=schols.filter(function(s){return s.season===“2026-27”;})[0];
+  var c=document.getElementById("ct");
+  var portal=prospects.filter(function(p){return p.source==="portal";});
+  var hs=prospects.filter(function(p){return p.source==="high_school";});
+  var starters=roster.filter(function(r){return r.depth_chart_position===1;});
+  var os=schols.filter(function(s){return s.season==="2026-27";})[0];
 
-if(tab===“dash”){
-var strJ=strategy&&strategy.strengths_json?jp(strategy.strengths_json):null;
-var weakJ=strategy&&strategy.weaknesses_json?jp(strategy.weaknesses_json):null;
-var needJ=strategy&&strategy.positional_needs_json?jp(strategy.positional_needs_json):null;
-var h=’<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">’;
-h+=’<div class="sb"><div class="l">Roster</div><div class="v">’+roster.length+’</div><div class="s">2025-26</div></div>’;
-h+=’<div class="sb"><div class="l">Portal</div><div class="v">’+portal.length+’</div><div class="s">targets</div></div>’;
-h+=’<div class="sb"><div class="l">Recruits</div><div class="v">’+hs.length+’</div><div class="s">2026-2029</div></div>’;
-h+=’<div class="sb"><div class="l">Open</div><div class="v">’+(os?os.available_count:”—”)+’</div><div class="s">schol 26-27</div></div></div>’;
-if(strJ){h+=’<div class="card"><div style="font-size:10px;letter-spacing:2px;color:var(--y);margin-bottom:8px">TEAM STRENGTHS</div>’;(strJ.top_strengths||[]).forEach(function(s){h+=’<div style="font-size:12px;color:var(--bright);margin-bottom:4px">+ ‘+s+’</div>’;});h+=’</div>’;}
-if(weakJ){h+=’<div class="card"><div style="font-size:10px;letter-spacing:2px;color:var(--red);margin-bottom:8px">CRITICAL WEAKNESSES</div>’;(weakJ.top_weaknesses||[]).forEach(function(s){h+=’<div style="font-size:12px;color:#fca5a5;margin-bottom:4px">— ‘+s+’</div>’;});h+=’</div>’;}
-if(needJ){h+=’<div class="card"><div style="font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:8px">POSITIONAL NEEDS</div>’;(needJ.priority_1||[]).forEach(function(n){h+=’<div style="font-size:12px;margin-bottom:6px"><span style="color:var(--gold);font-weight:700">’+n.pos+’</span> — ‘+n.need+’</div>’;});(needJ.priority_2||[]).forEach(function(n){h+=’<div style="font-size:12px;color:var(--dim);margin-bottom:6px"><span style="color:var(--bright)">’+n.pos+’</span> — ‘+n.need+’</div>’;});h+=’</div>’;}
-h+=’<div class="card"><div style="font-size:10px;letter-spacing:2px;color:var(--y);margin-bottom:8px">TOP SCORERS</div>’;
-starters.forEach(function(p){h+=’<div class=“row” style=“cursor:pointer” onclick=“openP('’+p.id+”’,‘r’)"><div><div style="font-size:14px;font-weight:600">#”+p.jersey_number+” “+p.player_name+”</div><div style="font-size:10px;color:var(–dim)">”+p.position+” · “+p[‘class_year’]+”</div></div><div style="text-align:right"><div style="font-size:16px;font-weight:700;color:var(–y);font-family:Bebas Neue">”+p.ppg+”</div><div style="font-size:9px;color:var(–dim)">PPG</div></div></div>”;});
-h+=’</div>’;c.innerHTML=h;
-}
+  if(tab==="dash"){
+    var strJ=strategy&&strategy.strengths_json?jp(strategy.strengths_json):null;
+    var weakJ=strategy&&strategy.weaknesses_json?jp(strategy.weaknesses_json):null;
+    var needJ=strategy&&strategy.positional_needs_json?jp(strategy.positional_needs_json):null;
+    var h='<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">';
+    h+='<div class="sb"><div class="l">Roster</div><div class="v">'+roster.length+'</div><div class="s">2025-26</div></div>';
+    h+='<div class="sb"><div class="l">Portal</div><div class="v">'+portal.length+'</div><div class="s">targets</div></div>';
+    h+='<div class="sb"><div class="l">Recruits</div><div class="v">'+hs.length+'</div><div class="s">2026-2029</div></div>';
+    h+='<div class="sb"><div class="l">Open</div><div class="v">'+(os?os.available_count:"—")+'</div><div class="s">schol 26-27</div></div></div>';
+    if(strJ){h+='<div class="card"><div style="font-size:10px;letter-spacing:2px;color:var(--y);margin-bottom:8px">TEAM STRENGTHS</div>';(strJ.top_strengths||[]).forEach(function(s){h+='<div style="font-size:12px;color:var(--bright);margin-bottom:4px">+ '+s+'</div>';});h+='</div>';}
+    if(weakJ){h+='<div class="card"><div style="font-size:10px;letter-spacing:2px;color:var(--red);margin-bottom:8px">CRITICAL WEAKNESSES</div>';(weakJ.top_weaknesses||[]).forEach(function(s){h+='<div style="font-size:12px;color:#fca5a5;margin-bottom:4px">— '+s+'</div>';});h+='</div>';}
+    if(needJ){h+='<div class="card"><div style="font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:8px">POSITIONAL NEEDS</div>';(needJ.priority_1||[]).forEach(function(n){h+='<div style="font-size:12px;margin-bottom:6px"><span style="color:var(--gold);font-weight:700">'+n.pos+'</span> — '+n.need+'</div>';});(needJ.priority_2||[]).forEach(function(n){h+='<div style="font-size:12px;color:var(--dim);margin-bottom:6px"><span style="color:var(--bright)">'+n.pos+'</span> — '+n.need+'</div>';});h+='</div>';}
+    h+='<div class="card"><div style="font-size:10px;letter-spacing:2px;color:var(--y);margin-bottom:8px">TOP SCORERS</div>';
+    starters.forEach(function(p){h+='<div class="row" style="cursor:pointer" onclick="openP(\''+p.id+"','r')\"><div><div style=\"font-size:14px;font-weight:600\">#"+p.jersey_number+" "+p.player_name+"</div><div style=\"font-size:10px;color:var(--dim)\">"+p.position+" · "+p['class_year']+"</div></div><div style=\"text-align:right\"><div style=\"font-size:16px;font-weight:700;color:var(--y);font-family:Bebas Neue\">"+p.ppg+"</div><div style=\"font-size:9px;color:var(--dim)\">PPG</div></div></div>";});
+    h+='</div>';c.innerHTML=h;
+  }
 
-if(tab===“roster”){
-var fl=roster;if(sq)fl=fl.filter(function(p){return p.player_name.toLowerCase().indexOf(sq)>=0;});if(pf!==“ALL”)fl=fl.filter(function(p){return p.position===pf;});
-var h=’<input class="si" placeholder="Search roster..." oninput="onSearch(this.value)">’;
-h+=’<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">’+posBtns()+’</div>’;
-h+=’<div style="font-size:10px;letter-spacing:2px;color:var(--dim);margin-bottom:8px">’+fl.length+’ PLAYERS</div>’;
-fl.forEach(function(p){h+=’<div class=“card” style=“cursor:pointer” onclick=“openP('’+p.id+”’,‘r’)"><div style="display:flex;justify-content:space-between;align-items:center"><div style="flex:1"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:4px"><span style="font-size:15px;font-weight:700">#”+p.jersey_number+” “+p.player_name+”</span>”+pill(p.position)+pill(p[‘class_year’],“var(–dim)”)+”</div><div style="font-size:11px;color:var(–dim)">”+(p.role_description||””).substring(0,60)+”</div></div><div style="text-align:right;min-width:60px">”+(p.ppg!=null?”<div style="font-size:13px">”+p.ppg+” <span style="font-size:9px;color:var(–dim)">ppg</span></div>”:””)+(p.rpg!=null?”<div style="font-size:13px">”+p.rpg+” <span style="font-size:9px;color:var(–dim)">rpg</span></div>”:””)+”</div></div></div>”;});
-c.innerHTML=h;
-}
+  if(tab==="roster"){
+    var fl=roster;if(sq)fl=fl.filter(function(p){return p.player_name.toLowerCase().indexOf(sq)>=0;});if(pf!=="ALL")fl=fl.filter(function(p){return p.position===pf;});
+    var h='<input class="si" placeholder="Search roster..." oninput="onSearch(this.value)">';
+    h+='<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">'+posBtns()+'</div>';
+    h+='<div style="font-size:10px;letter-spacing:2px;color:var(--dim);margin-bottom:8px">'+fl.length+' PLAYERS</div>';
+    fl.forEach(function(p){h+='<div class="card" style="cursor:pointer" onclick="openP(\''+p.id+"','r')\"><div style=\"display:flex;justify-content:space-between;align-items:center\"><div style=\"flex:1\"><div style=\"display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:4px\"><span style=\"font-size:15px;font-weight:700\">#"+p.jersey_number+" "+p.player_name+"</span>"+pill(p.position)+pill(p['class_year'],"var(--dim)")+"</div><div style=\"font-size:11px;color:var(--dim)\">"+(p.role_description||"").substring(0,60)+"</div></div><div style=\"text-align:right;min-width:60px\">"+(p.ppg!=null?"<div style=\"font-size:13px\">"+p.ppg+" <span style=\"font-size:9px;color:var(--dim)\">ppg</span></div>":"")+(p.rpg!=null?"<div style=\"font-size:13px\">"+p.rpg+" <span style=\"font-size:9px;color:var(--dim)\">rpg</span></div>":"")+"</div></div></div>";});
+    c.innerHTML=h;
+  }
 
-if(tab===“portal”){
-var fl=filt(portal);
-var h=’<input class="si" placeholder="Search portal..." oninput="onSearch(this.value)">’;
-h+=’<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">’+posBtns()+’<span style="width:6px"></span>’+stBtns()+’</div>’;
-h+=’<div style="font-size:10px;letter-spacing:2px;color:var(--dim);margin-bottom:8px">’+fl.length+’ TARGETS</div>’;
-fl.forEach(function(p){var ps=pStats[p.player_name]||{};var lg=crmLogs[p.id]||[];
-h+=’<div class=“card” style=“cursor:pointer” onclick=“openP('’+p.id+”’,‘p’)">”;
-h+=’<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px"><div><div style="font-size:15px;font-weight:700">’+p.player_name+’</div><div style="display:flex;gap:6px;margin-top:3px">’+pill(p.position)+pill(p[‘class_year’],“var(–dim)”)+pill(p.status.toUpperCase(),sc(p.status))+(lg.length?pill(lg.length+” logs”,“var(–bright)”):””)+’</div></div>’;
-if(p.nil_estimate)h+=’<div style="text-align:right"><div style="font-size:14px;font-weight:700;color:var(--green);font-family:Bebas Neue">$’+(p.nil_estimate/1000).toFixed(0)+‘K</div></div>’;
-h+=’</div><div style="font-size:11px;color:var(--dim);margin-bottom:3px">’+p.current_school+(p.current_conference?” · “+p.current_conference:””)+’</div>’;
-if(ps.ppg){h+=’<div style="display:flex;gap:10px">’;if(ps.ppg)h+=’<span style="font-size:11px"><b style="color:var(--y)">’+ps.ppg+’</b> ppg</span>’;if(ps.rpg)h+=’<span style="font-size:11px"><b style="color:var(--y)">’+ps.rpg+’</b> rpg</span>’;if(ps.three_pct)h+=’<span style="font-size:11px"><b style="color:var(--y)">’+(ps.three_pct*100).toFixed(0)+’%</b> 3PT</span>’;h+=’</div>’;}
-h+=’</div>’;});
-c.innerHTML=h;
-}
+  if(tab==="portal"){
+    var fl=filt(portal);
+    var h='<input class="si" placeholder="Search portal..." oninput="onSearch(this.value)">';
+    h+='<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">'+posBtns()+'<span style="width:6px"></span>'+stBtns()+'</div>';
+    h+='<div style="font-size:10px;letter-spacing:2px;color:var(--dim);margin-bottom:8px">'+fl.length+' TARGETS</div>';
+    fl.forEach(function(p){var ps=pStats[p.player_name]||{};var lg=crmLogs[p.id]||[];
+      h+='<div class="card" style="cursor:pointer" onclick="openP(\''+p.id+"','p')\">";
+      h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px"><div><div style="font-size:15px;font-weight:700">'+p.player_name+'</div><div style="display:flex;gap:6px;margin-top:3px">'+pill(p.position)+pill(p['class_year'],"var(--dim)")+pill(p.status.toUpperCase(),sc(p.status))+(lg.length?pill(lg.length+" logs","var(--bright)"):"")+'</div></div>';
+      if(p.nil_estimate)h+='<div style="text-align:right"><div style="font-size:14px;font-weight:700;color:var(--green);font-family:Bebas Neue">$'+(p.nil_estimate/1000).toFixed(0)+'K</div></div>';
+      h+='</div><div style="font-size:11px;color:var(--dim);margin-bottom:3px">'+p.current_school+(p.current_conference?" · "+p.current_conference:"")+'</div>';
+      if(ps.ppg){h+='<div style="display:flex;gap:10px">';if(ps.ppg)h+='<span style="font-size:11px"><b style="color:var(--y)">'+ps.ppg+'</b> ppg</span>';if(ps.rpg)h+='<span style="font-size:11px"><b style="color:var(--y)">'+ps.rpg+'</b> rpg</span>';if(ps.three_pct)h+='<span style="font-size:11px"><b style="color:var(--y)">'+(ps.three_pct*100).toFixed(0)+'%</b> 3PT</span>';h+='</div>';}
+      h+='</div>';});
+    c.innerHTML=h;
+  }
 
-if(tab===“hs”){
-var fl=filt(hs);
-var h=’<input class="si" placeholder="Search recruits..." oninput="onSearch(this.value)">’;
-h+=’<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">’+posBtns()+’<span style="width:6px"></span>’+stBtns()+’</div>’;
-h+=’<div style="font-size:10px;letter-spacing:2px;color:var(--dim);margin-bottom:8px">’+fl.length+’ RECRUITS</div>’;
-fl.forEach(function(p){
-h+=’<div class=“card” style=“cursor:pointer” onclick=“openP('’+p.id+”’,‘p’)">”;
-h+=’<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px"><div><div style="font-size:15px;font-weight:700">’+p.player_name+’</div><div style="display:flex;gap:6px;margin-top:3px">’+pill(p.position)+pill(p.status.toUpperCase(),sc(p.status))+’</div></div>’;
-if(p.nil_estimate)h+=’<div style="text-align:right"><div style="font-size:14px;font-weight:700;color:var(--green);font-family:Bebas Neue">$’+(p.nil_estimate/1000).toFixed(0)+‘K</div></div>’;
-h+=’</div><div style="font-size:11px;color:var(--dim);margin-bottom:3px">’+(p.current_school||””)+’</div>’;
-h+=’<div style="font-size:11px;color:var(--bright)">’+(p.fit_notes||””).substring(0,100)+’</div></div>’;});
-c.innerHTML=h;
-}
+  if(tab==="hs"){
+    var fl=filt(hs);
+    var h='<input class="si" placeholder="Search recruits..." oninput="onSearch(this.value)">';
+    h+='<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">'+posBtns()+'<span style="width:6px"></span>'+stBtns()+'</div>';
+    h+='<div style="font-size:10px;letter-spacing:2px;color:var(--dim);margin-bottom:8px">'+fl.length+' RECRUITS</div>';
+    fl.forEach(function(p){
+      h+='<div class="card" style="cursor:pointer" onclick="openP(\''+p.id+"','p')\">";
+      h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px"><div><div style="font-size:15px;font-weight:700">'+p.player_name+'</div><div style="display:flex;gap:6px;margin-top:3px">'+pill(p.position)+pill(p.status.toUpperCase(),sc(p.status))+'</div></div>';
+      if(p.nil_estimate)h+='<div style="text-align:right"><div style="font-size:14px;font-weight:700;color:var(--green);font-family:Bebas Neue">$'+(p.nil_estimate/1000).toFixed(0)+'K</div></div>';
+      h+='</div><div style="font-size:11px;color:var(--dim);margin-bottom:3px">'+(p.current_school||"")+'</div>';
+      h+='<div style="font-size:11px;color:var(--bright)">'+(p.fit_notes||"").substring(0,100)+'</div></div>';});
+    c.innerHTML=h;
+  }
 
-if(tab===“sf”){
-var res=portal.filter(function(p){var ps=pStats[p.player_name]||{};if(fP!==“ALL”&&p.position!==fP)return false;if(fPPG>0&&(!ps.ppg||ps.ppg<fPPG))return false;if(fRPG>0&&(!ps.rpg||ps.rpg<fRPG))return false;if(f3P>0&&(!ps.three_pct||ps.three_pct*100<f3P))return false;return true;});
-var h=’<div class="card"><div style="font-size:10px;letter-spacing:2px;color:var(--y);margin-bottom:12px">SMART FILTER</div>’;
-h+=’<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">’+[“ALL”,“PG”,“SG”,“SF”,“PF”,“C”].map(function(p){return ‘<button class=“fb’+(fP===p?” a”:””)+’” onclick=“uf('pos','’+p+’')”>’+p+’</button>’;}).join(””)+’</div>’;
-h+=’<div style="margin-bottom:12px"><label style="font-size:10px;color:var(--dim)">MIN PPG <span style="color:var(--y);font-weight:700;float:right">’+fPPG+’</span></label><input type="range" min="0" max="25" value="'+fPPG+'" oninput="uf(\'ppg\',this.value)" style="width:100%;accent-color:var(--y)"></div>’;
-h+=’<div style="margin-bottom:12px"><label style="font-size:10px;color:var(--dim)">MIN RPG <span style="color:var(--y);font-weight:700;float:right">’+fRPG+’</span></label><input type="range" min="0" max="12" step="0.5" value="'+fRPG+'" oninput="uf(\'rpg\',this.value)" style="width:100%;accent-color:var(--y)"></div>’;
-h+=’<div style="margin-bottom:12px"><label style="font-size:10px;color:var(--dim)">MIN 3PT% <span style="color:var(--y);font-weight:700;float:right">’+f3P+’%</span></label><input type="range" min="0" max="50" value="'+f3P+'" oninput="uf(\'3p\',this.value)" style="width:100%;accent-color:var(--y)"></div></div>’;
-h+=’<div style="font-size:10px;letter-spacing:2px;color:var(--dim);margin-bottom:8px">’+res.length+’ MATCHES</div>’;
-res.forEach(function(p){var ps=pStats[p.player_name]||{};
-h+=’<div class=“card” style=“cursor:pointer” onclick=“openP('’+p.id+”’,‘p’)">”;
-h+=’<div style="display:flex;justify-content:space-between"><div><div style="font-size:15px;font-weight:700">’+p.player_name+’</div><div style="display:flex;gap:6px;margin-top:3px">’+pill(p.position)+pill(p.status.toUpperCase(),sc(p.status))+’</div></div>’;
-if(p.nil_estimate)h+=’<div style="font-size:14px;font-weight:700;color:var(--green);font-family:Bebas Neue">$’+(p.nil_estimate/1000).toFixed(0)+‘K</div>’;
-h+=’</div><div style="font-size:11px;color:var(--dim);margin-top:4px">’+p.current_school+’</div>’;
-h+=’<div style="display:flex;gap:12px;margin-top:6px">’;
-if(ps.ppg)h+=’<span style="font-size:13px"><b style="color:var(--y)">’+ps.ppg+’</b> ppg</span>’;
-if(ps.rpg)h+=’<span style="font-size:13px"><b style="color:var(--y)">’+ps.rpg+’</b> rpg</span>’;
-if(ps.three_pct)h+=’<span style="font-size:13px"><b style="color:var(--y)">’+(ps.three_pct*100).toFixed(1)+’%</b> 3PT</span>’;
-h+=’</div></div>’;});
-c.innerHTML=h;
-}
+  if(tab==="sf"){
+    var res=portal.filter(function(p){var ps=pStats[p.player_name]||{};if(fP!=="ALL"&&p.position!==fP)return false;if(fPPG>0&&(!ps.ppg||ps.ppg<fPPG))return false;if(fRPG>0&&(!ps.rpg||ps.rpg<fRPG))return false;if(f3P>0&&(!ps.three_pct||ps.three_pct*100<f3P))return false;return true;});
+    var h='<div class="card"><div style="font-size:10px;letter-spacing:2px;color:var(--y);margin-bottom:12px">SMART FILTER</div>';
+    h+='<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">'+["ALL","PG","SG","SF","PF","C"].map(function(p){return '<button class="fb'+(fP===p?" a":"")+'" onclick="uf(\'pos\',\''+p+'\')">'+p+'</button>';}).join("")+'</div>';
+    h+='<div style="margin-bottom:12px"><label style="font-size:10px;color:var(--dim)">MIN PPG <span style="color:var(--y);font-weight:700;float:right">'+fPPG+'</span></label><input type="range" min="0" max="25" value="'+fPPG+'" oninput="uf(\'ppg\',this.value)" style="width:100%;accent-color:var(--y)"></div>';
+    h+='<div style="margin-bottom:12px"><label style="font-size:10px;color:var(--dim)">MIN RPG <span style="color:var(--y);font-weight:700;float:right">'+fRPG+'</span></label><input type="range" min="0" max="12" step="0.5" value="'+fRPG+'" oninput="uf(\'rpg\',this.value)" style="width:100%;accent-color:var(--y)"></div>';
+    h+='<div style="margin-bottom:12px"><label style="font-size:10px;color:var(--dim)">MIN 3PT% <span style="color:var(--y);font-weight:700;float:right">'+f3P+'%</span></label><input type="range" min="0" max="50" value="'+f3P+'" oninput="uf(\'3p\',this.value)" style="width:100%;accent-color:var(--y)"></div></div>';
+    h+='<div style="font-size:10px;letter-spacing:2px;color:var(--dim);margin-bottom:8px">'+res.length+' MATCHES</div>';
+    res.forEach(function(p){var ps=pStats[p.player_name]||{};
+      h+='<div class="card" style="cursor:pointer" onclick="openP(\''+p.id+"','p')\">";
+      h+='<div style="display:flex;justify-content:space-between"><div><div style="font-size:15px;font-weight:700">'+p.player_name+'</div><div style="display:flex;gap:6px;margin-top:3px">'+pill(p.position)+pill(p.status.toUpperCase(),sc(p.status))+'</div></div>';
+      if(p.nil_estimate)h+='<div style="font-size:14px;font-weight:700;color:var(--green);font-family:Bebas Neue">$'+(p.nil_estimate/1000).toFixed(0)+'K</div>';
+      h+='</div><div style="font-size:11px;color:var(--dim);margin-top:4px">'+p.current_school+'</div>';
+      h+='<div style="display:flex;gap:12px;margin-top:6px">';
+      if(ps.ppg)h+='<span style="font-size:13px"><b style="color:var(--y)">'+ps.ppg+'</b> ppg</span>';
+      if(ps.rpg)h+='<span style="font-size:13px"><b style="color:var(--y)">'+ps.rpg+'</b> rpg</span>';
+      if(ps.three_pct)h+='<span style="font-size:13px"><b style="color:var(--y)">'+(ps.three_pct*100).toFixed(1)+'%</b> 3PT</span>';
+      h+='</div></div>';});
+    c.innerHTML=h;
+  }
 }
 </script>
-
 </body>
 </html>
