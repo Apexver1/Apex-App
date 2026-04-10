@@ -106,7 +106,30 @@ window.decideReq=function(reqId,decision){
   }).then(function(){loadData().then(function(){render();});});
 }
 
-window.tier=function(ppg){if(ppg>=18)return{n:1,name:"Franchise",lo:1200000,hi:2000000,mid:1600000};if(ppg>=12)return{n:2,name:"Starter",lo:600000,hi:1200000,mid:900000};if(ppg>=8)return{n:3,name:"6th Man",lo:300000,hi:600000,mid:450000};if(ppg>=4)return{n:4,name:"Rotation",lo:100000,hi:300000,mid:200000};return{n:5,name:"Bench",lo:25000,hi:100000,mid:60000};}
+window.valueNil=function(p,ps){
+  var ppg=(ps&&ps.ppg)||p.ppg||0;
+  var pos=p.position||"";
+  var cls=p["class_year"]||"FR";
+  var schools=p.competing_schools?p.competing_schools.split(",").length:0;
+  var base=ppg*80000;
+  var posPrem=pos==="C"?200000:pos==="PG"?100000:0;
+  var yrsLeft=cls==="SR"?1:cls==="JR"?2:cls==="SO"?3:4;
+  var yrsPrem=yrsLeft*150000;
+  var demandPrem=schools*100000;
+  var confMult=1.0;
+  if(p.current_conference){
+    var cn=p.current_conference.toLowerCase();
+    if(cn.indexOf("big ten")>=0||cn.indexOf("sec")>=0||cn.indexOf("big 12")>=0||cn.indexOf("acc")>=0)confMult=1.0;
+    else if(cn.indexOf("big east")>=0||cn.indexOf("pac")>=0||cn.indexOf("mountain")>=0||cn.indexOf("aac")>=0)confMult=0.75;
+    else confMult=0.5;
+  }
+  var total=Math.round((base+posPrem+yrsPrem+demandPrem)*confMult);
+  var lo=Math.round(total*0.75);
+  var hi=Math.round(total*1.25);
+  var label=total>=1500000?"Franchise":total>=800000?"Starter":total>=400000?"6th Man":total>=150000?"Rotation":"Bench";
+  return{mid:total,lo:lo,hi:hi,name:label,n:total>=1500000?1:total>=800000?2:total>=400000?3:total>=150000?4:5,base:base,posPrem:posPrem,yrsPrem:yrsPrem,demandPrem:demandPrem,confMult:confMult,yrsLeft:yrsLeft};
+}
+window.tier=function(ppg){return valueNil({ppg:ppg,position:"",class_year:"FR",competing_schools:""},{});}
 
 window.openSlot=function(slotNum){
   var all=[];
@@ -124,7 +147,7 @@ window.openSlot=function(slotNum){
   h+='</div>';
   h+='<div style="font-size:10px;color:var(--dim);margin-bottom:8px">'+all.length+' players</div>';
   all.forEach(function(p){
-    var t=tier(p.ppg||0);
+    var t=valueNil(p.raw,pStats[p.name]||{});
     h+='<div class="card" style="cursor:pointer" onclick="commitP(\''+p.id+'\','+slotNum+','+t.mid+')">';
     h+='<div style="display:flex;justify-content:space-between"><div><div style="font-size:14px;font-weight:700">'+p.name+'</div><div style="font-size:10px;color:var(--dim)"><span style="color:'+p.color+';font-weight:700">'+p.src+'</span> · '+(p.pos||"")+' · '+(p.ppg||"--")+' ppg</div></div>';
     h+='<div style="text-align:right"><div style="font-size:11px;color:var(--y);font-weight:700">T'+t.n+' '+t.name+'</div><div style="font-size:13px;font-weight:700;color:var(--green);font-family:Bebas Neue">$'+(t.mid/1000).toFixed(0)+'K</div></div></div></div>';
@@ -135,6 +158,28 @@ window.openSlot=function(slotNum){
 
 window.commitP=function(pid,slot,nil){
   pickerSearch="";pickerPos="ALL";
+  openNilEdit(pid,slot,nil);
+}
+window.openNilEdit=function(pid,slot,suggestedNil){
+  var allP={};prospects.forEach(function(p){allP[p.id]=p;});roster.forEach(function(p){allP[p.id]=p;});
+  var p=allP[pid];if(!p)return;
+  var ps=pStats[p.player_name]||{};
+  var t=tier(ps.ppg||p.ppg||0);
+  var existing=(budget.per_player_allocations_json&&budget.per_player_allocations_json.by_player&&budget.per_player_allocations_json.by_player["slot_"+slot])||null;
+  var currentNil=existing?existing.nil:suggestedNil;
+  var h='<div class="mbg" onclick="if(event.target===this)closeM()"><div class="mdl">';
+  h+='<button class="x" onclick="closeM()">✕</button>';
+  h+='<h2 style="font-size:18px;margin-bottom:4px">'+p.player_name+'</h2>';
+  h+='<div style="font-size:11px;color:var(--dim);margin-bottom:12px">SLOT '+slot+' · '+(p.position||"")+' · T'+t.n+' '+t.name+'</div>';
+  h+='<div style="font-size:11px;color:var(--y);margin-bottom:6px">SUGGESTED: $'+(t.mid/1000).toFixed(0)+'K (range $'+(t.lo/1000).toFixed(0)+'K-$'+(t.hi/1000).toFixed(0)+'K)</div>';
+  h+='<label style="font-size:10px;color:var(--dim);letter-spacing:1px">NIL AMOUNT (USD)</label>';
+  h+='<input id="nilAmt" type="number" class="inp" value="'+currentNil+'">';
+  h+='<button class="btn" onclick="saveCommit(\''+pid+'\','+slot+')">'+(existing?"UPDATE":"COMMIT")+'</button>';
+  h+='</div></div>';
+  document.getElementById("mc").innerHTML=h;
+}
+window.saveCommit=function(pid,slot){
+  var nil=parseFloat(document.getElementById("nilAmt").value)||0;
   var alloc=budget.per_player_allocations_json||{by_position:{},by_player:{}};
   if(!alloc.by_player)alloc.by_player={};
   alloc.by_player["slot_"+slot]={prospect_id:pid,nil:nil,slot:slot};
@@ -362,7 +407,7 @@ window.render=function(){
     var filled=Object.keys(byPlayer).length;
     var h='<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">';
     h+='<div class="sb"><div class="l">Filled</div><div class="v">'+filled+'/15</div><div class="s">slots</div></div>';
-    h+='<div class="sb"><div class="l">Committed</div><div class="v">$'+(com/1000000).toFixed(2)+'M</div><div class="s">of $'+(tot/1000000).toFixed(0)+'M</div></div>';
+    var overB=com>tot;h+='<div class="sb"><div class="l">Committed</div><div class="v" style="color:'+(overB?'var(--red)':'var(--white)')+'">$'+(com/1000000).toFixed(2)+'M</div><div class="s" style="color:'+(overB?'var(--red)':'var(--dim)')+'">of $'+(tot/1000000).toFixed(0)+'M'+(overB?' OVER':'')+'</div></div>';
     h+='<div class="sb"><div class="l">Avg/Player</div><div class="v">$'+(filled>0?(com/filled/1000).toFixed(0):0)+'K</div><div class="s">per slot</div></div>';
     h+='</div>';
     h+='<div style="font-size:10px;letter-spacing:2px;color:var(--y);margin-bottom:8px">NIL ROSTER (Slots 1-10)</div>';
@@ -373,7 +418,7 @@ window.render=function(){
         var ps=pStats[p.player_name]||{};
         var t=tier(ps.ppg||0);
         var val=slot.nil<t.mid?'<span style="color:var(--green);font-size:9px">VALUE</span> ':'';
-        h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:11px;color:var(--dim)">SLOT '+i+'</div><div style="font-size:14px;font-weight:700">'+p.player_name+'</div><div style="font-size:10px;color:var(--dim)">'+p.position+' · T'+t.n+' '+t.name+' '+val+'</div></div><div style="text-align:right"><div style="font-size:14px;font-weight:700;color:var(--green);font-family:Bebas Neue">$'+(slot.nil/1000).toFixed(0)+'K</div><button onclick="removeSlot('+i+')" style="background:none;border:1px solid var(--red);color:var(--red);font-size:9px;padding:3px 8px;border-radius:3px;cursor:pointer;margin-top:4px">REMOVE</button></div></div></div>';
+        h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:11px;color:var(--dim)">SLOT '+i+'</div><div style="font-size:14px;font-weight:700">'+p.player_name+'</div><div style="font-size:10px;color:var(--dim)">'+p.position+' · T'+t.n+' '+t.name+' '+val+'</div></div><div style="text-align:right"><div style="font-size:14px;font-weight:700;color:var(--green);font-family:Bebas Neue">$'+(slot.nil/1000).toFixed(0)+'K</div><div style="display:flex;gap:4px;margin-top:4px"><button onclick="openNilEdit(\''+slot.prospect_id+'\','+i+','+slot.nil+')" style="background:none;border:1px solid var(--y);color:var(--y);font-size:9px;padding:3px 8px;border-radius:3px;cursor:pointer">EDIT</button><button onclick="removeSlot('+i+')" style="background:none;border:1px solid var(--red);color:var(--red);font-size:9px;padding:3px 8px;border-radius:3px;cursor:pointer">REMOVE</button></div></div></div></div>';
       } else {
         h+='<div class="card" style="cursor:pointer;border-style:dashed" onclick="openSlot('+i+')"><div style="text-align:center;color:var(--dim);font-size:12px">+ SLOT '+i+' · TAP TO ADD</div></div>';
       }
@@ -411,7 +456,7 @@ window.render=function(){
     }
     h+='<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">';
     h+='<div class="sb"><div class="l">Total Cap</div><div class="v">$'+(tot/1000000).toFixed(1)+'M</div><div class="s">2026-27</div></div>';
-    h+='<div class="sb"><div class="l">Committed</div><div class="v">$'+(com/1000000).toFixed(1)+'M</div><div class="s">'+pct+'% used</div></div>';
+    var overBudget=com>tot;var comColor=overBudget?'var(--red)':'var(--white)';h+='<div class="sb"><div class="l">Committed</div><div class="v" style="color:'+comColor+'">$'+(com/1000000).toFixed(1)+'M</div><div class="s" style="color:'+(overBudget?'var(--red)':'var(--dim)')+'">'+pct+'% used'+(overBudget?' OVER':'')+'</div></div>';
     h+='<div class="sb"><div class="l">Remaining</div><div class="v">$'+(rem/1000000).toFixed(1)+'M</div><div class="s">available</div></div>';
     h+='</div>';
     h+='<div class="card"><div style="font-size:10px;letter-spacing:2px;color:var(--y);margin-bottom:12px">POSITION ALLOCATIONS</div>';
