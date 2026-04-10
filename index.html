@@ -154,6 +154,32 @@ window.aiSearch=function(){
 }
 
 
+
+window.aiVoice=function(){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){alert("Voice not supported in this browser. Try Safari.");return;}
+  var rec=new SR();
+  rec.lang="en-US";rec.interimResults=false;rec.maxAlternatives=1;
+  var btn=document.getElementById("micBtn");
+  if(btn){btn.textContent="LISTENING...";btn.style.background="var(--red)";}
+  rec.onresult=function(e){
+    var t=e.results[0][0].transcript;
+    document.getElementById("aiInput").value=t;
+    aiQuery=t;
+    if(btn){btn.textContent="MIC";btn.style.background="var(--navy)";}
+    aiRun();
+  };
+  rec.onerror=function(e){
+    if(btn){btn.textContent="MIC";btn.style.background="var(--navy)";}
+    alert("Voice error: "+e.error);
+  };
+  rec.onend=function(){
+    if(btn&&btn.textContent.indexOf("LISTENING")>=0){btn.textContent="MIC";btn.style.background="var(--navy)";}
+  };
+  rec.start();
+}
+
+
 window.aiLLM=function(){
   aiQuery=document.getElementById("aiInput").value;
   if(!aiQuery.trim())return;
@@ -442,6 +468,7 @@ window.logC=function(pid){
 
 window.render=function(){
   var c=document.getElementById("ct");
+  c.style.maxWidth="480px";
   var portal=prospects.filter(function(p){return p.source==="portal";});
   var hs=prospects.filter(function(p){return p.source==="high_school";});
   var starters=roster.filter(function(r){return r.depth_chart_position===1;});
@@ -510,16 +537,16 @@ window.render=function(){
   
   
   if(tab==="ai"){
-    var h='<div class="card"><div style="font-size:10px;letter-spacing:2px;color:var(--y);margin-bottom:8px">✨ APEX AI SCOUT</div>';
+    var h='<div class="card" style="min-height:calc(100vh - 200px);display:flex;flex-direction:column"><div style="font-size:10px;letter-spacing:2px;color:var(--y);margin-bottom:8px">✨ APEX AI SCOUT</div>';
     h+='<div style="display:flex;gap:6px;margin-bottom:10px"><button class="fb'+(aiMode==="rules"?" a":"")+'" onclick="setAiMode(\'rules\')" style="flex:1">RULES (FREE)</button><button class="fb'+(aiMode==="llm"?" a":"")+'" onclick="setAiMode(\'llm\')" style="flex:1">APEX AI ($0.01/q)</button></div>';
-    h+='<input id="aiInput" class="inp" placeholder="'+(aiMode==="llm"?"Ask anything... e.g. Which prospect best fills our biggest weakness?":"e.g., Find me a PG shooter under $1M")+'" value="'+(aiQuery||"")+'">';
-    h+='<button class="btn" onclick="aiRun()">'+(aiLoading?"THINKING...":"SEARCH")+'</button>';
+    h+='<div style="display:flex;gap:6px;align-items:stretch"><input id="aiInput" class="inp" style="flex:1;margin-bottom:0" placeholder="'+(aiMode==="llm"?"Ask anything or tap mic to speak...":"e.g., Find me a PG shooter under $1M")+'" value="'+(aiQuery||"")+'"><button id="micBtn" onclick="aiVoice()" style="background:var(--navy);border:1px solid var(--b);color:var(--white);border-radius:6px;padding:0 16px;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:1px">MIC</button></div>';
+    h+='<button class="btn" style="margin-top:8px" onclick="aiRun()">'+(aiLoading?"THINKING...":"SEARCH")+'</button>';
     h+='<div style="font-size:10px;color:var(--dim);margin-top:12px;letter-spacing:1px">QUICK QUERIES</div>';
     var quicks=["Find me a PG with 15+ ppg","Best value picks under $1M","Elite shooter from the portal","Stretch PF with 35% from 3","Rim protector with 8+ rpg","Top scorers high school recruits","Cheapest portal centers"];
     h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">';
     quicks.forEach(function(q){h+='<button class="fb" style="text-align:left" onclick="aiQuick(\''+q.replace(/\'/g,"")+'\')">'+q+'</button>';});
     h+='</div></div>';
-    if(aiResults&&aiResults.mode==="llm"){h+='<div class="card"><div style="font-size:10px;letter-spacing:2px;color:var(--y);margin-bottom:8px">APEX AI RESPONSE</div><div style="font-size:10px;color:var(--dim);margin-bottom:8px">QUERY: "'+aiResults.query+'"</div><div style="font-size:13px;color:var(--white);line-height:1.6;white-space:pre-wrap">'+aiResults.llmAnswer.replace(/\*\*(.*?)\*\*/g,'<b style="color:var(--y)">$1</b>')+'</div></div>';}else if(aiResults){
+    if(aiResults&&aiResults.mode==="llm"){h+='<div class="card" style="min-height:60vh"><div style="font-size:11px;letter-spacing:2px;color:var(--y);margin-bottom:10px">APEX AI RESPONSE</div><div style="font-size:11px;color:var(--dim);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--b)">QUERY: "'+aiResults.query+'"</div><div style="font-size:15px;color:var(--white);line-height:1.8;white-space:pre-wrap">'+aiResults.llmAnswer.replace(/\*\*(.*?)\*\*/g,'<b style="color:var(--y)">$1</b>')+'</div></div>';}else if(aiResults){
       h+='<div class="card"><div style="font-size:10px;letter-spacing:2px;color:var(--bright);margin-bottom:6px">QUERY: "'+aiResults.query+'"</div>';
       if(aiResults.filters.explain.length){h+='<div style="font-size:10px;color:var(--dim);margin-bottom:8px">PARSED: '+aiResults.filters.explain.join(" · ")+'</div>';}
       h+='<div style="font-size:11px;color:var(--y)">'+aiResults.results.length+' matches</div></div>';
