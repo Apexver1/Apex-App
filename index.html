@@ -10,16 +10,16 @@
 *{margin:0;padding:0;box-sizing:border-box}body{background:var(--bg);color:var(--white);font-family:'DM Sans',sans-serif;font-size:15px}
 .topbar{background:var(--navy);border-bottom:2px solid var(--y);padding:0 16px;position:sticky;top:0;z-index:200;height:48px;display:flex;align-items:center;justify-content:space-between}
 .brand{font-size:16px;font-weight:800;letter-spacing:4px}.brand b{color:var(--y)}
-.body{padding:12px 14px 72px;max-width:480px;margin:0 auto}
+.body{padding:12px 14px 90px;max-width:480px;margin:0 auto}
 .card{background:var(--card);border:1px solid var(--b);border-radius:8px;padding:12px 14px;margin-bottom:10px}
 .pill{font-size:12px;border:1px solid;border-radius:3px;padding:2px 8px;letter-spacing:.5px;display:inline-block}
 .sb{background:var(--navy);border-radius:6px;padding:12px 14px;flex:1;min-width:75px}
 .sb .l{font-size:11px;color:var(--dim);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px}
 .sb .v{font-size:22px;font-weight:700;font-family:'Bebas Neue';letter-spacing:1px}
 .sb .s{font-size:12px;color:var(--dim);margin-top:2px}
-.nav{position:fixed;bottom:0;left:0;right:0;background:var(--navy);border-top:1px solid var(--b);display:flex;z-index:200;height:56px}
-.nav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:none;border:none;font-size:10px;letter-spacing:.8px;cursor:pointer;gap:2px;font-family:inherit}
-.nav button .i{font-size:18px}.nav button.a{color:var(--y)}.nav button:not(.a){color:var(--dim)}
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--navy);border-top:2px solid var(--y);display:flex;z-index:200;height:72px;box-shadow:0 -4px 20px rgba(0,0,0,0.4)}
+.nav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:none;border:none;font-size:11px;letter-spacing:.8px;cursor:pointer;gap:4px;font-family:inherit;padding:8px 0;font-weight:600}
+.nav button .i{font-size:26px;line-height:1}.nav button.a{color:var(--y)}.nav button:not(.a){color:var(--dim)}
 .si{width:100%;background:var(--card);border:1px solid var(--b);color:var(--white);border-radius:6px;padding:12px;font-size:15px;outline:none;margin-bottom:8px;font-family:inherit}
 .si:focus{border-color:var(--y)}
 .fb{background:var(--navy);border:1px solid var(--b);color:var(--dim);border-radius:4px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit}
@@ -56,6 +56,7 @@
 <button onclick="go('dash')" id="t-dash" class="a"><span class="i">◆</span>HOME</button>
 <button onclick="go('roster')" id="t-roster"><span class="i">◎</span>ROSTER</button>
 <button onclick="go('rec')" id="t-rec"><span class="i">★</span>RECRUIT</button>
+<button onclick="go('crm')" id="t-crm"><span class="i">☎</span>CRM</button>
 <button onclick="go('sf')" id="t-sf"><span class="i">⚡</span>FILTER</button>
 <button onclick="go('bg')" id="t-bg"><span class="i">$</span>BUDGET</button>
 <button onclick="go('rb')" id="t-rb"><span class="i">▦</span>BUILD</button>
@@ -614,6 +615,35 @@ window.render=function(){
     h+='<div style="font-size:10px;letter-spacing:2px;color:var(--dim);margin-bottom:8px">'+fl.length+' PLAYERS</div>';
     fl.forEach(function(p){h+='<div class="card" style="cursor:pointer" onclick="openP(\''+p.id+"','r')\"><div style=\"display:flex;justify-content:space-between;align-items:center\"><div style=\"flex:1\"><div style=\"display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:4px\"><span style=\"font-size:15px;font-weight:700\">#"+p.jersey_number+" "+p.player_name+"</span>"+pill(p.position)+pill(p['class_year'],"var(--dim)")+"</div><div style=\"font-size:11px;color:var(--dim)\">"+(p.role_description||"").substring(0,60)+"</div></div><div style=\"text-align:right;min-width:60px\">"+(p.ppg!=null?"<div style=\"font-size:13px\">"+p.ppg+" <span style=\"font-size:9px;color:var(--dim)\">ppg</span></div>":"")+(p.rpg!=null?"<div style=\"font-size:13px\">"+p.rpg+" <span style=\"font-size:9px;color:var(--dim)\">rpg</span></div>":"")+"</div></div></div>";});
     c.innerHTML=h;
+  }
+
+  
+  if(tab==="crm"){
+    var all=prospects.slice();
+    if(sq)all=all.filter(function(p){return(p.player_name||"").toLowerCase().indexOf(sq)>=0;});
+    var tierFilter=pf;
+    if(tierFilter!=="ALL"&&["A","B","C","D"].indexOf(tierFilter)>=0){all=all.filter(function(p){return p.priority_tier===tierFilter;});}
+    all.sort(function(a,b){var ta=a.priority_tier||"Z",tb=b.priority_tier||"Z";if(ta!==tb)return ta.localeCompare(tb);return(a.player_name||"").localeCompare(b.player_name||"");});
+    var h='<div style="font-size:11px;letter-spacing:2px;color:var(--y);margin-bottom:10px">CRM - CONTACT MANAGEMENT</div>';
+    h+='<input class="si" placeholder="Search all prospects..." oninput="onSearch(this.value)">';
+    h+='<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">';
+    ["ALL","A","B","C","D"].forEach(function(t){h+='<button class="fb'+(pf===t?" a":"")+'" onclick="onPF(\''+t+'\')">'+(t==="ALL"?"ALL TIERS":"TIER "+t)+'</button>';});
+    h+='</div>';
+    h+='<div style="font-size:11px;color:var(--dim);margin-bottom:8px">'+all.length+' prospects</div>';
+    all.forEach(function(p){
+      var fam=familyMap[p.id]||[];
+      var logs=crmLogs[p.id]||[];
+      var lastLog=logs[0];
+      var hasContact=p.cell_phone||p.email||fam.length>0;
+      var tierCol=p.priority_tier==="A"?"var(--green)":p.priority_tier==="B"?"var(--y)":p.priority_tier==="C"?"var(--gold)":p.priority_tier==="D"?"var(--dim)":"var(--b)";
+      h+='<div class="card" onclick="openCRM(\''+p.id+'\')" style="cursor:pointer;border-left:4px solid '+tierCol+'">';
+      h+='<div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="flex:1"><div style="font-size:16px;font-weight:700">'+p.player_name+'</div><div style="font-size:12px;color:var(--bright)">'+(p.current_school||"")+'</div><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">'+pill(p.position)+(p.priority_tier?pill("TIER "+p.priority_tier,tierCol):pill("UNTIERED","var(--dim)"))+(hasContact?pill("CONTACT ✓","var(--green)"):pill("NO CONTACT","var(--red)"))+(fam.length?pill(fam.length+" family","var(--bright)"):"")+'</div></div></div>';
+      if(p.cell_phone||p.email){h+='<div style="display:flex;gap:12px;margin-top:8px;padding-top:8px;border-top:1px solid var(--b);font-size:11px;color:var(--dim)">';if(p.cell_phone)h+='<span>☎ '+p.cell_phone+'</span>';if(p.email)h+='<span>✉ '+p.email+'</span>';h+='</div>';}
+      if(lastLog){h+='<div style="font-size:10px;color:var(--dim);margin-top:6px">Last: '+new Date(lastLog.contact_date).toLocaleDateString()+' · '+(lastLog.method||"").toUpperCase()+'</div>';}
+      h+='</div>';
+    });
+    c.innerHTML=h;
+    return;
   }
 
   if(tab==="rec"){
