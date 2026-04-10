@@ -58,12 +58,63 @@
 <button onclick="go('portal')" id="t-portal"><span class="i">⇄</span>PORTAL</button>
 <button onclick="go('hs')" id="t-hs"><span class="i">★</span>RECRUITS</button>
 <button onclick="go('sf')" id="t-sf"><span class="i">⚡</span>FILTER</button>
+<button onclick="go('bg')" id="t-bg"><span class="i">$</span>BUDGET</button>
+<button onclick="go('rb')" id="t-rb"><span class="i">▦</span>BUILD</button>
 </div></div>
 <div id="mc"></div>
 <script>
 var SU="https://midyxvjfoggchbugxzkd.supabase.co";
 var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pZHl4dmpmb2dnY2hidWd4emtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NzQ5ODQsImV4cCI6MjA5MTM1MDk4NH0.VLsaYxByQC2s4jLpcETNx3sYykp-x3azyC0v1q0dqmo";
-var T="",roster=[],prospects=[],strategy=null,schols=[],pStats={},crmLogs={},tab="dash",sq="",pf="ALL",sf="ALL",fPPG=0,fRPG=0,f3P=0,fP="ALL";
+var T="",budget=null,roster=[],prospects=[],strategy=null,schols=[],pStats={},crmLogs={},tab="dash",sq="",pf="ALL",sf="ALL",fPPG=0,fRPG=0,f3P=0,fP="ALL";
+
+
+window.tier=function(ppg){if(ppg>=18)return{n:1,name:"Franchise",lo:1200000,hi:2000000,mid:1600000};if(ppg>=12)return{n:2,name:"Starter",lo:600000,hi:1200000,mid:900000};if(ppg>=8)return{n:3,name:"6th Man",lo:300000,hi:600000,mid:450000};if(ppg>=4)return{n:4,name:"Rotation",lo:100000,hi:300000,mid:200000};return{n:5,name:"Bench",lo:25000,hi:100000,mid:60000};}
+
+window.openSlot=function(slotNum){
+  var fp=prospects.filter(function(p){return p.source==="portal"||p.source==="high_school";});
+  var h='<div class="mbg" onclick="if(event.target===this)closeM()"><div class="mdl">';
+  h+='<button class="x" onclick="closeM()">✕</button>';
+  h+='<h2 style="font-size:18px;margin-bottom:4px">SLOT '+slotNum+(slotNum<=10?" · NIL":" · NO NIL")+'</h2>';
+  h+='<div style="font-size:11px;color:var(--dim);margin-bottom:12px">Tap a prospect to commit</div>';
+  fp.forEach(function(p){
+    var ps=pStats[p.player_name]||{};
+    var ppg=ps.ppg||p.ppg||0;
+    var t=tier(ppg);
+    h+='<div class="card" style="cursor:pointer" onclick="commitP(\''+p.id+'\','+slotNum+','+t.mid+')">';
+    h+='<div style="display:flex;justify-content:space-between"><div><div style="font-size:14px;font-weight:700">'+p.player_name+'</div><div style="font-size:10px;color:var(--dim)">'+p.position+' · '+(ps.ppg||"--")+' ppg</div></div>';
+    h+='<div style="text-align:right"><div style="font-size:11px;color:var(--y);font-weight:700">T'+t.n+' '+t.name+'</div><div style="font-size:13px;font-weight:700;color:var(--green);font-family:Bebas Neue">$'+(t.mid/1000).toFixed(0)+'K</div></div></div></div>';
+  });
+  h+='</div></div>';
+  document.getElementById("mc").innerHTML=h;
+}
+
+window.commitP=function(pid,slot,nil){
+  var alloc=budget.per_player_allocations_json||{by_position:{},by_player:{}};
+  if(!alloc.by_player)alloc.by_player={};
+  alloc.by_player["slot_"+slot]={prospect_id:pid,nil:nil,slot:slot};
+  var totalCommitted=0;
+  Object.keys(alloc.by_player).forEach(function(k){totalCommitted+=alloc.by_player[k].nil||0;});
+  api("/rest/v1/nil_budget?id=eq."+budget.id,{method:"PATCH",body:JSON.stringify({per_player_allocations_json:alloc,committed_amount:totalCommitted}),prefer:"return=minimal"}).then(function(){
+    budget.per_player_allocations_json=alloc;
+    budget.committed_amount=totalCommitted;
+    budget.remaining_amount=parseFloat(budget.total_budget)-totalCommitted;
+    closeM();render();
+  });
+}
+
+window.removeSlot=function(slot){
+  var alloc=budget.per_player_allocations_json||{};
+  if(alloc.by_player&&alloc.by_player["slot_"+slot]){delete alloc.by_player["slot_"+slot];}
+  var totalCommitted=0;
+  Object.keys(alloc.by_player||{}).forEach(function(k){totalCommitted+=alloc.by_player[k].nil||0;});
+  api("/rest/v1/nil_budget?id=eq."+budget.id,{method:"PATCH",body:JSON.stringify({per_player_allocations_json:alloc,committed_amount:totalCommitted}),prefer:"return=minimal"}).then(function(){
+    budget.per_player_allocations_json=alloc;
+    budget.committed_amount=totalCommitted;
+    budget.remaining_amount=parseFloat(budget.total_budget)-totalCommitted;
+    render();
+  });
+}
+
 
 window.api=function(path,opt){
   opt=opt||{};
@@ -91,10 +142,11 @@ window.loadData=function(){
     api("/rest/v1/team_strategy?select=*&is_seed_data=eq.true&limit=1"),
     api("/rest/v1/scholarships?select=*&is_seed_data=eq.true&order=season.asc"),
     api("/rest/v1/prospect_stats?select=stat_name,stat_value,prospect_id&is_seed_data=eq.true"),
-    api("/rest/v1/crm_log?select=*&order=contact_date.desc")
+    api("/rest/v1/crm_log?select=*&order=contact_date.desc"),
+api("/rest/v1/nil_budget?select=*&is_seed_data=eq.true&limit=1")
   ]).then(function(r){
     roster=r[0]||[];prospects=r[1]||[];strategy=(r[2]&&r[2][0])||null;schols=r[3]||[];
-    var ps=r[4]||[];var logs=r[5]||[];
+    var ps=r[4]||[];var logs=r[5]||[];budget=(r[6]&&r[6][0])||null;
     var idMap={};prospects.forEach(function(p){idMap[p.id]=p.player_name;});
     pStats={};ps.forEach(function(s){var n=idMap[s.prospect_id];if(n){if(!pStats[n])pStats[n]={};pStats[n][s.stat_name]=s.stat_value;}});
     crmLogs={};logs.forEach(function(l){if(!crmLogs[l.prospect_id])crmLogs[l.prospect_id]=[];crmLogs[l.prospect_id].push(l);});
@@ -249,6 +301,72 @@ window.render=function(){
       if(p.nil_estimate)h+='<div style="text-align:right"><div style="font-size:14px;font-weight:700;color:var(--green);font-family:Bebas Neue">$'+(p.nil_estimate/1000).toFixed(0)+'K</div></div>';
       h+='</div><div style="font-size:11px;color:var(--dim);margin-bottom:3px">'+(p.current_school||"")+'</div>';
       h+='<div style="font-size:11px;color:var(--bright)">'+(p.fit_notes||"").substring(0,100)+'</div></div>';});
+    c.innerHTML=h;
+  }
+
+  
+  
+  if(tab==="rb"){
+    var alloc=(budget&&budget.per_player_allocations_json)||{by_player:{}};
+    var byPlayer=alloc.by_player||{};
+    var allP={};prospects.forEach(function(p){allP[p.id]=p;});
+    var tot=parseFloat(budget&&budget.total_budget)||10000000;
+    var com=parseFloat(budget&&budget.committed_amount)||0;
+    var filled=Object.keys(byPlayer).length;
+    var h='<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">';
+    h+='<div class="sb"><div class="l">Filled</div><div class="v">'+filled+'/15</div><div class="s">slots</div></div>';
+    h+='<div class="sb"><div class="l">Committed</div><div class="v">$'+(com/1000000).toFixed(2)+'M</div><div class="s">of $'+(tot/1000000).toFixed(0)+'M</div></div>';
+    h+='<div class="sb"><div class="l">Avg/Player</div><div class="v">$'+(filled>0?(com/filled/1000).toFixed(0):0)+'K</div><div class="s">per slot</div></div>';
+    h+='</div>';
+    h+='<div style="font-size:10px;letter-spacing:2px;color:var(--y);margin-bottom:8px">NIL ROSTER (Slots 1-10)</div>';
+    for(var i=1;i<=10;i++){
+      var slot=byPlayer["slot_"+i];
+      if(slot){
+        var p=allP[slot.prospect_id];if(!p){h+='<div class="card">Slot '+i+' · Player not found</div>';continue;}
+        var ps=pStats[p.player_name]||{};
+        var t=tier(ps.ppg||0);
+        var val=slot.nil<t.mid?'<span style="color:var(--green);font-size:9px">VALUE</span> ':'';
+        h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:11px;color:var(--dim)">SLOT '+i+'</div><div style="font-size:14px;font-weight:700">'+p.player_name+'</div><div style="font-size:10px;color:var(--dim)">'+p.position+' · T'+t.n+' '+t.name+' '+val+'</div></div><div style="text-align:right"><div style="font-size:14px;font-weight:700;color:var(--green);font-family:Bebas Neue">$'+(slot.nil/1000).toFixed(0)+'K</div><button onclick="removeSlot('+i+')" style="background:none;border:1px solid var(--red);color:var(--red);font-size:9px;padding:3px 8px;border-radius:3px;cursor:pointer;margin-top:4px">REMOVE</button></div></div></div>';
+      } else {
+        h+='<div class="card" style="cursor:pointer;border-style:dashed" onclick="openSlot('+i+')"><div style="text-align:center;color:var(--dim);font-size:12px">+ SLOT '+i+' · TAP TO ADD</div></div>';
+      }
+    }
+    h+='<div style="font-size:10px;letter-spacing:2px;color:var(--dim);margin-top:16px;margin-bottom:8px">DEPTH/WALK-ON (Slots 11-15)</div>';
+    for(var i=11;i<=15;i++){
+      var slot=byPlayer["slot_"+i];
+      if(slot){
+        var p=allP[slot.prospect_id]||{player_name:"Unknown"};
+        h+='<div class="card"><div style="display:flex;justify-content:space-between"><div><div style="font-size:11px;color:var(--dim)">SLOT '+i+'</div><div style="font-size:14px">'+p.player_name+'</div></div><button onclick="removeSlot('+i+')" style="background:none;border:1px solid var(--red);color:var(--red);font-size:9px;padding:3px 8px;border-radius:3px;cursor:pointer">REMOVE</button></div></div>';
+      } else {
+        h+='<div class="card" style="cursor:pointer;border-style:dashed" onclick="openSlot('+i+')"><div style="text-align:center;color:var(--dim);font-size:11px">+ SLOT '+i+'</div></div>';
+      }
+    }
+    c.innerHTML=h;
+  }
+
+  if(tab==="bg"){
+    if(!budget){c.innerHTML='<div class="card">No budget loaded</div>';return;}
+    var alloc=budget.per_player_allocations_json||{};
+    var byPos=alloc.by_position||{};
+    var tot=parseFloat(budget.total_budget);
+    var com=parseFloat(budget.committed_amount)||0;
+    var rem=parseFloat(budget.remaining_amount)||tot;
+    var pct=tot>0?(com/tot*100).toFixed(1):0;
+    var h='<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">';
+    h+='<div class="sb"><div class="l">Total Cap</div><div class="v">$'+(tot/1000000).toFixed(1)+'M</div><div class="s">2026-27</div></div>';
+    h+='<div class="sb"><div class="l">Committed</div><div class="v">$'+(com/1000000).toFixed(1)+'M</div><div class="s">'+pct+'% used</div></div>';
+    h+='<div class="sb"><div class="l">Remaining</div><div class="v">$'+(rem/1000000).toFixed(1)+'M</div><div class="s">available</div></div>';
+    h+='</div>';
+    h+='<div class="card"><div style="font-size:10px;letter-spacing:2px;color:var(--y);margin-bottom:12px">POSITION ALLOCATIONS</div>';
+    Object.keys(byPos).forEach(function(pos){
+      var p=byPos[pos];var a=p.allocated||0;var sp=p.spent||0;
+      var pp=a>0?(sp/a*100).toFixed(0):0;
+      var color=pp>90?"var(--red)":pp>70?"var(--gold)":"var(--green)";
+      h+='<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:13px;font-weight:700;color:var(--bright)">'+pos.toUpperCase()+'</span><span style="font-size:11px;color:var(--dim)">$'+(sp/1000).toFixed(0)+'K / $'+(a/1000).toFixed(0)+'K</span></div>';
+      h+='<div style="background:var(--bg);border-radius:4px;height:8px;overflow:hidden"><div style="background:'+color+';height:100%;width:'+pp+'%"></div></div>';
+      h+='<div style="font-size:10px;color:var(--dim);margin-top:3px">'+(p.notes||"")+'</div></div>';
+    });
+    h+='</div>';
     c.innerHTML=h;
   }
 
