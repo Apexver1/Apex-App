@@ -321,6 +321,14 @@ window.openP=function(id,type){
   if(ps.bpg)stats+='<div style="text-align:center;min-width:50px"><div style="font-size:20px;font-weight:700;color:var(--y);font-family:Bebas Neue">'+ps.bpg+'</div><div style="font-size:9px;color:var(--dim)">BPG</div></div>';
   if(ps.three_pct)stats+='<div style="text-align:center;min-width:50px"><div style="font-size:20px;font-weight:700;color:var(--y);font-family:Bebas Neue">'+(ps.three_pct*100).toFixed(1)+'%</div><div style="font-size:9px;color:var(--dim)">3PT%</div></div>';
 
+  var scoreSection="";
+  if(isPr){
+    var existingScore=scoresMap[id];
+    if(existingScore){
+      scoreSection='<div style="background:var(--bg);border-radius:6px;padding:10px;margin-bottom:10px"><div style="font-size:11px;color:var(--y);font-weight:700">COACH SCORE: '+existingScore.composite_score+'/10</div><div style="font-size:9px;color:var(--dim);margin-top:3px">Shoot:'+existingScore.shooting_score+' Def:'+existingScore.defense_score+' IQ:'+existingScore.iq_score+' Fit:'+existingScore.fit_score+'</div></div>';
+    }
+    scoreSection+='<button onclick="closeM();openScore(\''+id+'\')" class="btn" style="margin-bottom:10px;background:var(--y)">'+(existingScore?"UPDATE COACH SCORE":"SCORE THIS PLAYER")+'</button>';
+  }
   var statusBtns="";
   if(isPr){["watching","contacted","visited","offered"].forEach(function(s){statusBtns+='<button class="stb'+(p.status===s?" a":"")+'" onclick="updS(\''+p.id+"','"+s+"')\">"+s.toUpperCase()+"</button> ";});}
 
@@ -340,7 +348,7 @@ window.openP=function(id,type){
   h+='<button class="x" onclick="closeM()">✕</button>';
   h+='<h2 style="font-size:18px;margin-bottom:4px">'+p.player_name+'</h2>';
   h+='<div style="font-size:11px;color:var(--dim);margin-bottom:12px">'+(p.position||"")+" · "+cy+(ht?" · "+ht:"")+(isPr&&p.current_school?" · "+p.current_school:" · Oregon")+'</div>';
-  if(statusBtns)h+='<div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">'+statusBtns+'</div>';
+  h+=scoreSection;if(statusBtns)h+='<div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">'+statusBtns+'</div>';
   if(stats)h+='<div style="font-size:10px;letter-spacing:2px;color:var(--y);margin-bottom:6px">STATS</div><div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px">'+stats+'</div>';
   if(p.nil_estimate)h+='<div style="font-size:18px;font-weight:700;color:var(--green);font-family:Bebas Neue;margin-bottom:12px">$'+(p.nil_estimate/1000).toFixed(0)+'K NIL EST</div>';
   if(p.fit_notes||p.role_description)h+='<div style="font-size:10px;letter-spacing:2px;color:var(--y);margin-bottom:6px">'+(isPr?"SCOUTING":"ROLE")+'</div><div style="font-size:12px;color:var(--bright);line-height:1.5;margin-bottom:12px">'+(p.fit_notes||p.role_description||"")+'</div>';
