@@ -116,7 +116,7 @@ window.getWeights=function(preset,custom){
 }
 window.openScore=function(pid){
   var existing=scoresMap[pid]||{shooting_score:5,defense_score:5,iq_score:5,fit_score:5,weighting_preset:"equal",notes:""};
-  var p=prospects.filter(function(x){return x.id===pid;})[0];if(!p)return;
+  var p=prospects.filter(function(x){return x.id===pid;})[0];if(!p)p=roster.filter(function(x){return x.id===pid;})[0];if(!p)return;
   var h='<div class="mbg" onclick="if(event.target===this)closeM()"><div class="mdl">';
   h+='<button class="x" onclick="closeM()">✕</button>';
   h+='<h2 style="font-size:18px;margin-bottom:4px">SCORE: '+p.player_name+'</h2>';
@@ -327,7 +327,7 @@ window.openP=function(id,type){
     if(existingScore){
       scoreSection='<div style="background:var(--bg);border-radius:6px;padding:10px;margin-bottom:10px"><div style="font-size:11px;color:var(--y);font-weight:700">COACH SCORE: '+existingScore.composite_score+'/10</div><div style="font-size:9px;color:var(--dim);margin-top:3px">Shoot:'+existingScore.shooting_score+' Def:'+existingScore.defense_score+' IQ:'+existingScore.iq_score+' Fit:'+existingScore.fit_score+'</div></div>';
     }
-    scoreSection+='<button onclick="closeM();openScore(\''+id+'\')" class="btn" style="margin-bottom:10px;background:var(--y)">'+(existingScore?"UPDATE COACH SCORE":"SCORE THIS PLAYER")+'</button>';
+    scoreSection+='<button onclick="openScore(\''+id+'\')" class="btn" style="margin-bottom:10px;background:var(--y)">'+(existingScore?"UPDATE COACH SCORE":"SCORE THIS PLAYER")+'</button>';
   }
   var statusBtns="";
   if(isPr){["watching","contacted","visited","offered"].forEach(function(s){statusBtns+='<button class="stb'+(p.status===s?" a":"")+'" onclick="updS(\''+p.id+"','"+s+"')\">"+s.toUpperCase()+"</button> ";});}
