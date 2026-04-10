@@ -65,23 +65,68 @@
 <script>
 var SU="https://midyxvjfoggchbugxzkd.supabase.co";
 var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pZHl4dmpmb2dnY2hidWd4emtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NzQ5ODQsImV4cCI6MjA5MTM1MDk4NH0.VLsaYxByQC2s4jLpcETNx3sYykp-x3azyC0v1q0dqmo";
-var T="",budget=null,roster=[],prospects=[],strategy=null,schols=[],pStats={},crmLogs={},tab="dash",sq="",pf="ALL",sf="ALL",fPPG=0,fRPG=0,f3P=0,fP="ALL";
+var T="",budget=null,bRequests=[],pickerSearch="",pickerPos="ALL",roster=[],prospects=[],strategy=null,schols=[],pStats={},crmLogs={},tab="dash",sq="",pf="ALL",sf="ALL",fPPG=0,fRPG=0,f3P=0,fP="ALL";
 
+
+
+window.reqIncrease=function(){
+  var amt=parseFloat(document.getElementById("reqAmt").value);
+  var reason=document.getElementById("reqReason").value;
+  if(!amt||amt<=0){alert("Enter valid amount");return;}
+  if(!reason.trim()){alert("Enter reason");return;}
+  api("/rest/v1/nil_budget_requests",{method:"POST",body:JSON.stringify({season:budget.season,requested_amount:amt,reason:reason,requested_by:UID,status:"pending"}),prefer:"return=minimal"}).then(function(){
+    loadData().then(function(){closeM();render();});
+  });
+}
+
+window.openReqModal=function(){
+  var h='<div class="mbg" onclick="if(event.target===this)closeM()"><div class="mdl">';
+  h+='<button class="x" onclick="closeM()">✕</button>';
+  h+='<h2 style="font-size:18px;margin-bottom:12px">REQUEST BUDGET INCREASE</h2>';
+  h+='<label style="font-size:10px;color:var(--dim);letter-spacing:1px">AMOUNT (USD)</label>';
+  h+='<input id="reqAmt" type="number" class="inp" placeholder="500000">';
+  h+='<label style="font-size:10px;color:var(--dim);letter-spacing:1px">REASON</label>';
+  h+='<textarea id="reqReason" class="inp" rows="3" placeholder="Why do you need this increase?"></textarea>';
+  h+='<button class="btn" onclick="reqIncrease()">SUBMIT REQUEST</button>';
+  h+='</div></div>';
+  document.getElementById("mc").innerHTML=h;
+}
+
+window.decideReq=function(reqId,decision){
+  var notes=prompt(decision.toUpperCase()+" notes (optional):")||"";
+  var body={status:decision,approved_by:UID,approved_at:new Date().toISOString(),decision_notes:notes};
+  api("/rest/v1/nil_budget_requests?id=eq."+reqId,{method:"PATCH",body:JSON.stringify(body),prefer:"return=minimal"}).then(function(){
+    if(decision==="approved"){
+      var req=bRequests.filter(function(r){return r.id===reqId;})[0];
+      if(req){
+        var newTotal=parseFloat(budget.total_budget)+parseFloat(req.requested_amount);
+        return api("/rest/v1/nil_budget?id=eq."+budget.id,{method:"PATCH",body:JSON.stringify({total_budget:newTotal}),prefer:"return=minimal"});
+      }
+    }
+  }).then(function(){loadData().then(function(){render();});});
+}
 
 window.tier=function(ppg){if(ppg>=18)return{n:1,name:"Franchise",lo:1200000,hi:2000000,mid:1600000};if(ppg>=12)return{n:2,name:"Starter",lo:600000,hi:1200000,mid:900000};if(ppg>=8)return{n:3,name:"6th Man",lo:300000,hi:600000,mid:450000};if(ppg>=4)return{n:4,name:"Rotation",lo:100000,hi:300000,mid:200000};return{n:5,name:"Bench",lo:25000,hi:100000,mid:60000};}
 
 window.openSlot=function(slotNum){
-  var fp=prospects.filter(function(p){return p.source==="portal"||p.source==="high_school";});
+  var all=[];
+  roster.forEach(function(p){all.push({id:p.id,name:p.player_name,pos:p.position,ppg:p.ppg,src:"ROSTER",color:"var(--bright)",raw:p});});
+  prospects.forEach(function(p){var ps=pStats[p.player_name]||{};all.push({id:p.id,name:p.player_name,pos:p.position,ppg:ps.ppg||p.ppg,src:p.source==="portal"?"PORTAL":"HS",color:p.source==="portal"?"var(--y)":"var(--gold)",raw:p});});
+  if(pickerSearch)all=all.filter(function(p){return p.name.toLowerCase().indexOf(pickerSearch.toLowerCase())>=0;});
+  if(pickerPos!=="ALL")all=all.filter(function(p){return p.pos===pickerPos;});
   var h='<div class="mbg" onclick="if(event.target===this)closeM()"><div class="mdl">';
   h+='<button class="x" onclick="closeM()">✕</button>';
   h+='<h2 style="font-size:18px;margin-bottom:4px">SLOT '+slotNum+(slotNum<=10?" · NIL":" · NO NIL")+'</h2>';
-  h+='<div style="font-size:11px;color:var(--dim);margin-bottom:12px">Tap a prospect to commit</div>';
-  fp.forEach(function(p){
-    var ps=pStats[p.player_name]||{};
-    var ppg=ps.ppg||p.ppg||0;
-    var t=tier(ppg);
+  h+='<div style="font-size:11px;color:var(--dim);margin-bottom:12px">All players · tap to commit</div>';
+  h+='<input class="inp" placeholder="Search by name..." value="'+pickerSearch+'" oninput="pickerSearch=this.value;openSlot('+slotNum+')">';
+  h+='<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">';
+  ["ALL","PG","SG","SF","PF","C"].forEach(function(p){h+='<button class="fb'+(pickerPos===p?" a":"")+'" onclick="pickerPos=\''+p+'\';openSlot('+slotNum+')">'+p+'</button>';});
+  h+='</div>';
+  h+='<div style="font-size:10px;color:var(--dim);margin-bottom:8px">'+all.length+' players</div>';
+  all.forEach(function(p){
+    var t=tier(p.ppg||0);
     h+='<div class="card" style="cursor:pointer" onclick="commitP(\''+p.id+'\','+slotNum+','+t.mid+')">';
-    h+='<div style="display:flex;justify-content:space-between"><div><div style="font-size:14px;font-weight:700">'+p.player_name+'</div><div style="font-size:10px;color:var(--dim)">'+p.position+' · '+(ps.ppg||"--")+' ppg</div></div>';
+    h+='<div style="display:flex;justify-content:space-between"><div><div style="font-size:14px;font-weight:700">'+p.name+'</div><div style="font-size:10px;color:var(--dim)"><span style="color:'+p.color+';font-weight:700">'+p.src+'</span> · '+(p.pos||"")+' · '+(p.ppg||"--")+' ppg</div></div>';
     h+='<div style="text-align:right"><div style="font-size:11px;color:var(--y);font-weight:700">T'+t.n+' '+t.name+'</div><div style="font-size:13px;font-weight:700;color:var(--green);font-family:Bebas Neue">$'+(t.mid/1000).toFixed(0)+'K</div></div></div></div>';
   });
   h+='</div></div>';
@@ -89,6 +134,7 @@ window.openSlot=function(slotNum){
 }
 
 window.commitP=function(pid,slot,nil){
+  pickerSearch="";pickerPos="ALL";
   var alloc=budget.per_player_allocations_json||{by_position:{},by_player:{}};
   if(!alloc.by_player)alloc.by_player={};
   alloc.by_player["slot_"+slot]={prospect_id:pid,nil:nil,slot:slot};
@@ -143,10 +189,11 @@ window.loadData=function(){
     api("/rest/v1/scholarships?select=*&is_seed_data=eq.true&order=season.asc"),
     api("/rest/v1/prospect_stats?select=stat_name,stat_value,prospect_id&is_seed_data=eq.true"),
     api("/rest/v1/crm_log?select=*&order=contact_date.desc"),
-api("/rest/v1/nil_budget?select=*&is_seed_data=eq.true&limit=1")
+api("/rest/v1/nil_budget?select=*&is_seed_data=eq.true&limit=1"),
+api("/rest/v1/nil_budget_requests?select=*&order=requested_at.desc")
   ]).then(function(r){
     roster=r[0]||[];prospects=r[1]||[];strategy=(r[2]&&r[2][0])||null;schols=r[3]||[];
-    var ps=r[4]||[];var logs=r[5]||[];budget=(r[6]&&r[6][0])||null;
+    var ps=r[4]||[];var logs=r[5]||[];budget=(r[6]&&r[6][0])||null;bRequests=r[7]||[];
     var idMap={};prospects.forEach(function(p){idMap[p.id]=p.player_name;});
     pStats={};ps.forEach(function(s){var n=idMap[s.prospect_id];if(n){if(!pStats[n])pStats[n]={};pStats[n][s.stat_name]=s.stat_value;}});
     crmLogs={};logs.forEach(function(l){if(!crmLogs[l.prospect_id])crmLogs[l.prospect_id]=[];crmLogs[l.prospect_id].push(l);});
@@ -352,7 +399,17 @@ window.render=function(){
     var com=parseFloat(budget.committed_amount)||0;
     var rem=parseFloat(budget.remaining_amount)||tot;
     var pct=tot>0?(com/tot*100).toFixed(1):0;
-    var h='<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">';
+    var pending=bRequests.filter(function(r){return r.status==="pending";});
+    var history=bRequests.filter(function(r){return r.status!=="pending";});
+    var h='';
+    if(pending.length){
+      h+='<div class="card" style="border-color:var(--gold)"><div style="font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:8px">PENDING REQUESTS ('+pending.length+')</div>';
+      pending.forEach(function(r){
+        h+='<div style="padding:8px 0;border-bottom:1px solid var(--b)"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="flex:1"><div style="font-size:14px;font-weight:700;color:var(--green);font-family:Bebas Neue">+$'+(parseFloat(r.requested_amount)/1000).toFixed(0)+'K</div><div style="font-size:11px;color:var(--bright);margin-top:2px">'+(r.reason||"")+'</div><div style="font-size:9px;color:var(--dim);margin-top:2px">'+new Date(r.requested_at).toLocaleString()+'</div></div><div style="display:flex;flex-direction:column;gap:4px"><button onclick="decideReq(\''+r.id+'\',\'approved\')" style="background:var(--green);color:#000;border:none;border-radius:3px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer">APPROVE</button><button onclick="decideReq(\''+r.id+'\',\'denied\')" style="background:none;border:1px solid var(--red);color:var(--red);border-radius:3px;padding:4px 10px;font-size:10px;cursor:pointer">DENY</button></div></div></div>';
+      });
+      h+='</div>';
+    }
+    h+='<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">';
     h+='<div class="sb"><div class="l">Total Cap</div><div class="v">$'+(tot/1000000).toFixed(1)+'M</div><div class="s">2026-27</div></div>';
     h+='<div class="sb"><div class="l">Committed</div><div class="v">$'+(com/1000000).toFixed(1)+'M</div><div class="s">'+pct+'% used</div></div>';
     h+='<div class="sb"><div class="l">Remaining</div><div class="v">$'+(rem/1000000).toFixed(1)+'M</div><div class="s">available</div></div>';
@@ -367,6 +424,15 @@ window.render=function(){
       h+='<div style="font-size:10px;color:var(--dim);margin-top:3px">'+(p.notes||"")+'</div></div>';
     });
     h+='</div>';
+    h+='<button class="btn" style="margin-top:12px" onclick="openReqModal()">REQUEST BUDGET INCREASE</button>';
+    if(history.length){
+      h+='<div class="card" style="margin-top:12px"><div style="font-size:10px;letter-spacing:2px;color:var(--dim);margin-bottom:8px">REQUEST HISTORY</div>';
+      history.forEach(function(r){
+        var col=r.status==="approved"?"var(--green)":"var(--red)";
+        h+='<div style="padding:6px 0;border-bottom:1px solid var(--b);font-size:11px"><span style="color:'+col+';font-weight:700">'+r.status.toUpperCase()+'</span> · $'+(parseFloat(r.requested_amount)/1000).toFixed(0)+'K · <span style="color:var(--dim)">'+new Date(r.requested_at).toLocaleDateString()+'</span><div style="color:var(--bright);margin-top:2px">'+(r.reason||"")+'</div></div>';
+      });
+      h+='</div>';
+    }
     c.innerHTML=h;
   }
 
