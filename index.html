@@ -55,8 +55,7 @@
 <div class="nav">
 <button onclick="go('dash')" id="t-dash" class="a"><span class="i">◆</span>HOME</button>
 <button onclick="go('roster')" id="t-roster"><span class="i">◎</span>ROSTER</button>
-<button onclick="go('portal')" id="t-portal"><span class="i">⇄</span>PORTAL</button>
-<button onclick="go('hs')" id="t-hs"><span class="i">★</span>RECRUITS</button>
+<button onclick="go('rec')" id="t-rec"><span class="i">★</span>RECRUIT</button>
 <button onclick="go('sf')" id="t-sf"><span class="i">⚡</span>FILTER</button>
 <button onclick="go('bg')" id="t-bg"><span class="i">$</span>BUDGET</button>
 <button onclick="go('rb')" id="t-rb"><span class="i">▦</span>BUILD</button>
@@ -66,7 +65,7 @@
 <script>
 var SU="https://midyxvjfoggchbugxzkd.supabase.co";
 var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pZHl4dmpmb2dnY2hidWd4emtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NzQ5ODQsImV4cCI6MjA5MTM1MDk4NH0.VLsaYxByQC2s4jLpcETNx3sYykp-x3azyC0v1q0dqmo";
-var T="",budget=null,bRequests=[],scoresMap={},familyMap={},sortBy="model",aiQuery="",aiResults=null,aiMode="rules",aiLoading=false,pickerSearch="",pickerPos="ALL",roster=[],prospects=[],strategy=null,schols=[],pStats={},crmLogs={},tab="dash",sq="",pf="ALL",sf="ALL",fPPG=0,fRPG=0,f3P=0,fP="ALL";
+var T="",budget=null,bRequests=[],scoresMap={},familyMap={},recSrc="portal",sortBy="model",aiQuery="",aiResults=null,aiMode="rules",aiLoading=false,pickerSearch="",pickerPos="ALL",roster=[],prospects=[],strategy=null,schols=[],pStats={},crmLogs={},tab="dash",sq="",pf="ALL",sf="ALL",fPPG=0,fRPG=0,f3P=0,fP="ALL";
 
 
 
@@ -306,6 +305,7 @@ window.setAiMode=function(m){aiMode=m;render();}
 window.aiRun=function(){if(aiMode==="llm")aiLLM();else aiSearch();}
 
 
+window.setRecSrc=function(s){recSrc=s;sq="";pf="ALL";sf="ALL";render();}
 window.aiQuick=function(q){document.getElementById("aiInput").value=q;aiRun();}
 
 
@@ -616,7 +616,33 @@ window.render=function(){
     c.innerHTML=h;
   }
 
-  if(tab==="portal"){
+  if(tab==="rec"){
+    var srcTabs='<div style="display:flex;gap:6px;margin-bottom:10px"><button class="fb'+(recSrc==="portal"?" a":"")+'" style="flex:1" onclick="setRecSrc(\'portal\')">PORTAL</button><button class="fb'+(recSrc==="high_school"?" a":"")+'" style="flex:1" onclick="setRecSrc(\'high_school\')">HIGH SCHOOL</button><button class="fb'+(recSrc==="international"?" a":"")+'" style="flex:1" onclick="setRecSrc(\'international\')">INTL</button></div>';
+    if(recSrc==="international"){
+      c.innerHTML=srcTabs+'<div class="card" style="text-align:center;padding:40px"><div style="font-size:12px;color:var(--dim)">International recruits coming soon</div></div>';
+      return;
+    }
+    var pool=prospects.filter(function(p){return p.source===recSrc;});
+    var fl=filt(pool).map(function(p){p._mv=valueNil(p,pStats[p.player_name]||{}).mid;return p;});
+    if(sortBy==="model")fl.sort(function(a,b){return b._mv-a._mv;});
+    else if(sortBy==="delta")fl.sort(function(a,b){return(b._mv-(b.nil_estimate||0))-(a._mv-(a.nil_estimate||0));});
+    else if(sortBy==="composite")fl.sort(function(a,b){var sa=scoresMap[a.id],sb=scoresMap[b.id];return(sb&&sb.composite_score||0)-(sa&&sa.composite_score||0);});
+    var h=srcTabs;
+    h+='<select class="inp" style="margin-bottom:8px" onchange="sortBy=this.value;render()"><option value="model"'+(sortBy==="model"?" selected":"")+'>Sort: Apex Model</option><option value="delta"'+(sortBy==="delta"?" selected":"")+'>Sort: Value Delta</option><option value="composite"'+(sortBy==="composite"?" selected":"")+'>Sort: Coach Score</option></select>';
+    h+='<input class="si" placeholder="Search..." oninput="onSearch(this.value)">';
+    h+='<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">'+posBtns()+'<span style="width:6px"></span>'+stBtns()+'</div>';
+    h+='<div style="font-size:10px;letter-spacing:2px;color:var(--dim);margin-bottom:8px">'+fl.length+(recSrc==="portal"?" TARGETS":" RECRUITS")+'</div>';
+    fl.forEach(function(p){var ps=pStats[p.player_name]||{};var lg=crmLogs[p.id]||[];var mv=p._mv||0;var market=p.nil_estimate||0;var delta=mv-market;var deltaCol=delta>=0?"var(--green)":"var(--red)";var deltaBg=delta>=0?"rgba(74,222,128,0.12)":"rgba(239,68,68,0.12)";var scoreObj=scoresMap[p.id];
+      h+='<div class="card" style="cursor:pointer" onclick="openP(\''+p.id+'\',\'p\')">';
+      h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px"><div style="flex:1"><div style="font-size:17px;font-weight:700;margin-bottom:2px">'+p.player_name+'</div><div style="font-size:12px;color:var(--bright);margin-bottom:6px">'+(p.current_school||"")+(p.current_conference?" · "+p.current_conference:"")+'</div><div style="display:flex;gap:6px;flex-wrap:wrap">'+pill(p.position)+pill(p["class_year"],"var(--dim)")+pill(p.status.toUpperCase(),sc(p.status))+(p.priority_tier?pill("TIER "+p.priority_tier,"var(--gold)"):"")+(lg.length?pill(lg.length+" logs","var(--bright)"):"")+(scoreObj?pill("★"+scoreObj.composite_score,"var(--gold)"):"")+'</div></div></div>';
+      h+='<div style="display:flex;gap:6px;margin-bottom:8px"><div style="flex:1;background:rgba(14,165,233,0.1);border:1px solid rgba(14,165,233,0.3);border-radius:6px;padding:8px;text-align:center"><div style="font-size:9px;color:var(--y);letter-spacing:1.5px;font-weight:700">APEX MODEL</div><div style="font-size:16px;font-weight:700;color:var(--y);font-family:Bebas Neue;margin-top:2px">$'+(mv/1000).toFixed(0)+'K</div></div><div style="flex:1;background:var(--navy);border:1px solid var(--b);border-radius:6px;padding:8px;text-align:center"><div style="font-size:9px;color:var(--dim);letter-spacing:1.5px;font-weight:700">MARKET</div><div style="font-size:16px;font-weight:700;color:var(--white);font-family:Bebas Neue;margin-top:2px">$'+(market/1000).toFixed(0)+'K</div></div><div style="flex:1;background:'+deltaBg+';border:1px solid '+deltaCol+';border-radius:6px;padding:8px;text-align:center"><div style="font-size:9px;color:'+deltaCol+';letter-spacing:1.5px;font-weight:700">DELTA</div><div style="font-size:16px;font-weight:700;color:'+deltaCol+';font-family:Bebas Neue;margin-top:2px">'+(delta>=0?"+":"")+'$'+(delta/1000).toFixed(0)+'K</div></div></div>';
+      if(ps.ppg||ps.rpg||ps.three_pct){h+='<div style="display:flex;gap:14px;padding-top:6px;border-top:1px solid var(--b);margin-bottom:8px">';if(ps.ppg)h+='<span style="font-size:12px"><b style="color:var(--y);font-size:14px">'+ps.ppg+'</b> ppg</span>';if(ps.rpg)h+='<span style="font-size:12px"><b style="color:var(--y);font-size:14px">'+ps.rpg+'</b> rpg</span>';if(ps.three_pct)h+='<span style="font-size:12px"><b style="color:var(--y);font-size:14px">'+(ps.three_pct*100).toFixed(0)+'%</b> 3PT</span>';h+='</div>';}
+      h+='</div>';});
+    c.innerHTML=h;
+    return;
+  }
+
+  if(tab==="portal_OLD"){
     var sortHTML='<select class="inp" style="margin-bottom:8px" onchange="sortBy=this.value;render()"><option value="model"'+(sortBy==="model"?" selected":"")+'>Sort: Model Value</option><option value="delta"'+(sortBy==="delta"?" selected":"")+'>Sort: Value Delta</option><option value="composite"'+(sortBy==="composite"?" selected":"")+'>Sort: Coach Score</option></select>';
     var fl=filt(portal).map(function(p){p._mv=valueNil(p,pStats[p.player_name]||{}).mid;return p;});
     if(sortBy==="model")fl.sort(function(a,b){return b._mv-a._mv;});
@@ -635,7 +661,7 @@ window.render=function(){
     c.innerHTML=h;
   }
 
-  if(tab==="hs"){
+  if(tab==="hs_OLD"){
     var fl=filt(hs);
     var h='<input class="si" placeholder="Search recruits..." oninput="onSearch(this.value)">';
     h+='<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">'+posBtns()+'<span style="width:6px"></span>'+stBtns()+'</div>';
