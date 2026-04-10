@@ -356,7 +356,7 @@ window.render=function(){
   if(tab==="rb"){
     var alloc=(budget&&budget.per_player_allocations_json)||{by_player:{}};
     var byPlayer=alloc.by_player||{};
-    var allP={};prospects.forEach(function(p){allP[p.id]=p;});
+    var allP={};prospects.forEach(function(p){allP[p.id]=p;});roster.forEach(function(p){allP[p.id]=p;});
     var tot=parseFloat(budget&&budget.total_budget)||10000000;
     var com=parseFloat(budget&&budget.committed_amount)||0;
     var filled=Object.keys(byPlayer).length;
