@@ -60,12 +60,13 @@
 <button onclick="go('sf')" id="t-sf"><span class="i">⚡</span>FILTER</button>
 <button onclick="go('bg')" id="t-bg"><span class="i">$</span>BUDGET</button>
 <button onclick="go('rb')" id="t-rb"><span class="i">▦</span>BUILD</button>
+<button onclick="go('ai')" id="t-ai"><span class="i">✦</span>SCOUT</button>
 </div></div>
 <div id="mc"></div>
 <script>
 var SU="https://midyxvjfoggchbugxzkd.supabase.co";
 var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pZHl4dmpmb2dnY2hidWd4emtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NzQ5ODQsImV4cCI6MjA5MTM1MDk4NH0.VLsaYxByQC2s4jLpcETNx3sYykp-x3azyC0v1q0dqmo";
-var T="",budget=null,bRequests=[],scoresMap={},sortBy="model",pickerSearch="",pickerPos="ALL",roster=[],prospects=[],strategy=null,schols=[],pStats={},crmLogs={},tab="dash",sq="",pf="ALL",sf="ALL",fPPG=0,fRPG=0,f3P=0,fP="ALL";
+var T="",budget=null,bRequests=[],scoresMap={},sortBy="model",aiQuery="",aiResults=null,aiMode="rules",aiLoading=false,pickerSearch="",pickerPos="ALL",roster=[],prospects=[],strategy=null,schols=[],pStats={},crmLogs={},tab="dash",sq="",pf="ALL",sf="ALL",fPPG=0,fRPG=0,f3P=0,fP="ALL";
 
 
 
@@ -105,6 +106,66 @@ window.decideReq=function(reqId,decision){
     }
   }).then(function(){loadData().then(function(){render();});});
 }
+
+
+
+window.aiParse=function(q){
+  q=q.toLowerCase();
+  var f={pos:null,minPpg:0,minRpg:0,min3p:0,maxNil:null,minNil:null,sortBy:"value",explain:[],src:null};
+  if(/\bpg\b|point guard/.test(q)){f.pos="PG";f.explain.push("position: PG");}
+  if(/\bsg\b|shooting guard/.test(q)){f.pos="SG";f.explain.push("position: SG");}
+  if(/\bsf\b|small forward|wing/.test(q)){f.pos="SF";f.explain.push("position: SF");}
+  if(/\bpf\b|power forward|stretch four|stretch 4/.test(q)){f.pos="PF";f.explain.push("position: PF");}
+  if(/\bcenter\b|\bc\b|big man|rim protector/.test(q)){f.pos="C";f.explain.push("position: C");}
+  if(/portal|transfer/.test(q)){f.src="portal";f.explain.push("source: portal");}
+  if(/high school|recruit|hs\b|prep/.test(q)){f.src="high_school";f.explain.push("source: high school");}
+  var ppgM=q.match(/(\d+)\s*\+?\s*(?:ppg|points|pts)/);if(ppgM){f.minPpg=parseFloat(ppgM[1]);f.explain.push("min "+f.minPpg+" ppg");}
+  var rpgM=q.match(/(\d+)\s*\+?\s*(?:rpg|rebounds|rebs)/);if(rpgM){f.minRpg=parseFloat(rpgM[1]);f.explain.push("min "+f.minRpg+" rpg");}
+  var threeM=q.match(/(\d+)\s*%?\s*(?:from\s*3|3pt|three)/);if(threeM){f.min3p=parseFloat(threeM[1]);f.explain.push("min "+f.min3p+"% 3PT");}
+  var underM=q.match(/under\s*\$?(\d+(?:\.\d+)?)\s*(k|m|million)?/);if(underM){var v=parseFloat(underM[1]);if(/m|million/.test(underM[2]||""))v*=1000000;else if(underM[2]==="k"||v<100)v*=1000;f.maxNil=v;f.explain.push("under $"+(v/1000).toFixed(0)+"K");}
+  if(/shooter|knockdown|sharp/.test(q)&&!f.min3p){f.min3p=35;f.explain.push("3PT shooter");}
+  if(/scorer|scoring/.test(q)&&!f.minPpg){f.minPpg=15;f.explain.push("scorer (15+ ppg)");}
+  if(/value|undervalued|bargain|cheap/.test(q)){f.sortBy="delta";f.explain.push("sorted: best value");}
+  if(/elite|best|top/.test(q)){f.sortBy="model";f.explain.push("sorted: highest valued");}
+  if(/affordable/.test(q)){f.sortBy="cheap";f.explain.push("sorted: cheapest");}
+  return f;
+}
+
+window.aiSearch=function(){
+  aiQuery=document.getElementById("aiInput").value;
+  var f=aiParse(aiQuery);
+  var pool=prospects.slice();
+  if(f.src)pool=pool.filter(function(p){return p.source===f.src;});
+  if(f.pos)pool=pool.filter(function(p){return p.position===f.pos;});
+  pool=pool.map(function(p){p._mv=valueNil(p,pStats[p.player_name]||{}).mid;return p;});
+  pool=pool.filter(function(p){
+    var ps=pStats[p.player_name]||{};
+    if(f.minPpg>0&&(!ps.ppg||ps.ppg<f.minPpg))return false;
+    if(f.minRpg>0&&(!ps.rpg||ps.rpg<f.minRpg))return false;
+    if(f.min3p>0&&(!ps.three_pct||ps.three_pct*100<f.min3p))return false;
+    if(f.maxNil&&p._mv>f.maxNil)return false;
+    return true;
+  });
+  if(f.sortBy==="delta")pool.sort(function(a,b){return(b._mv-(b.nil_estimate||0))-(a._mv-(a.nil_estimate||0));});
+  else if(f.sortBy==="cheap")pool.sort(function(a,b){return a._mv-b._mv;});
+  else pool.sort(function(a,b){return b._mv-a._mv;});
+  aiResults={query:aiQuery,filters:f,results:pool.slice(0,15)};
+  render();
+}
+
+
+window.aiLLM=function(){
+  aiQuery=document.getElementById("aiInput").value;
+  if(!aiQuery.trim())return;
+  aiLoading=true;render();
+  var enriched=prospects.map(function(p){var ps=pStats[p.player_name]||{};return{player_name:p.player_name,position:p.position,source:p.source,current_school:p.current_school,current_conference:p.current_conference,nil_estimate:p.nil_estimate,apex_model:valueNil(p,ps).mid,stats:{ppg:ps.ppg,rpg:ps.rpg,apg:ps.apg,three_pct:ps.three_pct}};}).sort(function(a,b){return b.apex_model-a.apex_model});
+  fetch(SU+"/functions/v1/apex-scout",{method:"POST",headers:{"Authorization":"Bearer "+T,"apikey":SK,"Content-Type":"application/json"},body:JSON.stringify({query:aiQuery,prospects:enriched,roster:roster.map(function(r){return{player_name:r.player_name,position:r.position,ppg:r.ppg,rpg:r.rpg};}),budget:budget,strategy:strategy})}).then(function(r){return r.json();}).then(function(d){aiLoading=false;aiResults={query:aiQuery,llmAnswer:d.answer||d.error||"No response",mode:"llm"};render();}).catch(function(e){aiLoading=false;aiResults={query:aiQuery,llmAnswer:"Error: "+e.message,mode:"llm"};render();});
+}
+window.setAiMode=function(m){aiMode=m;render();}
+window.aiRun=function(){if(aiMode==="llm")aiLLM();else aiSearch();}
+
+
+window.aiQuick=function(q){document.getElementById("aiInput").value=q;aiRun();}
 
 
 window.calcComposite=function(s,w){return Math.round((s.shooting_score*w.shooting+s.defense_score*w.defense+s.iq_score*w.iq+s.fit_score*w.fit)*10)/10;}
@@ -447,6 +508,34 @@ window.render=function(){
 
   
   
+  
+  if(tab==="ai"){
+    var h='<div class="card"><div style="font-size:10px;letter-spacing:2px;color:var(--y);margin-bottom:8px">✨ APEX AI SCOUT</div>';
+    h+='<div style="display:flex;gap:6px;margin-bottom:10px"><button class="fb'+(aiMode==="rules"?" a":"")+'" onclick="setAiMode(\'rules\')" style="flex:1">RULES (FREE)</button><button class="fb'+(aiMode==="llm"?" a":"")+'" onclick="setAiMode(\'llm\')" style="flex:1">APEX AI ($0.01/q)</button></div>';
+    h+='<input id="aiInput" class="inp" placeholder="'+(aiMode==="llm"?"Ask anything... e.g. Which prospect best fills our biggest weakness?":"e.g., Find me a PG shooter under $1M")+'" value="'+(aiQuery||"")+'">';
+    h+='<button class="btn" onclick="aiRun()">'+(aiLoading?"THINKING...":"SEARCH")+'</button>';
+    h+='<div style="font-size:10px;color:var(--dim);margin-top:12px;letter-spacing:1px">QUICK QUERIES</div>';
+    var quicks=["Find me a PG with 15+ ppg","Best value picks under $1M","Elite shooter from the portal","Stretch PF with 35% from 3","Rim protector with 8+ rpg","Top scorers high school recruits","Cheapest portal centers"];
+    h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">';
+    quicks.forEach(function(q){h+='<button class="fb" style="text-align:left" onclick="aiQuick(\''+q.replace(/\'/g,"")+'\')">'+q+'</button>';});
+    h+='</div></div>';
+    if(aiResults&&aiResults.mode==="llm"){h+='<div class="card"><div style="font-size:10px;letter-spacing:2px;color:var(--y);margin-bottom:8px">APEX AI RESPONSE</div><div style="font-size:10px;color:var(--dim);margin-bottom:8px">QUERY: "'+aiResults.query+'"</div><div style="font-size:13px;color:var(--white);line-height:1.6;white-space:pre-wrap">'+aiResults.llmAnswer.replace(/\*\*(.*?)\*\*/g,'<b style="color:var(--y)">$1</b>')+'</div></div>';}else if(aiResults){
+      h+='<div class="card"><div style="font-size:10px;letter-spacing:2px;color:var(--bright);margin-bottom:6px">QUERY: "'+aiResults.query+'"</div>';
+      if(aiResults.filters.explain.length){h+='<div style="font-size:10px;color:var(--dim);margin-bottom:8px">PARSED: '+aiResults.filters.explain.join(" · ")+'</div>';}
+      h+='<div style="font-size:11px;color:var(--y)">'+aiResults.results.length+' matches</div></div>';
+      aiResults.results.forEach(function(p){
+        var ps=pStats[p.player_name]||{};
+        var mv=p._mv||0;
+        var market=p.nil_estimate||0;
+        var delta=mv-market;
+        h+='<div class="card" style="cursor:pointer" onclick="openP(\''+p.id+'\',\'p\')"><div style="display:flex;justify-content:space-between"><div><div style="font-size:15px;font-weight:700">'+p.player_name+'</div><div style="font-size:11px;color:var(--bright)">'+(p.current_school||"")+(p.current_conference?" · "+p.current_conference:"")+'</div><div style="display:flex;gap:6px;margin-top:4px">'+pill(p.position)+pill((p.source||"").toUpperCase().replace("_"," "),"var(--dim)")+'</div></div><div style="text-align:right"><div style="font-size:14px;font-weight:700;color:var(--y);font-family:Bebas Neue">$'+(mv/1000).toFixed(0)+'K</div><div style="font-size:9px;color:'+(delta>=0?"var(--green)":"var(--red)")+'">'+(delta>=0?"+":"")+'$'+(delta/1000).toFixed(0)+'K vs mkt</div></div></div>';
+        if(ps.ppg||ps.rpg||ps.three_pct){h+='<div style="display:flex;gap:12px;margin-top:6px;padding-top:6px;border-top:1px solid var(--b)">';if(ps.ppg)h+='<span style="font-size:11px"><b style="color:var(--y)">'+ps.ppg+'</b> ppg</span>';if(ps.rpg)h+='<span style="font-size:11px"><b style="color:var(--y)">'+ps.rpg+'</b> rpg</span>';if(ps.three_pct)h+='<span style="font-size:11px"><b style="color:var(--y)">'+(ps.three_pct*100).toFixed(0)+'%</b> 3PT</span>';h+='</div>';}
+        h+='</div>';
+      });
+    }
+    c.innerHTML=h;
+  }
+
   if(tab==="rb"){
     var alloc=(budget&&budget.per_player_allocations_json)||{by_player:{}};
     var byPlayer=alloc.by_player||{};
