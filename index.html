@@ -353,7 +353,14 @@ window.getDivision=function(conf){
 
 window.pickerState={div:"D1",conf:"",q:""};
 
+var APEX_UNLOCKED=false;
+var APEX_PW="stewart2026";
 window.openSchoolPicker=function(){
+  if(!APEX_UNLOCKED){
+    var p=prompt("Admin password required to switch programs:");
+    if(p!==APEX_PW){alert("Incorrect password");return;}
+    APEX_UNLOCKED=true;
+  }
   pickerState={div:"D1",conf:"",q:""};
   renderPicker();
 }
