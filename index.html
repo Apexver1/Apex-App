@@ -625,7 +625,7 @@ api("/rest/v1/nil_budget_requests?select=*&order=requested_at.desc"),
 api("/rest/v1/prospect_scores?select=*"),
 api("/rest/v1/prospect_family?select=*"),
 api("/rest/v1/contact_reminders?select=*&status=eq.pending&order=scheduled_for.asc"),
-fetch(SU+"/rest/v1/schools?select=id,name,conference,city,state&order=name.asc",{headers:{apikey:SK,Authorization:"Bearer "+T,Range:"0-1999"}}).then(function(r){return r.json();})
+fetch(SU+"/rest/v1/schools?select=id,name,conference,city,state&order=name.asc&limit=2000",{headers:{apikey:SK,Authorization:"Bearer "+T,"Range-Unit":"items",Range:"0-1999"}}).then(function(r){return r.json();})
   ]).then(function(r){
     roster=r[0]||[];prospects=r[1]||[];strategy=(r[2]&&r[2][0])||null;schols=r[3]||[];
     var ps=r[4]||[];var logs=r[5]||[];budget=(r[6]&&r[6][0])||null;bRequests=r[7]||[];scoresMap={};(r[8]||[]).forEach(function(s){scoresMap[s.prospect_id]=s;});familyMap={};(r[9]||[]).forEach(function(f){if(!familyMap[f.prospect_id])familyMap[f.prospect_id]=[];familyMap[f.prospect_id].push(f);});reminders=r[10]||[];schools=r[11]||[];
