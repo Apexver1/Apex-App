@@ -51,7 +51,7 @@
 <div style="text-align:center;margin-top:40px;font-size:11px;color:var(--dim);letter-spacing:1.5px">DEVELOPED BY MILES STEWART</div>
 </div></div>
 <div id="app" class="hide">
-<div class="topbar"><div class="brand">APEX <b>INTEL</b></div><div style="font-size:10px;color:var(--dim)" id="ue"></div></div>
+<div class="topbar"><div class="brand" onclick="openSchoolPicker()" style="cursor:pointer">APEX <b>INTEL</b> <span style="font-size:10px;color:var(--dim);margin-left:6px">▼</span></div><div style="font-size:10px;color:var(--dim)" id="ue"></div></div>
 <div class="body" id="ct"></div>
 <div class="nav">
 <button onclick="go('dash')" id="t-dash" class="a"><span class="i">◆</span>HOME</button>
@@ -67,7 +67,7 @@
 <script>
 var SU="https://midyxvjfoggchbugxzkd.supabase.co";
 var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pZHl4dmpmb2dnY2hidWd4emtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NzQ5ODQsImV4cCI6MjA5MTM1MDk4NH0.VLsaYxByQC2s4jLpcETNx3sYykp-x3azyC0v1q0dqmo";
-var T="",budget=null,bRequests=[],scoresMap={},familyMap={},reminders=[],recSrc="portal",sortBy="model",aiQuery="",aiResults=null,aiMode="rules",aiLoading=false,pickerSearch="",pickerPos="ALL",roster=[],prospects=[],strategy=null,schols=[],pStats={},crmLogs={},tab="dash",sq="",pf="ALL",sf="ALL",fPPG=0,fRPG=0,f3P=0,fP="ALL";
+var T="",budget=null,bRequests=[],scoresMap={},familyMap={},reminders=[],schools=[],schoolQ="",showSchoolPicker=false,recSrc="portal",sortBy="model",aiQuery="",aiResults=null,aiMode="rules",aiLoading=false,pickerSearch="",pickerPos="ALL",roster=[],prospects=[],strategy=null,schols=[],pStats={},crmLogs={},tab="dash",sq="",pf="ALL",sf="ALL",fPPG=0,fRPG=0,f3P=0,fP="ALL";
 
 
 
@@ -339,6 +339,77 @@ window.exportVCard=function(pid){
 }
 
 
+
+window.D1_CONFS=["ACC","SEC","Big 12","Big Ten","Big East","American","A-10","Mountain West","Missouri Valley","WCC","C-USA","MAC","Sun Belt","CAA","Big West","Big Sky","Summit","Horizon","Ivy","MAAC","MEAC","NEC","OVC","Patriot","Southern","Southland","SWAC","WAC","ASUN","America East","Pac-12"];
+
+window.getDivision=function(conf){
+  if(!conf)return "Other";
+  for(var i=0;i<D1_CONFS.length;i++){if(conf.indexOf(D1_CONFS[i])>=0)return "D1";}
+  if(conf.indexOf("D2")>=0||conf.indexOf("GLIAC")>=0||conf.indexOf("GLVC")>=0||conf.indexOf("PSAC")>=0||conf.indexOf("RMAC")>=0||conf.indexOf("SSC")>=0||conf.indexOf("MIAA")>=0)return "D2";
+  if(conf.indexOf("D3")>=0||conf.indexOf("NESCAC")>=0||conf.indexOf("UAA")>=0||conf.indexOf("Centennial")>=0||conf.indexOf("Liberty League")>=0)return "D3";
+  if(conf.indexOf("NAIA")>=0)return "NAIA";
+  return "Other";
+}
+
+window.pickerState={div:"D1",conf:"",q:""};
+
+window.openSchoolPicker=function(){
+  pickerState={div:"D1",conf:"",q:""};
+  renderPicker();
+}
+
+window.renderPicker=function(){
+  var h='<div class="mbg" onclick="if(event.target===this)closeM()"><div class="mdl">';
+  h+='<button class="x" onclick="closeM()">X</button>';
+  h+='<h2 style="font-size:18px;margin-bottom:4px">SELECT PROGRAM</h2>';
+  h+='<div style="font-size:11px;color:var(--dim);margin-bottom:12px">'+schools.length+' schools total</div>';
+
+  // Division tabs
+  h+='<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">';
+  ["D1","D2","D3","NAIA","Other"].forEach(function(d){
+    h+='<button class="fb'+(pickerState.div===d?" a":"")+'" onclick="pickerState.div=\''+d+'\';pickerState.conf=\'\';renderPicker()">'+d+'</button>';
+  });
+  h+='</div>';
+
+  // Filter schools by division
+  var divSchools=schools.filter(function(s){return getDivision(s.conference)===pickerState.div;});
+
+  // Conference dropdown
+  var confSet={};
+  divSchools.forEach(function(s){if(s.conference)confSet[s.conference]=true;});
+  var confs=Object.keys(confSet).sort();
+  h+='<label style="font-size:10px;color:var(--y);letter-spacing:1.5px;font-weight:700">CONFERENCE ('+confs.length+')</label>';
+  h+='<select class="inp" onchange="pickerState.conf=this.value;renderPicker()">';
+  h+='<option value="">-- All '+pickerState.div+' Conferences --</option>';
+  confs.forEach(function(cf){h+='<option value="'+cf+'"'+(pickerState.conf===cf?" selected":"")+'>'+cf+'</option>';});
+  h+='</select>';
+
+  // Search box
+  h+='<input id="schInput" class="inp" placeholder="Search by school name..." value="'+(pickerState.q||"")+'" oninput="pickerState.q=this.value;renderPicker();setTimeout(function(){var i=document.getElementById(\'schInput\');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length);}},10)">';
+
+  // Filter by conference + query
+  var filtered=divSchools;
+  if(pickerState.conf)filtered=filtered.filter(function(s){return s.conference===pickerState.conf;});
+  if(pickerState.q){var qq=pickerState.q.toLowerCase();filtered=filtered.filter(function(s){return(s.name||"").toLowerCase().indexOf(qq)>=0;});}
+
+  h+='<div style="font-size:10px;color:var(--dim);letter-spacing:1.5px;margin:10px 0 6px">'+filtered.length+' SCHOOLS</div>';
+  h+='<div style="max-height:45vh;overflow-y:auto">';
+  if(filtered.length===0){h+='<div style="text-align:center;color:var(--dim);padding:20px">No matches</div>';}
+  filtered.slice(0,200).forEach(function(s){
+    h+='<div class="card" style="cursor:pointer;padding:10px 12px;margin-bottom:6px" onclick="selectSchool(\''+s.id+'\',\''+(s.name||"").replace(/\'/g,"")+'\')"><div style="font-size:14px;font-weight:700">'+s.name+'</div><div style="font-size:11px;color:var(--bright)">'+(s.conference||"?")+(s.city?" \u00b7 "+s.city:"")+(s.state?", "+s.state:"")+'</div></div>';
+  });
+  h+='</div></div></div>';
+  document.getElementById("mc").innerHTML=h;
+}
+
+window.filterSchools=function(q){pickerState.q=q;renderPicker();}
+
+window.selectSchool=function(sid,sname){
+  alert("Selected: "+sname+"\n\nTeam switching will load that school's roster in the next phase. For now, Apex Intel stays focused on Oregon. Phase 6C will connect rosters to schools.");
+  closeM();
+}
+
+
 window.aiVoice=function(){
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){alert("Voice not supported in this browser. Try Safari.");return;}
@@ -546,10 +617,11 @@ api("/rest/v1/nil_budget?select=*&is_seed_data=eq.true&limit=1"),
 api("/rest/v1/nil_budget_requests?select=*&order=requested_at.desc"),
 api("/rest/v1/prospect_scores?select=*"),
 api("/rest/v1/prospect_family?select=*"),
-api("/rest/v1/contact_reminders?select=*&status=eq.pending&order=scheduled_for.asc")
+api("/rest/v1/contact_reminders?select=*&status=eq.pending&order=scheduled_for.asc"),
+api("/rest/v1/schools?select=id,name,conference,city,state&order=name.asc&limit=2000")
   ]).then(function(r){
     roster=r[0]||[];prospects=r[1]||[];strategy=(r[2]&&r[2][0])||null;schols=r[3]||[];
-    var ps=r[4]||[];var logs=r[5]||[];budget=(r[6]&&r[6][0])||null;bRequests=r[7]||[];scoresMap={};(r[8]||[]).forEach(function(s){scoresMap[s.prospect_id]=s;});familyMap={};(r[9]||[]).forEach(function(f){if(!familyMap[f.prospect_id])familyMap[f.prospect_id]=[];familyMap[f.prospect_id].push(f);});reminders=r[10]||[];
+    var ps=r[4]||[];var logs=r[5]||[];budget=(r[6]&&r[6][0])||null;bRequests=r[7]||[];scoresMap={};(r[8]||[]).forEach(function(s){scoresMap[s.prospect_id]=s;});familyMap={};(r[9]||[]).forEach(function(f){if(!familyMap[f.prospect_id])familyMap[f.prospect_id]=[];familyMap[f.prospect_id].push(f);});reminders=r[10]||[];schools=r[11]||[];
     var idMap={};prospects.forEach(function(p){idMap[p.id]=p.player_name;});
     pStats={};ps.forEach(function(s){var n=idMap[s.prospect_id];if(n){if(!pStats[n])pStats[n]={};pStats[n][s.stat_name]=s.stat_value;}});
     crmLogs={};logs.forEach(function(l){if(!crmLogs[l.prospect_id])crmLogs[l.prospect_id]=[];crmLogs[l.prospect_id].push(l);});
