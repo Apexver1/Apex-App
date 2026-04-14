@@ -548,7 +548,7 @@ window.loadData=function(){
     api("/rest/v1/prospect_scores?select=*"),
     api("/rest/v1/prospect_family?select=*"),
     api("/rest/v1/contact_reminders?select=*&status=eq.pending&order=scheduled_for.asc"),
-    fetch(SU+"/rest/v1/schools?select=id,name,conference,city,state,head_coach_name&order=name.asc&limit=2000",{headers:{apikey:SK,Authorization:"Bearer "+T,"Range-Unit":"items",Range:"0-1999"}}).then(function(r){return r.json();}).catch(function(){return[];})
+    fetch(SU+"/rest/v1/schools?select=id,name,conference,city,state,head_coach_name&conference=not.is.null&order=name.asc&limit=2000",{headers:{apikey:SK,Authorization:"Bearer "+T,"Range-Unit":"items",Range:"0-1999"}}).then(function(r){return r.json();}).catch(function(){return[];})
   ]).then(function(r){
     roster=r[0]||[];prospects=r[1]||[];strategy=(r[2]&&r[2][0])||null;schols=r[3]||[];
     var ps=r[4]||[];var logs=r[5]||[];budget=(r[6]&&r[6][0])||null;bRequests=r[7]||[];
