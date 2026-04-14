@@ -620,23 +620,48 @@ window.openSchoolPicker=function(){
   pickerState.q="";
   renderPicker();
 };
+function getD1Schools(){
+  if(window._d1Cache)return window._d1Cache;
+  var seen={},arr=[];
+  for(var i=0;i<schools.length;i++){var s=schools[i];if(!s||!s.conference)continue;if(seen[s.id])continue;seen[s.id]=1;arr.push(s);}
+  window._d1Cache=arr;return arr;
+}
 window.renderPicker=function(){
+  var all=getD1Schools();
+  var confs={};for(var i=0;i<all.length;i++)if(all[i].conference)confs[all[i].conference]=1;
+  var confList=Object.keys(confs).sort();
+  var curConf=pickerState.conf||"ALL";var curSort=pickerState.sort||"name";
   var h='<div class="mbg" onclick="if(event.target===this)closeM()"><div class="mdl">';
-  h+='<div class="mdl-grab"></div>';
-  h+='<div class="mdl-head"><div><div class="mdl-title">Switch school</div><div class="mdl-sub">'+schools.length+' programs available</div></div><button class="mdl-close" onclick="closeM()" aria-label="Close"></button></div>';
-  h+='<input class="inp mb-md" placeholder="Search schools..." oninput="filterSchools(this.value)" autofocus>';
-  var filtered=schools.slice();
-  if(pickerState.q){var qq=pickerState.q.toLowerCase();filtered=filtered.filter(function(s){return(s.name||"").toLowerCase().indexOf(qq)>=0;});}
-  h+='<div style="font-size:11px;color:var(--ink-3);letter-spacing:0.3px;margin:8px 0 8px">'+filtered.length+' schools</div>';
-  h+='<div class="scroll-h">';
-  if(filtered.length===0){h+='<div class="empty">No matches</div>';}
-  filtered.slice(0,200).forEach(function(s){
-    h+='<div class="card" style="cursor:pointer;padding:12px 14px;margin-bottom:6px" onclick="selectSchool(\''+s.id+'\',\''+esc(s.name)+'\')"><div style="font-size:14px;font-weight:600">'+esc(s.name)+'</div><div style="font-size:11px;color:var(--ink-2);margin-top:2px">'+esc(s.conference||"?")+(s.city?" · "+esc(s.city):"")+(s.state?", "+esc(s.state):"")+'</div></div>';
-  });
-  h+='</div></div></div>';
+  h+='<div class="mdl-head"><div><div class="mdl-title">Switch school</div><div class="mdl-sub">'+all.length+' D1 programs</div></div><button class="mdl-close" onclick="closeM()" aria-label="Close">\u00d7</button></div>';
+  h+='<input id="pickerInput" class="inp mb-md" placeholder="Search schools..." oninput="filterSchools(this.value)" value="'+esc(pickerState.q||"")+'" autofocus>';
+  h+='<div style="display:flex;gap:10px;margin:0 0 8px;font-size:12px;align-items:center"><span style="color:var(--ink-3)">Sort:</span>';
+  h+='<span onclick="setPickerSort(\'name\')" style="cursor:pointer;font-weight:'+(curSort==="name"?"700":"400")+';color:'+(curSort==="name"?"var(--ink-1)":"var(--ink-3)")+'">Name</span>';
+  h+='<span onclick="setPickerSort(\'conf\')" style="cursor:pointer;font-weight:'+(curSort==="conf"?"700":"400")+';color:'+(curSort==="conf"?"var(--ink-1)":"var(--ink-3)")+'">Conference</span></div>';
+  h+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;max-height:72px;overflow-y:auto">';
+  h+='<span onclick="setPickerConf(\'ALL\')" style="cursor:pointer;padding:3px 9px;border-radius:12px;font-size:11px;background:'+(curConf==="ALL"?"var(--accent)":"var(--surface-2)")+';color:'+(curConf==="ALL"?"#fff":"var(--ink-2)")+'">All</span>';
+  for(var j=0;j<confList.length;j++){var c=confList[j];h+='<span onclick="setPickerConf(\''+esc(c)+'\')" style="cursor:pointer;padding:3px 9px;border-radius:12px;font-size:11px;background:'+(curConf===c?"var(--accent)":"var(--surface-2)")+';color:'+(curConf===c?"#fff":"var(--ink-2)")+'">'+esc(c)+'</span>';}
+  h+='</div><div id="pickerResults" class="scroll-h"></div></div></div>';
   document.getElementById("mc").innerHTML=h;
+  renderPickerResults();
+  var ip=document.getElementById("pickerInput");if(ip){ip.focus();try{ip.setSelectionRange(ip.value.length,ip.value.length);}catch(e){}}
 };
-window.filterSchools=function(q){pickerState.q=q;renderPicker();};
+window.renderPickerResults=function(){
+  var all=getD1Schools();
+  var q=(pickerState.q||"").toLowerCase();var conf=pickerState.conf||"ALL";var sortBy=pickerState.sort||"name";
+  var filtered=all;
+  if(conf!=="ALL")filtered=filtered.filter(function(s){return s.conference===conf;});
+  if(q)filtered=filtered.filter(function(s){return(s.name||"").toLowerCase().indexOf(q)>=0;});
+  if(sortBy==="conf"){filtered=filtered.slice().sort(function(a,b){var ca=(a.conference||"").toLowerCase(),cb=(b.conference||"").toLowerCase();if(ca!==cb)return ca<cb?-1:1;var na=(a.name||"").toLowerCase(),nb=(b.name||"").toLowerCase();return na<nb?-1:(na>nb?1:0);});}
+  else{filtered=filtered.slice().sort(function(a,b){var na=(a.name||"").toLowerCase(),nb=(b.name||"").toLowerCase();return na<nb?-1:(na>nb?1:0);});}
+  var el=document.getElementById("pickerResults");if(!el)return;
+  var h='<div style="font-size:11px;color:var(--ink-3);letter-spacing:0.3px;margin:8px 0 8px">'+filtered.length+' of '+all.length+' D1 programs</div>';
+  if(filtered.length===0){h+='<div class="empty">No matches</div>';}
+  else{for(var i=0;i<filtered.length;i++){var s=filtered[i];h+='<div class="card" style="cursor:pointer;padding:12px 14px;margin-bottom:6px" onclick="selectSchool(\''+s.id+'\',\''+esc(s.name)+'\')"><div style="font-size:14px;font-weight:600">'+esc(s.name)+'</div><div style="font-size:11px;color:var(--ink-2);margin-top:2px">'+esc(s.conference||"\u2014")+'</div></div>';}}
+  el.innerHTML=h;
+};
+window.filterSchools=function(q){pickerState.q=q;renderPickerResults();};
+window.setPickerConf=function(c){pickerState.conf=c;renderPicker();};
+window.setPickerSort=function(s){pickerState.sort=s;renderPicker();};
 window.selectSchool=function(sid,sname){
   closeM();
   toast("Loading "+sname+"...");
