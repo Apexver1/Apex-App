@@ -534,14 +534,16 @@ window.signOut=function(){
    DATA LOAD
    ============================================ */
 window.loadData=function(){
+  var sid=CURRENT_SCHOOL_ID;
+  var qSchool="school_id=eq."+sid;
   return Promise.all([
-    api("/rest/v1/my_roster?select=*&season=eq.2025-26&order=ppg.desc.nullslast"),
-    api("/rest/v1/prospect_shortlist?select=*&is_seed_data=eq.true&order=nil_estimate.desc.nullslast"),
+    api("/rest/v1/my_roster?select=*&"+qSchool+"&season=eq.2025-26&order=ppg.desc.nullslast"),
+    api("/rest/v1/prospect_shortlist?select=*&"+qSchool+"&deleted_at=is.null&order=nil_estimate.desc.nullslast"),
     api("/rest/v1/team_strategy?select=*&is_seed_data=eq.true&limit=1"),
     api("/rest/v1/scholarships?select=*&is_seed_data=eq.true&order=season.asc"),
     api("/rest/v1/prospect_stats?select=stat_name,stat_value,prospect_id&is_seed_data=eq.true"),
     api("/rest/v1/crm_log?select=*&order=contact_date.desc"),
-    api("/rest/v1/nil_budget?select=*&is_seed_data=eq.true&limit=1"),
+    api("/rest/v1/nil_budget?select=*&"+qSchool+"&season=eq.2026-27&limit=1"),
     api("/rest/v1/nil_budget_requests?select=*&order=requested_at.desc"),
     api("/rest/v1/prospect_scores?select=*"),
     api("/rest/v1/prospect_family?select=*"),
@@ -556,12 +558,15 @@ window.loadData=function(){
     var idMap={};prospects.forEach(function(p){idMap[p.id]=p.player_name;});
     pStats={};ps.forEach(function(s){var n=idMap[s.prospect_id];if(n){if(!pStats[n])pStats[n]={};pStats[n][s.stat_name]=s.stat_value;}});
     crmLogs={};logs.forEach(function(l){if(!crmLogs[l.prospect_id])crmLogs[l.prospect_id]=[];crmLogs[l.prospect_id].push(l);});
-    /* hydrate coach from schools.head_coach_name if present */
     var sch=schools.filter(function(s){return s.id===CURRENT_SCHOOL_ID;})[0];
     if(sch&&sch.head_coach_name){
       var parts=sch.head_coach_name.split(" ");
       var initials=parts.map(function(p){return p[0]||"";}).join("").toUpperCase().slice(0,2);
       COACH_FALLBACK[CURRENT_SCHOOL_ID]={name:sch.head_coach_name,role:"Head coach",initials:initials};
+    }else if(sch){
+      var words=(sch.name||"").split(" ");
+      var ini=words.map(function(w){return w[0]||"";}).join("").toUpperCase().slice(0,2);
+      COACH_FALLBACK[CURRENT_SCHOOL_ID]={name:"Head Coach",role:"Head coach",initials:ini};
     }
     updateDrawerIdentity();
     updateCrmBadge();
@@ -633,8 +638,18 @@ window.renderPicker=function(){
 };
 window.filterSchools=function(q){pickerState.q=q;renderPicker();};
 window.selectSchool=function(sid,sname){
-  toast("School switching wires up in Phase 6C.");
   closeM();
+  toast("Loading "+sname+"...");
+  fetch(SU+"/rest/v1/rpc/materialize_school_defaults",{method:"POST",headers:{apikey:SK,Authorization:"Bearer "+T,"Content-Type":"application/json"},body:JSON.stringify({p_school_id:sid})}).then(function(r){return r.json();}).then(function(result){
+    CURRENT_SCHOOL_ID=sid;
+    CURRENT_SCHOOL_NAME=sname;
+    document.getElementById("schoolLabel").textContent=sname+" \u00b7 2025\u201326 \u25be";
+    return loadData();
+  }).then(function(){
+    tab="home";sq="";pf="ALL";sf="ALL";cy="ALL";vSel=null;vMon=0;bldStatus="all";
+    render();
+    toast("Switched to "+sname);
+  }).catch(function(e){console.error("School switch failed:",e);toast("Could not switch schools");});
 };
 
 /* ============================================
