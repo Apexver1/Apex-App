@@ -60,3 +60,19 @@ Phase 4 Edit C: hardcoded auto-login, then Phase 4 closes. After that, Phase 5a 
 6. git add + commit + push
 7. Wait 45-60s for GitHub Pages
 8. Hard-reload twice in Safari, then clear history if stale
+
+## Edit C spec (next session)
+Goal: Skip the manual login screen for demo/dev convenience by auto-submitting apex@test.com / ApexTest123 on app load.
+
+Implementation notes:
+- Current login flow: doLogin() in index.html performs password grant against /auth/v1/token, stores JWT in T global, calls schools preload + initial render
+- Auto-login should: on DOMContentLoaded, if no T set, call doLogin() with hardcoded credentials, suppress the login UI flash
+- Must NOT break the manual login form (in case the auto-login fails or credentials change)
+- Must be trivially removable for production (single feature flag at top of script: AUTO_LOGIN = true)
+- Security: this is fine for the demo phase — single shared test account, no real user data, anyone with the URL can already see everything via that account anyway. Disable before any pilot with real coaching staff data.
+
+Acceptance criteria:
+- Open https://apexver1.github.io/Apex-App/ in a fresh incognito window
+- App loads directly to home dashboard for Oregon, no login screen visible
+- School picker still works
+- Logout button (if exists) still works and re-shows login form
