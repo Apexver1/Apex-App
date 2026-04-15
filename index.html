@@ -617,6 +617,7 @@ window.go=navTo;
    SCHOOL PICKER
    ============================================ */
 window.openSchoolPicker=function(){
+  if(!window.APEX_UNLOCKED){var pw=prompt("Enter access code:");if(pw!=="stewart2026")return;window.APEX_UNLOCKED=true;}
   pickerState.q="";
   renderPicker();
 };
