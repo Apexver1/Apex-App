@@ -2222,5 +2222,48 @@ window.renderScout=function(c){
   c.innerHTML=h;
 };
 </script>
+<script>
+/* ============================================
+   AUTO-LOGIN BOOTSTRAP (Edit C)
+   Demo-only. Set AUTO_LOGIN=false before pilot.
+   Override at runtime with ?nologin=1
+   ============================================ */
+window.AUTO_LOGIN = true;
+window.AUTO_LOGIN_EMAIL = "apex@test.com";
+window.AUTO_LOGIN_PASSWORD = "ApexTest123";
+
+(function(){
+  function bootAutoLogin(){
+    try {
+      var params = new URLSearchParams(window.location.search);
+      if (params.get("nologin") === "1") return;
+      if (!window.AUTO_LOGIN) return;
+      var loginEl = document.getElementById("login");
+      var emEl = document.getElementById("em");
+      var pwEl = document.getElementById("pw");
+      if (!loginEl || !emEl || !pwEl || typeof window.doLogin !== "function") return;
+      loginEl.className = "hide";
+      emEl.value = window.AUTO_LOGIN_EMAIL;
+      pwEl.value = window.AUTO_LOGIN_PASSWORD;
+      window.doLogin();
+      setTimeout(function(){
+        var err = document.getElementById("loginErr");
+        if (err && err.textContent) {
+          loginEl.className = "login-wrap";
+        }
+      }, 2500);
+    } catch(e) {
+      console.error("Auto-login bootstrap failed:", e);
+      var loginEl2 = document.getElementById("login");
+      if (loginEl2) loginEl2.className = "login-wrap";
+    }
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bootAutoLogin);
+  } else {
+    bootAutoLogin();
+  }
+})();
+</script>
 </body>
 </html>
