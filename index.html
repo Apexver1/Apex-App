@@ -491,7 +491,7 @@ window.toast=function(msg,kind){
   c.innerHTML='<div class="toast">'+msg+'</div>';
   setTimeout(function(){c.innerHTML="";},2400);
 };
-window.esc=function(s){return(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");};
+window.esc=function(s){if(s==null)return"";return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");};
 window.fmt$=function(n){if(n==null||isNaN(n))return"—";if(n>=1000000)return"$"+(n/1000000).toFixed(1)+"M";if(n>=1000)return"$"+Math.round(n/1000)+"K";return"$"+n;};
 window.coachFor=function(schoolId){
   return COACH_FALLBACK[schoolId]||{name:"Coach",role:"Head coach",initials:"C"};
@@ -1328,11 +1328,14 @@ window.aiLLM=function(){
   aiLoading=true;aiFilterSrc="ALL";aiSortBy="match";render();
   var enriched=prospects.map(function(p){var ps=pStats[p.player_name]||{};return{player_name:p.player_name,position:p.position,source:p.source,current_school:p.current_school,current_conference:p.current_conference,nil_estimate:p.nil_estimate,apex_model:valueNil(p,ps).mid,stats:{ppg:ps.ppg,rpg:ps.rpg,apg:ps.apg,three_pct:ps.three_pct}};}).sort(function(a,b){return b.apex_model-a.apex_model});
   fetch(SU+"/functions/v1/apex-scout",{method:"POST",headers:{"Authorization":"Bearer "+T,"apikey":SK,"Content-Type":"application/json"},body:JSON.stringify({query:aiQuery,prospects:enriched,roster:roster.map(function(r){return{player_name:r.player_name,position:r.position,ppg:r.ppg,rpg:r.rpg};}),budget:budget,strategy:strategy})}).then(function(r){return r.json();}).then(function(d){
+    console.log("[Scout 1.1.1] raw response:",d);
     aiLoading=false;
+    var toStr=function(v){if(v==null)return"";if(typeof v==="string")return v;try{return JSON.stringify(v);}catch(e){return String(v);}};
+    var ans=d.answer!=null?d.answer:(d.error!=null?d.error:"No response");
     aiResults={
       query:aiQuery,
-      llmAnswer:d.answer||d.error||"No response",
-      summary:d.summary||"",
+      llmAnswer:toStr(ans),
+      summary:toStr(d.summary||""),
       toolCalls:Array.isArray(d.tool_calls)?d.tool_calls:[],
       iterations:d.iterations||0,
       schemaVersion:d.schema_version||null,
@@ -1340,8 +1343,9 @@ window.aiLLM=function(){
     };
     render();
   }).catch(function(e){
+    console.error("[Scout 1.1.1] fetch/render error:",e);
     aiLoading=false;
-    aiResults={query:aiQuery,llmAnswer:"Error: "+e.message,summary:"",toolCalls:[],iterations:0,mode:"llm"};
+    aiResults={query:aiQuery,llmAnswer:"Error: "+(e&&e.message?e.message:String(e)),summary:"",toolCalls:[],iterations:0,mode:"llm"};
     render();
   });
 };
