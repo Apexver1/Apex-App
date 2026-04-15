@@ -617,7 +617,6 @@ window.go=navTo;
    SCHOOL PICKER
    ============================================ */
 window.openSchoolPicker=function(){
-  if(!window.APEX_UNLOCKED){var pw=prompt("Enter access code:");if(pw!=="stewart2026")return;window.APEX_UNLOCKED=true;}
   pickerState.q="";
   renderPicker();
 };
@@ -1368,7 +1367,7 @@ window.renderHome=function(c,portal,hs){
   /* greeting */
   h+='<div class="mb-lg" style="margin-bottom:22px">';
   h+='<div class="greet-date">'+dateLong()+'</div>';
-  var _ln=coach.name?coach.name.split(" ").slice(-1)[0]:"";if(_ln.toLowerCase()==="coach")_ln="";h+='<div class="greet-line">'+greet+", Coach"+(_ln?" "+_ln:"")+'.</div>';
+  h+='<div class="greet-line">'+greet+", Coach "+coach.name.split(" ").slice(-1)[0]+'.</div>';
   h+='</div>';
 
   /* today's brief */
@@ -1383,13 +1382,16 @@ window.renderHome=function(c,portal,hs){
   h+='</div>';
 
   /* next game */
-    h+='<div class="sec-head"><span class="sec-title">Next up</span></div>';
-    h+='<div class="game-hero mb-lg" style="text-align:center;padding:24px 16px">';
-    h+='<div style="font-size:14px;color:var(--ink-3);margin-bottom:4px">Season complete</div>';
-    h+='<div style="font-size:12px;color:var(--ink-4)">2026-27 schedule TBD</div>';
-    h+='</div>';
+  h+='<div class="sec-head"><span class="sec-title">Next up</span><span class="sec-link">Season schedule</span></div>';
+  h+='<div class="game-hero mb-lg">';
+  h+='<div class="game-head"><span class="game-date">'+NEXT_GAME.date+'</span><span class="chip">'+NEXT_GAME.venue+'</span></div>';
+  h+='<div class="game-vs"><div class="game-team"><div class="game-team-name">'+NEXT_GAME.home.name+'</div><div class="game-team-meta">KenPom #'+NEXT_GAME.home.kpom+'</div></div>';
+  h+='<div class="game-sep">vs</div>';
+  h+='<div class="game-team away"><div class="game-team-name">'+NEXT_GAME.away.name+'</div><div class="game-team-meta">KenPom #'+NEXT_GAME.away.kpom+'</div></div></div>';
+  h+='<div class="game-foot"><span>Win probability</span><span style="color:var(--ink);font-weight:600" class="num">'+NEXT_GAME.winprob+'%</span></div>';
+  h+='</div>';
 
-    /* roster pulse */
+  /* roster pulse */
   h+='<div class="sec-head"><span class="sec-title">Roster pulse</span><span class="sec-link" onclick="navTo(\'roster\')">View roster</span></div>';
   h+='<div class="card mb-lg">';
   h+='<div class="pulse-stats">';
