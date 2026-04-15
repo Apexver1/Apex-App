@@ -7,7 +7,7 @@
 
 ## Shipping next
 
-1. **Apex Scout flagship upgrade** — This is the moat. Strip rules/AI toggle (always LLM). Natural-language placeholder. Voice input working. Rich player-card responses (not plain text). Enhanced AI reasoning with stat citations. Multi-turn conversation with context persistence. Full data access: all players + team strategy + CRM state + KenPom + Torvik + Synergy (when wired).
+1. **Scout 1.1.1 — Frontend rich rendering** — Read scout-1.1 structured response (tool_calls, iterations, schema_version). Render markdown answer with proper formatting (## headers as bold, **text** as bold). Render players from tool_calls[].output.results[] as rich cards instead of plain markdown. Fix "X players identified" counter. Add collapsible reasoning trace ("How Scout reasoned").
 
 2. **CRM redesign as "Apex CRM"** — Full rewrite. Stars (1-5) replace tier A/B/C/D. Alphabetical phonebook layout (A-Z sections). Rich contact profiles (parents, AAU, HS coach, phone, email, social). Restore vCard import/export (existed, got removed). Log contact gets date/time picker. Coach assignment per relationship (1 or multiple). Dashboard surfaces smart suggestions ("time to text [5-star kid]").
 
@@ -22,6 +22,8 @@
 ---
 
 ## Queued
+
+- **Portal player stats backfill** — 1,192 portal players have has_ppg=0. Run loader against BT 2024-25 (year=2025) and match by name only with high threshold (95+); portal players pre-portal D1 season has full stats. Expected 600-900 stats gained.
 
 - **Build out "+ New" visit flow** — Button currently stubs "coming in Phase 5b." Needs form modal, prospect_visits table migration, itinerary add-item modal, file upload to Storage bucket.
 - **Player detail modal centering** — Currently anchored to bottom of screen. Should be vertically centered.
@@ -122,6 +124,9 @@ Original framework from Apr 9. Status as of Apr 15:
 - 33 portal players with NULL source school
 - Mid-season coaching changes stale (UNC, Arizona State, Cincinnati, Kansas State, Boston College)
 - Coach names beyond 79 Power 5 + Big East schools
+- 948 D1 roster players unmatched by Bart Torvik loader (mostly Jr./II/III suffix mismatches; need name normalization in fuzzy matcher)
+- 2 unmatched BT team names: FIU = Florida International, UMKC = University of Missouri-Kansas City; add MANUAL_OVERRIDES dict to loader
+- Strategic brief v1.1 polish: remove EvanMiya from market map, soften pilot count language, add contact email
 
 ---
 
@@ -160,6 +165,7 @@ Original framework from Apr 9. Status as of Apr 15:
 ## Shipped recently
 
 | Date | Item |
+| Apr 15 (PM) | Scout 1.1: agentic Edge Function + 4 tools + 4,122 D1 players with Bart Torvik advanced stats |
 |------|------|
 | Apr 15 | D.1: Coach greeting fix for non-Power 5 schools (d301b99) |
 | Apr 15 | Password gate on school picker restored (38956ec) |
