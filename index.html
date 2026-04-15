@@ -2272,7 +2272,8 @@ window.renderScout=function(c){
     h+='<div class="card">';
     h+='<div style="font-size:10px;color:var(--accent);font-weight:700;margin-bottom:6px;letter-spacing:0.4px;text-transform:uppercase">Apex AI \u00b7 '+summaryBits.join(" \u00b7 ")+'</div>';
     h+='<div style="font-size:13px;color:var(--ink);font-style:italic;line-height:1.5">\u201c'+esc(aiResults.query)+'\u201d</div>';
-    if(aiResults.summary)h+='<div style="font-size:12px;color:var(--ink-2);margin-top:8px;line-height:1.5">'+esc(aiResults.summary)+'</div>';
+    /* Only show summary if backend sent a real one-liner that's not just a duplicate of the full answer */
+    if(aiResults.summary&&aiResults.summary!==answer&&aiResults.summary.length<300){h+='<div style="font-size:12px;color:var(--ink-2);margin-top:8px;line-height:1.5">'+esc(aiResults.summary)+'</div>';}
     h+='</div>';
 
     /* Player cards */
