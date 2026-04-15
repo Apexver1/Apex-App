@@ -508,12 +508,15 @@ window.greetingText=function(){
    when the LLM returns answer text without proper newlines. */
 window.mdToHtml=function(md){
   if(!md)return"";
-  var s=String(md);
+  /* Normalize line endings — JS regex `.` doesn't match \r, which breaks ^...$/gm patterns when LLM returns Windows-style \r\n */
+  var s=String(md).replace(/\r\n/g,'\n').replace(/\r/g,'\n');
   /* Insert paragraph break before mid-text headers (## or ###) */
   s=s.replace(/([^\n])\s+(##+\s)/g,'$1\n\n$2');
-  /* Insert paragraph break before numbered list items like "**1. Name**" or "1. Name" */
+  /* Insert paragraph break before numbered list items in any of these patterns:
+     "**1. Name**", "1. **Name**", or after colon/period: "things: 1. Name" / "done. 2. Next" */
   s=s.replace(/([^\n])\s+(\*\*\d+\.\s)/g,'$1\n\n$2');
-  s=s.replace(/([.!?])\s+(\d+\.\s\*\*)/g,'$1\n\n$2');
+  s=s.replace(/([.!?:])\s+(\d+\.\s\*\*)/g,'$1\n\n$2');
+  s=s.replace(/([.!?:])\s+(\d+\.\s+[A-Z])/g,'$1\n\n$2');
   /* Insert line break before "- " bullet markers when mid-text */
   s=s.replace(/([^\n])\s+(- [A-Z])/g,'$1\n$2');
   var html=esc(s);
@@ -523,9 +526,9 @@ window.mdToHtml=function(md){
   html=html.replace(/\*\*(.+?)\*\*/g,'<b style="color:var(--brand)">$1</b>');
   html=html.replace(/\*([^*\n]+)\*/g,'<i>$1</i>');
   html=html.replace(/`([^`]+)`/g,'<code style="background:var(--surface-3);padding:1px 5px;border-radius:3px;font-size:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace">$1</code>');
-  html=html.replace(/^(\d+)\. (.+)$/gm,'<div style="padding-left:20px;position:relative;margin:6px 0"><span style="position:absolute;left:0;color:var(--accent);font-weight:600">$1.</span>$2</div>');
+  html=html.replace(/^(\d+)\. (.+)$/gm,'<div style="padding-left:20px;position:relative;margin:8px 0"><span style="position:absolute;left:0;color:var(--accent);font-weight:700">$1.</span>$2</div>');
   html=html.replace(/^- (.+)$/gm,'<div style="padding-left:14px;position:relative;margin:4px 0"><span style="position:absolute;left:0;color:var(--accent)">\u2022</span>$1</div>');
-  html=html.replace(/\n\n+/g,'<div style="height:8px"></div>');
+  html=html.replace(/\n\n+/g,'<div style="height:10px"></div>');
   html=html.replace(/\n/g,'<br>');
   return html;
 };
