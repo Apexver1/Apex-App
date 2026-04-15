@@ -503,17 +503,27 @@ window.greetingText=function(){
   return"Good evening";
 };
 /* Lightweight markdown -> HTML for Scout LLM responses.
-   Handles ## ### headers, **bold**, *italic*, `code`, - bullets, 1. numbered lists, paragraphs. */
+   Handles ## ### headers, **bold**, *italic*, `code`, - bullets, 1. numbered lists, paragraphs.
+   Pre-processor inserts paragraph breaks before headers and numbered list items
+   when the LLM returns answer text without proper newlines. */
 window.mdToHtml=function(md){
   if(!md)return"";
-  var html=esc(md);
+  var s=String(md);
+  /* Insert paragraph break before mid-text headers (## or ###) */
+  s=s.replace(/([^\n])\s+(##+\s)/g,'$1\n\n$2');
+  /* Insert paragraph break before numbered list items like "**1. Name**" or "1. Name" */
+  s=s.replace(/([^\n])\s+(\*\*\d+\.\s)/g,'$1\n\n$2');
+  s=s.replace(/([.!?])\s+(\d+\.\s\*\*)/g,'$1\n\n$2');
+  /* Insert line break before "- " bullet markers when mid-text */
+  s=s.replace(/([^\n])\s+(- [A-Z])/g,'$1\n$2');
+  var html=esc(s);
   html=html.replace(/^### (.+)$/gm,'<div style="font-size:13px;font-weight:700;color:var(--brand);margin-top:14px;margin-bottom:6px;letter-spacing:-0.1px">$1</div>');
   html=html.replace(/^## (.+)$/gm,'<div style="font-size:14px;font-weight:700;color:var(--brand);margin-top:16px;margin-bottom:6px;letter-spacing:-0.2px">$1</div>');
   html=html.replace(/^# (.+)$/gm,'<div style="font-size:15px;font-weight:700;color:var(--brand);margin-top:16px;margin-bottom:8px;letter-spacing:-0.2px">$1</div>');
   html=html.replace(/\*\*(.+?)\*\*/g,'<b style="color:var(--brand)">$1</b>');
   html=html.replace(/\*([^*\n]+)\*/g,'<i>$1</i>');
   html=html.replace(/`([^`]+)`/g,'<code style="background:var(--surface-3);padding:1px 5px;border-radius:3px;font-size:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace">$1</code>');
-  html=html.replace(/^(\d+)\. (.+)$/gm,'<div style="padding-left:20px;position:relative;margin:4px 0"><span style="position:absolute;left:0;color:var(--accent);font-weight:600">$1.</span>$2</div>');
+  html=html.replace(/^(\d+)\. (.+)$/gm,'<div style="padding-left:20px;position:relative;margin:6px 0"><span style="position:absolute;left:0;color:var(--accent);font-weight:600">$1.</span>$2</div>');
   html=html.replace(/^- (.+)$/gm,'<div style="padding-left:14px;position:relative;margin:4px 0"><span style="position:absolute;left:0;color:var(--accent)">\u2022</span>$1</div>');
   html=html.replace(/\n\n+/g,'<div style="height:8px"></div>');
   html=html.replace(/\n/g,'<br>');
@@ -829,11 +839,12 @@ window.closeM=function(){document.getElementById("mc").innerHTML="";};
 window.openScoutPlayer=function(idx){
   var data=(window._scoutPlayers||[])[idx];
   if(!data)return;
-  var name=data.player_name||data.name||"Player";
-  var school=data.current_school||data.school||data.team_name||"";
-  var conf=data.current_conference||data.conference||"";
-  var pos=data.position||"";
-  var cls=data.class_year||data["class_year"]||"";
+  var fld=function(v){if(v==null)return"";if(typeof v==="object"){return v.name||v.school_name||v.full_name||v.title||v.label||"";}return String(v);};
+  var name=fld(data.player_name||data.name)||"Player";
+  var school=fld(data.current_school||data.school||data.team_name||data.team);
+  var conf=fld(data.current_conference||data.conference||data.conf);
+  var pos=fld(data.position||data.pos);
+  var cls=fld(data.class_year||data["class_year"]);
   var ht=data.height_inches?(Math.floor(data.height_inches/12)+"'"+(data.height_inches%12)+"\""):"";
   var pctFmt=function(v){var n=+v;if(n<=1)n=n*100;return n.toFixed(0);};
   var h='<div class="mbg" onclick="if(event.target===this)closeM()"><div class="mdl">';
@@ -2293,13 +2304,15 @@ window.renderScout=function(c){
       /* Build prospect lookup so known prospects link to existing player modal */
       var prospectByName={};
       prospects.forEach(function(p){if(p.player_name)prospectByName[p.player_name.toLowerCase()]=p;});
+      /* Field normalizer — backend may return nested objects from joined Supabase queries */
+      var fld=function(v){if(v==null)return"";if(typeof v==="object"){return v.name||v.school_name||v.full_name||v.title||v.label||"";}return String(v);};
 
       filtered.forEach(function(p,idx){
-        var name=p.player_name||p.name||"Unknown";
-        var school=p.current_school||p.school||p.team_name||"";
-        var conf=p.current_conference||p.conference||"";
-        var pos=p.position||"";
-        var src=p.source||"";
+        var name=fld(p.player_name||p.name)||"Unknown";
+        var school=fld(p.current_school||p.school||p.team_name||p.team);
+        var conf=fld(p.current_conference||p.conference||p.conf);
+        var pos=fld(p.position||p.pos);
+        var src=fld(p.source);
         var srcBadge=src==="portal"?chip("Portal","chip-navy")
                     :src==="high_school"?chip("HS"+(p.recruiting_class_year?" "+p.recruiting_class_year:""),"chip-accent")
                     :src?chip(src.toUpperCase().replace(/_/g," "),"chip-line")
