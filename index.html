@@ -502,6 +502,23 @@ window.greetingText=function(){
   if(h<17)return"Good afternoon";
   return"Good evening";
 };
+/* Lightweight markdown -> HTML for Scout LLM responses.
+   Handles ## ### headers, **bold**, *italic*, `code`, - bullets, 1. numbered lists, paragraphs. */
+window.mdToHtml=function(md){
+  if(!md)return"";
+  var html=esc(md);
+  html=html.replace(/^### (.+)$/gm,'<div style="font-size:13px;font-weight:700;color:var(--brand);margin-top:14px;margin-bottom:6px;letter-spacing:-0.1px">$1</div>');
+  html=html.replace(/^## (.+)$/gm,'<div style="font-size:14px;font-weight:700;color:var(--brand);margin-top:16px;margin-bottom:6px;letter-spacing:-0.2px">$1</div>');
+  html=html.replace(/^# (.+)$/gm,'<div style="font-size:15px;font-weight:700;color:var(--brand);margin-top:16px;margin-bottom:8px;letter-spacing:-0.2px">$1</div>');
+  html=html.replace(/\*\*(.+?)\*\*/g,'<b style="color:var(--brand)">$1</b>');
+  html=html.replace(/\*([^*\n]+)\*/g,'<i>$1</i>');
+  html=html.replace(/`([^`]+)`/g,'<code style="background:var(--surface-3);padding:1px 5px;border-radius:3px;font-size:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace">$1</code>');
+  html=html.replace(/^(\d+)\. (.+)$/gm,'<div style="padding-left:20px;position:relative;margin:4px 0"><span style="position:absolute;left:0;color:var(--accent);font-weight:600">$1.</span>$2</div>');
+  html=html.replace(/^- (.+)$/gm,'<div style="padding-left:14px;position:relative;margin:4px 0"><span style="position:absolute;left:0;color:var(--accent)">\u2022</span>$1</div>');
+  html=html.replace(/\n\n+/g,'<div style="height:8px"></div>');
+  html=html.replace(/\n/g,'<br>');
+  return html;
+};
 window.dateLong=function(d){
   d=d||new Date();
   var days=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
@@ -807,6 +824,64 @@ window.openP=function(id,kind){
   document.getElementById("mc").innerHTML=h;
 };
 window.closeM=function(){document.getElementById("mc").innerHTML="";};
+/* Detail modal for D1-universe players returned by Scout that aren't in user's prospects.
+   Reads from window._scoutPlayers populated during render. */
+window.openScoutPlayer=function(idx){
+  var data=(window._scoutPlayers||[])[idx];
+  if(!data)return;
+  var name=data.player_name||data.name||"Player";
+  var school=data.current_school||data.school||data.team_name||"";
+  var conf=data.current_conference||data.conference||"";
+  var pos=data.position||"";
+  var cls=data.class_year||data["class_year"]||"";
+  var ht=data.height_inches?(Math.floor(data.height_inches/12)+"'"+(data.height_inches%12)+"\""):"";
+  var pctFmt=function(v){var n=+v;if(n<=1)n=n*100;return n.toFixed(0);};
+  var h='<div class="mbg" onclick="if(event.target===this)closeM()"><div class="mdl">';
+  h+='<div class="mdl-grab"></div>';
+  h+='<div class="mdl-head"><div><div class="mdl-title">'+esc(name)+'</div><div class="mdl-sub">'+esc(pos||"")+(cls?" \u00b7 "+esc(cls):"")+(ht?" \u00b7 "+ht:"")+(school?" \u00b7 "+esc(school):"")+(conf?" \u00b7 "+esc(conf):"")+'</div></div><button class="mdl-close" onclick="closeM()" aria-label="Close"></button></div>';
+  /* Counting stats */
+  var s1='';
+  if(data.ppg!=null)s1+='<div class="stat-box"><div class="l">PPG</div><div class="v">'+(+data.ppg).toFixed(1)+'</div></div>';
+  if(data.rpg!=null)s1+='<div class="stat-box"><div class="l">RPG</div><div class="v">'+(+data.rpg).toFixed(1)+'</div></div>';
+  if(data.apg!=null)s1+='<div class="stat-box"><div class="l">APG</div><div class="v">'+(+data.apg).toFixed(1)+'</div></div>';
+  if(data.spg!=null)s1+='<div class="stat-box"><div class="l">SPG</div><div class="v">'+(+data.spg).toFixed(1)+'</div></div>';
+  if(data.bpg!=null)s1+='<div class="stat-box"><div class="l">BPG</div><div class="v">'+(+data.bpg).toFixed(1)+'</div></div>';
+  if(data.games!=null)s1+='<div class="stat-box"><div class="l">G</div><div class="v">'+data.games+'</div></div>';
+  if(s1)h+='<div style="font-size:11px;color:var(--ink-2);font-weight:600;margin-bottom:6px;letter-spacing:0.3px">PER GAME</div><div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px">'+s1+'</div>';
+  /* Shooting */
+  var s2='';
+  if(data.fg_pct!=null)s2+='<div class="stat-box"><div class="l">FG%</div><div class="v">'+pctFmt(data.fg_pct)+'</div></div>';
+  if(data.three_pct!=null||data.tp_pct!=null)s2+='<div class="stat-box"><div class="l">3PT%</div><div class="v">'+pctFmt(data.three_pct!=null?data.three_pct:data.tp_pct)+'</div></div>';
+  if(data.two_pct!=null)s2+='<div class="stat-box"><div class="l">2PT%</div><div class="v">'+pctFmt(data.two_pct)+'</div></div>';
+  if(data.ft_pct!=null)s2+='<div class="stat-box"><div class="l">FT%</div><div class="v">'+pctFmt(data.ft_pct)+'</div></div>';
+  if(data.ts_pct!=null)s2+='<div class="stat-box"><div class="l">TS%</div><div class="v">'+pctFmt(data.ts_pct)+'</div></div>';
+  if(data.efg_pct!=null)s2+='<div class="stat-box"><div class="l">eFG%</div><div class="v">'+pctFmt(data.efg_pct)+'</div></div>';
+  if(s2)h+='<div style="font-size:11px;color:var(--ink-2);font-weight:600;margin-bottom:6px;letter-spacing:0.3px">SHOOTING</div><div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px">'+s2+'</div>';
+  /* Advanced */
+  var s3='';
+  if(data.ortg!=null)s3+='<div class="stat-box"><div class="l">ORtg</div><div class="v">'+(+data.ortg).toFixed(0)+'</div></div>';
+  if(data.drtg!=null)s3+='<div class="stat-box"><div class="l">DRtg</div><div class="v">'+(+data.drtg).toFixed(0)+'</div></div>';
+  if(data.bpm!=null)s3+='<div class="stat-box"><div class="l">BPM</div><div class="v">'+(data.bpm>0?"+":"")+(+data.bpm).toFixed(1)+'</div></div>';
+  if(data.usg_pct!=null)s3+='<div class="stat-box"><div class="l">USG%</div><div class="v">'+pctFmt(data.usg_pct)+'</div></div>';
+  if(data.min_pct!=null)s3+='<div class="stat-box"><div class="l">MIN%</div><div class="v">'+pctFmt(data.min_pct)+'</div></div>';
+  if(data.porpag!=null)s3+='<div class="stat-box"><div class="l">PORPAG</div><div class="v">'+(+data.porpag).toFixed(1)+'</div></div>';
+  if(data.adjoe!=null)s3+='<div class="stat-box"><div class="l">AdjOE</div><div class="v">'+(+data.adjoe).toFixed(1)+'</div></div>';
+  if(data.ast_pct!=null)s3+='<div class="stat-box"><div class="l">AST%</div><div class="v">'+pctFmt(data.ast_pct)+'</div></div>';
+  if(data.to_pct!=null)s3+='<div class="stat-box"><div class="l">TO%</div><div class="v">'+pctFmt(data.to_pct)+'</div></div>';
+  if(s3)h+='<div style="font-size:11px;color:var(--ink-2);font-weight:600;margin-bottom:6px;letter-spacing:0.3px">ADVANCED \u00b7 BART TORVIK</div><div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px">'+s3+'</div>';
+  /* Reasoning hint */
+  if(data.reason||data.match_reason||data.note){
+    h+='<div style="background:var(--accent-bg);border:0.5px solid rgba(23,88,232,0.15);border-radius:10px;padding:12px 14px;margin-bottom:14px">';
+    h+='<div style="font-size:10px;color:var(--accent);font-weight:700;margin-bottom:4px;letter-spacing:0.3px">WHY SCOUT PICKED THIS PLAYER</div>';
+    h+='<div style="font-size:12px;color:var(--ink);line-height:1.5">'+esc(data.reason||data.match_reason||data.note)+'</div></div>';
+  }
+  h+='<div style="background:var(--surface-2);border-radius:10px;padding:12px 14px">';
+  h+='<div style="font-size:11px;color:var(--ink-2);font-weight:600;margin-bottom:4px">Not yet on shortlist</div>';
+  h+='<div style="font-size:12px;color:var(--ink-3);line-height:1.5">This player is from the broader D1 universe (~5,400 players). Add them to your tracked prospects from the Recruiting tab to log contact, score them, and run NIL valuations.</div>';
+  h+='</div>';
+  h+='</div></div>';
+  document.getElementById("mc").innerHTML=h;
+};
 
 window.updS=function(pid,st){
   api("/rest/v1/prospect_shortlist?id=eq."+pid,{method:"PATCH",body:JSON.stringify({status:st}),prefer:"return=minimal"}).then(function(){
@@ -1252,7 +1327,23 @@ window.aiLLM=function(){
   if(!aiQuery.trim())return;
   aiLoading=true;aiFilterSrc="ALL";aiSortBy="match";render();
   var enriched=prospects.map(function(p){var ps=pStats[p.player_name]||{};return{player_name:p.player_name,position:p.position,source:p.source,current_school:p.current_school,current_conference:p.current_conference,nil_estimate:p.nil_estimate,apex_model:valueNil(p,ps).mid,stats:{ppg:ps.ppg,rpg:ps.rpg,apg:ps.apg,three_pct:ps.three_pct}};}).sort(function(a,b){return b.apex_model-a.apex_model});
-  fetch(SU+"/functions/v1/apex-scout",{method:"POST",headers:{"Authorization":"Bearer "+T,"apikey":SK,"Content-Type":"application/json"},body:JSON.stringify({query:aiQuery,prospects:enriched,roster:roster.map(function(r){return{player_name:r.player_name,position:r.position,ppg:r.ppg,rpg:r.rpg};}),budget:budget,strategy:strategy})}).then(function(r){return r.json();}).then(function(d){aiLoading=false;aiResults={query:aiQuery,llmAnswer:d.answer||d.error||"No response",mode:"llm"};render();}).catch(function(e){aiLoading=false;aiResults={query:aiQuery,llmAnswer:"Error: "+e.message,mode:"llm"};render();});
+  fetch(SU+"/functions/v1/apex-scout",{method:"POST",headers:{"Authorization":"Bearer "+T,"apikey":SK,"Content-Type":"application/json"},body:JSON.stringify({query:aiQuery,prospects:enriched,roster:roster.map(function(r){return{player_name:r.player_name,position:r.position,ppg:r.ppg,rpg:r.rpg};}),budget:budget,strategy:strategy})}).then(function(r){return r.json();}).then(function(d){
+    aiLoading=false;
+    aiResults={
+      query:aiQuery,
+      llmAnswer:d.answer||d.error||"No response",
+      summary:d.summary||"",
+      toolCalls:Array.isArray(d.tool_calls)?d.tool_calls:[],
+      iterations:d.iterations||0,
+      schemaVersion:d.schema_version||null,
+      mode:"llm"
+    };
+    render();
+  }).catch(function(e){
+    aiLoading=false;
+    aiResults={query:aiQuery,llmAnswer:"Error: "+e.message,summary:"",toolCalls:[],iterations:0,mode:"llm"};
+    render();
+  });
 };
 window.aiSearch=function(){
   aiQuery=document.getElementById("aiInput").value;
@@ -2102,113 +2193,205 @@ window.slotHTML=function(i,byPlayer,allP,small){
 };
 
 /* ============================================
-   AI SCOUT
+   AI SCOUT — v1.1.1 rich rendering
    ============================================ */
 window.renderScout=function(c){
   var h='<div class="card">';
-  h+='<div style="font-size:13px;font-weight:600;margin-bottom:10px">AI Scout</div>';
+  h+='<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px">';
+  h+='<div style="font-size:13px;font-weight:600">AI Scout <span style="font-family:var(--serif);font-size:11px;color:var(--gold);font-style:italic;font-weight:400;margin-left:4px">Pro</span></div>';
+  h+='<div style="font-size:10px;color:var(--ink-3);letter-spacing:0.3px">v1.1.1 \u00b7 4,122 D1 players \u00b7 BT advanced</div>';
+  h+='</div>';
   h+='<div class="seg" style="margin-bottom:12px">';
-  h+='<div class="seg-item'+(aiMode==="rules"?" a":"")+'" onclick="setAiMode(\'rules\')">Rules · free</div>';
-  h+='<div class="seg-item'+(aiMode==="llm"?" a":"")+'" onclick="setAiMode(\'llm\')">Apex AI · $0.01/q</div>';
+  h+='<div class="seg-item'+(aiMode==="rules"?" a":"")+'" onclick="setAiMode(\'rules\')">Rules \u00b7 free</div>';
+  h+='<div class="seg-item'+(aiMode==="llm"?" a":"")+'" onclick="setAiMode(\'llm\')">Apex AI \u00b7 $0.01/q</div>';
   h+='</div>';
   h+='<div style="display:flex;gap:8px;margin-bottom:10px">';
   h+='<input id="aiInput" class="inp" style="flex:1;margin:0" placeholder="'+(aiMode==="llm"?"Ask anything or tap mic...":"e.g., Find me a PG shooter under $1M")+'" value="'+esc(aiQuery||"")+'">';
   h+='<button id="micBtn" class="btn btn-line" style="width:auto;padding:12px 16px" onclick="aiVoice()">Mic</button>';
   h+='</div>';
-  h+='<button class="btn btn-primary" onclick="aiRun()">'+(aiLoading?"Thinking…":"Search")+'</button>';
+  h+='<button class="btn btn-primary" onclick="aiRun()">'+(aiLoading?"Thinking\u2026":"Search")+'</button>';
   h+='<div style="font-size:11px;color:var(--ink-3);margin-top:14px;margin-bottom:6px;font-weight:500">Quick queries</div>';
   h+='<div class="ai-chips">';
-  ["Find me a PG with 15+ ppg","Best value picks under $1M","Elite shooter from the portal","Stretch PF with 35% from 3","Rim protector with 8+ rpg","Top HS scorers","Cheapest portal centers"].forEach(function(q){
+  var quickQueries=aiMode==="llm"
+    ?["Top 5 D1 scorers averaging 20+ ppg","Best two-way wings by BPM","Elite shooters from the portal","Stretch PFs hitting 35%+ from 3","Rim protectors with 8+ rpg","Defensive-minded power forwards","Cheapest portal centers"]
+    :["Find me a PG with 15+ ppg","Best value picks under $1M","Elite shooter from the portal","Stretch PF with 35% from 3","Rim protector with 8+ rpg","Top HS scorers","Cheapest portal centers"];
+  quickQueries.forEach(function(q){
     h+='<div class="ai-chip" onclick="aiQuick(\''+esc(q).replace(/'/g,"")+'\')">'+q+'</div>';
   });
   h+='</div></div>';
 
+  /* ===== LLM (Scout 1.1) results — structured tool_calls + answer ===== */
   if(aiResults&&aiResults.mode==="llm"){
-    /* Extract player names mentioned in LLM answer */
     var answer=aiResults.llmAnswer||"";
-    var picks=[];var seen={};
-    prospects.forEach(function(p){
-      if(!p.player_name||seen[p.id])return;
-      var escaped=p.player_name.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
-      var re=new RegExp("\\b"+escaped+"\\b","i");
-      if(re.test(answer)){seen[p.id]=true;picks.push(p);}
+    var toolCalls=aiResults.toolCalls||[];
+
+    /* Extract players from any find_players tool calls (defensive against shape variants) */
+    var toolPlayers=[];var seenPlayer={};
+    toolCalls.forEach(function(tc){
+      if(!tc||(tc.name!=="find_players"&&tc.tool_name!=="find_players"))return;
+      var out=tc.output||tc.result||tc.results||{};
+      var arr=[];
+      if(Array.isArray(out))arr=out;
+      else if(Array.isArray(out.results))arr=out.results;
+      else if(Array.isArray(out.players))arr=out.players;
+      else if(Array.isArray(out.data))arr=out.data;
+      arr.forEach(function(r){
+        if(!r)return;
+        var nm=r.player_name||r.name||"";
+        var sch=r.current_school||r.school||r.team_name||"";
+        var key=(nm+"|"+sch).toLowerCase();
+        if(!nm||seenPlayer[key])return;
+        seenPlayer[key]=true;
+        toolPlayers.push(r);
+      });
     });
 
-    /* Count by source for chip labels */
-    var portalCount=picks.filter(function(p){return p.source==="portal";}).length;
-    var hsCount=picks.filter(function(p){return p.source==="high_school";}).length;
+    /* Header summary */
+    var summaryBits=[];
+    summaryBits.push(toolPlayers.length+" player"+(toolPlayers.length===1?"":"s"));
+    if(toolCalls.length)summaryBits.push(toolCalls.length+" tool call"+(toolCalls.length===1?"":"s"));
+    if(aiResults.iterations)summaryBits.push(aiResults.iterations+" iteration"+(aiResults.iterations===1?"":"s"));
+    h+='<div class="card">';
+    h+='<div style="font-size:10px;color:var(--accent);font-weight:700;margin-bottom:6px;letter-spacing:0.4px;text-transform:uppercase">Apex AI \u00b7 '+summaryBits.join(" \u00b7 ")+'</div>';
+    h+='<div style="font-size:13px;color:var(--ink);font-style:italic;line-height:1.5">\u201c'+esc(aiResults.query)+'\u201d</div>';
+    if(aiResults.summary)h+='<div style="font-size:12px;color:var(--ink-2);margin-top:8px;line-height:1.5">'+esc(aiResults.summary)+'</div>';
+    h+='</div>';
 
-    /* Apply filter */
-    var filteredPicks=picks.filter(function(p){
-      if(aiFilterSrc==="ALL")return true;
-      if(aiFilterSrc==="PORTAL")return p.source==="portal";
-      if(aiFilterSrc==="HS")return p.source==="high_school";
-      return true;
-    });
+    /* Player cards */
+    if(toolPlayers.length>0){
+      var hasSourceField=toolPlayers.some(function(p){return p.source;});
+      var filtered=toolPlayers.slice();
+      if(hasSourceField){
+        var portalCt=toolPlayers.filter(function(p){return p.source==="portal";}).length;
+        var hsCt=toolPlayers.filter(function(p){return p.source==="high_school";}).length;
+        var rosCt=toolPlayers.filter(function(p){return p.source!=="portal"&&p.source!=="high_school";}).length;
+        if(aiFilterSrc==="PORTAL")filtered=toolPlayers.filter(function(p){return p.source==="portal";});
+        else if(aiFilterSrc==="HS")filtered=toolPlayers.filter(function(p){return p.source==="high_school";});
+        else if(aiFilterSrc==="ROSTER")filtered=toolPlayers.filter(function(p){return p.source!=="portal"&&p.source!=="high_school";});
 
-    /* Apply sort */
-    if(aiSortBy==="rank"){
-      filteredPicks.sort(function(a,b){return(a.on3_consensus_rank||9999)-(b.on3_consensus_rank||9999);});
-    }else if(aiSortBy==="nil_asc"){
-      filteredPicks.sort(function(a,b){return(a.nil_estimate||0)-(b.nil_estimate||0);});
-    }else if(aiSortBy==="nil_desc"){
-      filteredPicks.sort(function(a,b){return(b.nil_estimate||0)-(a.nil_estimate||0);});
-    }
-
-    h+='<div class="card"><div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:8px">Apex AI response · '+picks.length+' player'+(picks.length===1?"":"s")+' identified</div>';
-    h+='<div style="font-size:11px;color:var(--ink-3)">Query: "'+esc(aiResults.query)+'"</div></div>';
-
-    if(picks.length>0){
-      h+='<div class="card" style="padding:12px 14px">';
-      h+='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px"><div style="font-size:10px;color:var(--ink-3);font-weight:700;letter-spacing:0.4px;text-transform:uppercase">Refine results</div><div style="font-size:11px;color:var(--ink-3)">'+filteredPicks.length+' showing</div></div>';
-      h+='<div style="font-size:10px;color:var(--ink-3);margin-bottom:6px;font-weight:500">Source</div>';
-      h+='<div class="fbar" style="margin-bottom:10px">';
-      [["ALL","All · "+picks.length],["PORTAL","Portal · "+portalCount],["HS","HS · "+hsCount]].forEach(function(opt){
-        h+='<button class="fb'+(aiFilterSrc===opt[0]?" a":"")+'" onclick="aiFilterSrc=\''+opt[0]+'\';render()">'+opt[1]+'</button>';
-      });
-      h+='</div>';
-      h+='<div style="font-size:10px;color:var(--ink-3);margin-bottom:6px;font-weight:500">Sort by</div>';
-      h+='<select class="inp" style="margin:0;font-size:12px;padding:8px 10px" onchange="aiSortBy=this.value;render()">';
-      [["match","Match order (AI's ranking)"],["rank","On3 Rank (best first)"],["nil_asc","NIL (cheapest first)"],["nil_desc","NIL (highest first)"]].forEach(function(opt){
-        h+='<option value="'+opt[0]+'"'+(aiSortBy===opt[0]?" selected":"")+'>'+opt[1]+'</option>';
-      });
-      h+='</select>';
-      h+='</div>';
-    }
-
-    filteredPicks.forEach(function(p){
-      var ps=pStats[p.player_name]||{};
-      var mv=valueNil(p,ps).mid;var market=p.nil_estimate||0;var delta=mv-market;
-      var srcBadge=p.source==="portal"?chip("Portal","chip-navy"):p.source==="high_school"?chip("HS"+(p.recruiting_class_year?" "+p.recruiting_class_year:""),"chip-accent"):chip((p.source||"").toUpperCase().replace("_"," "),"chip-line");
-      h+='<div class="card" style="cursor:pointer" onclick="openP(\''+p.id+'\',\'p\')">';
-      h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">';
-      h+='<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:600">'+esc(p.player_name)+'</div><div style="font-size:11px;color:var(--ink-2);margin-top:2px">'+esc(p.current_school||"")+(p.current_conference?" · "+esc(p.current_conference):"")+'</div>';
-      h+='<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">'+chip(p.position)+srcBadge+(p.priority_tier?chip("T"+p.priority_tier,"chip-gold"):"")+'</div></div>';
-      if(p.on3_consensus_rank){
-        h+='<div class="rank-callout" style="min-width:64px"><div class="rc-l">'+(p.source==="portal"?"On3 Portal":"On3 Cons")+'</div><div class="rc-n">#'+p.on3_consensus_rank+'</div>'+(p.on3_iri_score&&p.source!=="portal"?'<div class="rc-s">IRI '+p.on3_iri_score+'</div>':'')+'</div>';
+        if((portalCt&&hsCt)||(portalCt&&rosCt)||(hsCt&&rosCt)){
+          h+='<div class="card" style="padding:12px 14px">';
+          h+='<div style="font-size:10px;color:var(--ink-3);font-weight:700;letter-spacing:0.4px;text-transform:uppercase;margin-bottom:8px">Refine</div>';
+          h+='<div class="fbar" style="margin-bottom:0">';
+          var srcOpts=[["ALL","All \u00b7 "+toolPlayers.length]];
+          if(rosCt)srcOpts.push(["ROSTER","D1 rosters \u00b7 "+rosCt]);
+          if(portalCt)srcOpts.push(["PORTAL","Portal \u00b7 "+portalCt]);
+          if(hsCt)srcOpts.push(["HS","HS \u00b7 "+hsCt]);
+          srcOpts.forEach(function(opt){
+            h+='<button class="fb'+(aiFilterSrc===opt[0]?" a":"")+'" onclick="aiFilterSrc=\''+opt[0]+'\';render()">'+opt[1]+'</button>';
+          });
+          h+='</div></div>';
+        }
       }
-      h+='</div>';
-      h+='<div style="display:flex;gap:10px;margin-top:10px;padding-top:8px;border-top:0.5px solid var(--line-2);flex-wrap:wrap">';
-      if(ps.ppg)h+='<span style="font-size:11px"><b style="color:var(--brand)">'+ps.ppg+'</b> ppg</span>';
-      if(ps.rpg)h+='<span style="font-size:11px"><b style="color:var(--brand)">'+ps.rpg+'</b> rpg</span>';
-      if(ps.apg)h+='<span style="font-size:11px"><b style="color:var(--brand)">'+ps.apg+'</b> apg</span>';
-      if(ps.bpg)h+='<span style="font-size:11px"><b style="color:var(--brand)">'+ps.bpg+'</b> bpg</span>';
-      if(ps.three_pct)h+='<span style="font-size:11px"><b style="color:var(--brand)">'+(ps.three_pct*100).toFixed(0)+'%</b> 3PT</span>';
-      h+='<span style="margin-left:auto;font-size:11px"><span style="color:var(--brand);font-weight:600">'+fmt$(mv)+'</span> <span style="color:'+(delta>=0?"var(--pos)":"var(--neg)")+'">'+(delta>=0?"+":"−")+fmt$(Math.abs(delta))+'</span></span>';
-      h+='</div></div>';
-    });
 
-    h+='<div class="card" style="background:var(--surface-2)"><div style="font-size:10px;color:var(--ink-3);font-weight:700;letter-spacing:0.4px;text-transform:uppercase;margin-bottom:10px">AI Reasoning</div>';
-    h+='<div style="font-size:13px;color:var(--ink);line-height:1.7;white-space:pre-wrap">'+esc(answer).replace(/\*\*(.*?)\*\*/g,'<b style="color:var(--brand)">$1</b>')+'</div></div>';
-  }else if(aiResults){
+      /* Cache filtered list globally so click handlers can look up by index */
+      window._scoutPlayers=filtered;
+      /* Build prospect lookup so known prospects link to existing player modal */
+      var prospectByName={};
+      prospects.forEach(function(p){if(p.player_name)prospectByName[p.player_name.toLowerCase()]=p;});
+
+      filtered.forEach(function(p,idx){
+        var name=p.player_name||p.name||"Unknown";
+        var school=p.current_school||p.school||p.team_name||"";
+        var conf=p.current_conference||p.conference||"";
+        var pos=p.position||"";
+        var src=p.source||"";
+        var srcBadge=src==="portal"?chip("Portal","chip-navy")
+                    :src==="high_school"?chip("HS"+(p.recruiting_class_year?" "+p.recruiting_class_year:""),"chip-accent")
+                    :src?chip(src.toUpperCase().replace(/_/g," "),"chip-line")
+                    :chip("D1","chip-line");
+
+        var existing=prospectByName[name.toLowerCase()];
+        var clickAttr=existing
+          ?'style="cursor:pointer" onclick="openP(\''+existing.id+'\',\'p\')"'
+          :'style="cursor:pointer" onclick="openScoutPlayer('+idx+')"';
+
+        h+='<div class="card" '+clickAttr+'>';
+        h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">';
+        h+='<div style="flex:1;min-width:0">';
+        h+='<div style="font-size:15px;font-weight:600">'+esc(name)+(existing?' <span style="font-size:9px;color:var(--pos);font-weight:600;letter-spacing:0.3px;margin-left:4px;vertical-align:middle">\u2022 ON SHORTLIST</span>':'')+'</div>';
+        if(school||conf)h+='<div style="font-size:11px;color:var(--ink-2);margin-top:2px">'+esc(school)+(conf?" \u00b7 "+esc(conf):"")+'</div>';
+        h+='<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">';
+        if(pos)h+=chip(pos);
+        h+=srcBadge;
+        if(p.priority_tier)h+=chip("T"+p.priority_tier,"chip-gold");
+        h+='</div></div>';
+
+        /* Right-side rank/efficiency callout — prefer BPM, then On3 rank */
+        if(p.bpm!=null){
+          var bpmVal=+p.bpm;
+          h+='<div class="rank-callout" style="min-width:64px"><div class="rc-l">BPM</div><div class="rc-n">'+(bpmVal>0?"+":"")+bpmVal.toFixed(1)+'</div></div>';
+        }else if(p.on3_consensus_rank){
+          h+='<div class="rank-callout" style="min-width:64px"><div class="rc-l">'+(src==="portal"?"On3 Portal":"On3 Cons")+'</div><div class="rc-n">#'+p.on3_consensus_rank+'</div>'+(p.on3_iri_score&&src!=="portal"?'<div class="rc-s">IRI '+p.on3_iri_score+'</div>':'')+'</div>';
+        }
+        h+='</div>';
+
+        /* Stat row — counting + key advanced */
+        var statBits=[];
+        if(p.ppg!=null)statBits.push('<span style="font-size:11px"><b style="color:var(--brand)">'+(+p.ppg).toFixed(1)+'</b> ppg</span>');
+        if(p.rpg!=null)statBits.push('<span style="font-size:11px"><b style="color:var(--brand)">'+(+p.rpg).toFixed(1)+'</b> rpg</span>');
+        if(p.apg!=null)statBits.push('<span style="font-size:11px"><b style="color:var(--brand)">'+(+p.apg).toFixed(1)+'</b> apg</span>');
+        if(p.bpg!=null&&p.bpg>0)statBits.push('<span style="font-size:11px"><b style="color:var(--brand)">'+(+p.bpg).toFixed(1)+'</b> bpg</span>');
+        if(p.three_pct!=null){var tp=+p.three_pct;if(tp<=1)tp=tp*100;statBits.push('<span style="font-size:11px"><b style="color:var(--brand)">'+tp.toFixed(0)+'%</b> 3PT</span>');}
+        if(p.ts_pct!=null){var ts=+p.ts_pct;if(ts<=1)ts=ts*100;statBits.push('<span style="font-size:11px"><b style="color:var(--brand)">'+ts.toFixed(0)+'%</b> TS</span>');}
+        if(p.ortg!=null&&p.drtg!=null)statBits.push('<span style="font-size:11px"><b style="color:var(--brand)">'+(+p.ortg).toFixed(0)+'/'+(+p.drtg).toFixed(0)+'</b> ORtg/DRtg</span>');
+        if(statBits.length){
+          h+='<div style="display:flex;gap:10px;margin-top:10px;padding-top:8px;border-top:0.5px solid var(--line-2);flex-wrap:wrap">'+statBits.join('')+'</div>';
+        }
+        h+='</div>';
+      });
+    }
+
+    /* Scout's narrative answer — markdown-formatted */
+    if(answer){
+      h+='<div class="card">';
+      h+='<div style="font-size:10px;color:var(--ink-3);font-weight:700;letter-spacing:0.4px;text-transform:uppercase;margin-bottom:10px">Scout analysis</div>';
+      h+='<div style="font-size:13px;color:var(--ink);line-height:1.7">'+mdToHtml(answer)+'</div>';
+      h+='</div>';
+    }
+
+    /* Reasoning trace — collapsible */
+    if(toolCalls.length>0){
+      h+='<details class="card" style="cursor:pointer"><summary style="font-size:10px;color:var(--ink-3);font-weight:700;letter-spacing:0.4px;text-transform:uppercase;cursor:pointer;outline:none;list-style:none">How Scout reasoned \u00b7 '+toolCalls.length+' tool call'+(toolCalls.length===1?"":"s")+' \u00b7 tap to expand</summary>';
+      h+='<div style="margin-top:12px">';
+      toolCalls.forEach(function(tc,i){
+        if(!tc)return;
+        var tcName=tc.name||tc.tool_name||"tool";
+        var tcInput=tc.input||tc.parameters||tc.arguments||{};
+        var tcOut=tc.output||tc.result||{};
+        var resultCount=0;
+        if(tcOut&&Array.isArray(tcOut.results))resultCount=tcOut.results.length;
+        else if(tcOut&&Array.isArray(tcOut.players))resultCount=tcOut.players.length;
+        else if(Array.isArray(tcOut))resultCount=tcOut.length;
+
+        h+='<div style="border-left:2px solid var(--accent);padding-left:12px;margin-bottom:12px">';
+        h+='<div style="font-size:12px;font-weight:600;color:var(--brand)">'+(i+1)+'. '+esc(tcName)+(resultCount?' \u2192 '+resultCount+' result'+(resultCount===1?'':'s'):'')+'</div>';
+        var inputBits=[];
+        if(tcInput&&typeof tcInput==="object"){
+          Object.keys(tcInput).forEach(function(k){
+            var v=tcInput[k];
+            if(v==null||v===""||(Array.isArray(v)&&v.length===0))return;
+            var vs=typeof v==="object"?JSON.stringify(v):String(v);
+            if(vs.length>60)vs=vs.substring(0,60)+"\u2026";
+            inputBits.push(k+"="+vs);
+          });
+        }
+        if(inputBits.length)h+='<div style="font-size:11px;color:var(--ink-2);margin-top:4px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;line-height:1.5;word-break:break-word">'+esc(inputBits.join(", "))+'</div>';
+        h+='</div>';
+      });
+      h+='</div></details>';
+    }
+  }
+  /* ===== Rules-mode results (legacy regex parser, unchanged) ===== */
+  else if(aiResults){
     h+='<div class="card"><div style="font-size:11px;color:var(--ink-2);margin-bottom:6px;font-weight:500">Query: "'+esc(aiResults.query)+'"</div>';
-    if(aiResults.filters.explain.length)h+='<div style="font-size:11px;color:var(--ink-3);margin-bottom:8px">Parsed: '+esc(aiResults.filters.explain.join(" · "))+'</div>';
+    if(aiResults.filters&&aiResults.filters.explain&&aiResults.filters.explain.length)h+='<div style="font-size:11px;color:var(--ink-3);margin-bottom:8px">Parsed: '+esc(aiResults.filters.explain.join(" \u00b7 "))+'</div>';
     h+='<div style="font-size:12px;color:var(--accent);font-weight:600">'+aiResults.results.length+' matches</div></div>';
     aiResults.results.forEach(function(p){
       var ps=pStats[p.player_name]||{};
       var mv=p._mv||0;var market=p.nil_estimate||0;var delta=mv-market;
-      h+='<div class="card" style="cursor:pointer" onclick="openP(\''+p.id+'\',\'p\')"><div style="display:flex;justify-content:space-between"><div><div style="font-size:15px;font-weight:600">'+esc(p.player_name)+'</div><div style="font-size:11px;color:var(--ink-2)">'+esc(p.current_school||"")+(p.current_conference?" · "+esc(p.current_conference):"")+'</div><div style="display:flex;gap:6px;margin-top:6px">'+chip(p.position)+chip((p.source||"").toUpperCase().replace("_"," "),"chip-line")+'</div></div>';
-      h+='<div style="text-align:right"><div style="font-size:14px;font-weight:600;color:var(--brand);font-variant-numeric:tabular-nums">'+fmt$(mv)+'</div><div style="font-size:10px;color:'+(delta>=0?"var(--pos)":"var(--neg)")+'">'+(delta>=0?"+":"−")+fmt$(Math.abs(delta))+' vs mkt</div></div></div>';
+      h+='<div class="card" style="cursor:pointer" onclick="openP(\''+p.id+'\',\'p\')"><div style="display:flex;justify-content:space-between"><div><div style="font-size:15px;font-weight:600">'+esc(p.player_name)+'</div><div style="font-size:11px;color:var(--ink-2)">'+esc(p.current_school||"")+(p.current_conference?" \u00b7 "+esc(p.current_conference):"")+'</div><div style="display:flex;gap:6px;margin-top:6px">'+chip(p.position)+chip((p.source||"").toUpperCase().replace(/_/g," "),"chip-line")+'</div></div>';
+      h+='<div style="text-align:right"><div style="font-size:14px;font-weight:600;color:var(--brand);font-variant-numeric:tabular-nums">'+fmt$(mv)+'</div><div style="font-size:10px;color:'+(delta>=0?"var(--pos)":"var(--neg)")+'">'+(delta>=0?"+":"\u2212")+fmt$(Math.abs(delta))+' vs mkt</div></div></div>';
       if(ps.ppg||ps.rpg||ps.three_pct){
         h+='<div style="display:flex;gap:12px;margin-top:8px;padding-top:8px;border-top:0.5px solid var(--line-2)">';
         if(ps.ppg)h+='<span style="font-size:11px"><b style="color:var(--brand)">'+ps.ppg+'</b> ppg</span>';
