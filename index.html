@@ -1368,7 +1368,7 @@ window.renderHome=function(c,portal,hs){
   /* greeting */
   h+='<div class="mb-lg" style="margin-bottom:22px">';
   h+='<div class="greet-date">'+dateLong()+'</div>';
-  h+='<div class="greet-line">'+greet+", Coach "+coach.name.split(" ").slice(-1)[0]+'.</div>';
+  var _cln=coach.name?(coach.name.split(" ").slice(-1)[0]):"";if(_cln.toLowerCase()==="coach")_cln="";h+='<div class="greet-line">'+greet+", Coach"+(_cln?" "+_cln:"")+'.</div>';
   h+='</div>';
 
   /* today's brief */
