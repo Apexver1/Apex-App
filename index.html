@@ -819,14 +819,24 @@ window.addCrmBtn=function(prospectId){
   return '<button class="crm-add-btn'+(added?" added":"")+'" onclick="event.stopPropagation();toggleAddCrm(\''+prospectId+'\')" aria-label="'+(added?"In CRM":"Add to CRM")+'" title="'+(added?"In CRM":"Add to CRM")+'">'+(added?"\u2713":"+")+'</button>';
 };
 window.toggleAddCrm=function(prospectId){
+  if(!prospectId)return;
   if(ADDED_TO_CRM.has(prospectId)){
     ADDED_TO_CRM.delete(prospectId);
-    toast("Removed from CRM");
+    render();
+    api("/rest/v1/crm_added?prospect_id=eq."+prospectId,{method:"DELETE",prefer:"return=minimal"}).then(function(){
+      toast("Removed from CRM");
+    }).catch(function(){
+      ADDED_TO_CRM.add(prospectId);render();toast("Sync failed — re-added","warn");
+    });
   }else{
     ADDED_TO_CRM.add(prospectId);
-    toast("Added to CRM");
+    render();
+    api("/rest/v1/crm_added",{method:"POST",body:JSON.stringify({prospect_id:prospectId,school_id:CURRENT_SCHOOL_ID}),prefer:"return=minimal"}).then(function(){
+      toast("Added to CRM");
+    }).catch(function(){
+      ADDED_TO_CRM.delete(prospectId);render();toast("Sync failed — undone","warn");
+    });
   }
-  render();
 };
 
 /* Stars component */
@@ -869,14 +879,24 @@ window.setStars=function(prospectId,n){
 
 /* Watchlist toggle */
 window.toggleWatch=function(prospectId){
+  if(!prospectId)return;
   if(WATCHLIST.has(prospectId)){
     WATCHLIST.delete(prospectId);
-    toast("Removed from watchlist");
+    render();
+    api("/rest/v1/watchlist?prospect_id=eq."+prospectId,{method:"DELETE",prefer:"return=minimal"}).then(function(){
+      toast("Removed from watchlist");
+    }).catch(function(){
+      WATCHLIST.add(prospectId);render();toast("Sync failed — re-added","warn");
+    });
   }else{
     WATCHLIST.add(prospectId);
-    toast("Added to watchlist");
+    render();
+    api("/rest/v1/watchlist",{method:"POST",body:JSON.stringify({prospect_id:prospectId,school_id:CURRENT_SCHOOL_ID}),prefer:"return=minimal"}).then(function(){
+      toast("Added to watchlist");
+    }).catch(function(){
+      WATCHLIST.delete(prospectId);render();toast("Sync failed — undone","warn");
+    });
   }
-  render();
 };
 window.wlStarBtn=function(prospectId){
   if(!prospectId)return"";
@@ -984,7 +1004,7 @@ window.doLogin=function(){
 };
 document.getElementById("pw").onkeydown=function(e){if(e.key==="Enter")doLogin();};
 window.signOut=function(){
-  T="";UID="";closeDrawer();
+  T="";UID="";ADDED_TO_CRM=new Set();WATCHLIST=new Set();closeDrawer();
   document.getElementById("app").className="hide";
   document.getElementById("splash").className="hide";
   document.getElementById("login").className="login-wrap";
@@ -1008,13 +1028,17 @@ window.loadData=function(){
     api("/rest/v1/prospect_scores?select=*"),
     api("/rest/v1/prospect_family?select=*"),
     api("/rest/v1/contact_reminders?select=*&status=eq.pending&order=scheduled_for.asc"),
-    fetch(SU+"/rest/v1/schools?select=id,name,conference,city,state,head_coach_name&conference=not.is.null&order=name.asc&limit=2000",{headers:{apikey:SK,Authorization:"Bearer "+T,"Range-Unit":"items",Range:"0-1999"}}).then(function(r){return r.json();}).catch(function(){return[];})
+    fetch(SU+"/rest/v1/schools?select=id,name,conference,city,state,head_coach_name&conference=not.is.null&order=name.asc&limit=2000",{headers:{apikey:SK,Authorization:"Bearer "+T,"Range-Unit":"items",Range:"0-1999"}}).then(function(r){return r.json();}).catch(function(){return[];}),
+    api("/rest/v1/crm_added?select=prospect_id").catch(function(){return[];}),
+    api("/rest/v1/watchlist?select=prospect_id").catch(function(){return[];})
   ]).then(function(r){
     roster=r[0]||[];prospects=r[1]||[];strategy=(r[2]&&r[2][0])||null;schols=r[3]||[];
     var ps=r[4]||[];var logs=r[5]||[];budget=(r[6]&&r[6][0])||null;bRequests=r[7]||[];
     scoresMap={};(r[8]||[]).forEach(function(s){scoresMap[s.prospect_id]=s;});
     familyMap={};(r[9]||[]).forEach(function(f){if(!familyMap[f.prospect_id])familyMap[f.prospect_id]=[];familyMap[f.prospect_id].push(f);});
     reminders=r[10]||[];schools=r[11]||[];
+    ADDED_TO_CRM=new Set();(r[12]||[]).forEach(function(x){if(x&&x.prospect_id)ADDED_TO_CRM.add(x.prospect_id);});
+    WATCHLIST=new Set();(r[13]||[]).forEach(function(x){if(x&&x.prospect_id)WATCHLIST.add(x.prospect_id);});
     var idMap={};prospects.forEach(function(p){idMap[p.id]=p.player_name;});
     pStats={};ps.forEach(function(s){var n=idMap[s.prospect_id];if(n){if(!pStats[n])pStats[n]={};pStats[n][s.stat_name]=s.stat_value;}});
     crmLogs={};logs.forEach(function(l){if(!crmLogs[l.prospect_id])crmLogs[l.prospect_id]=[];crmLogs[l.prospect_id].push(l);});
