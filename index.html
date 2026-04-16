@@ -1240,7 +1240,7 @@ window.openP=function(id,kind){
 
   var h='<div class="mbg" onclick="if(event.target===this)closeM()"><div class="mdl">';
   h+='<div class="mdl-grab"></div>';
-  h+='<div class="mdl-head"><div style="display:flex;align-items:center;gap:14px">'+photoAv(p.player_name,"hero",p.photo_url)+'<div><div class="mdl-title">'+esc(p.player_name)+'</div><div class="mdl-sub">'+schoolLogo(isPr?p.current_school:"Oregon",22)+' '+esc(p.position||"")+(cy?" · "+esc(cy):"")+(ht?" · "+ht:"")+(isPr&&p.current_school?" · "+esc(p.current_school):" · Oregon")+'</div></div></div><button class="mdl-close" onclick="closeM()" aria-label="Close"></button></div>';
+  h+='<div class="mdl-head"><div style="display:flex;align-items:center;gap:14px">'+photoAv(p.player_name,"hero",p.photo_url)+'<div><div class="mdl-title">'+esc(p.player_name)+'</div><div class="mdl-sub">'+schoolLogo(isPr?p.current_school:"Oregon",28)+' '+esc(p.position||"")+(cy?" · "+esc(cy):"")+(ht?" · "+ht:"")+(isPr&&p.current_school?" · "+esc(p.current_school):" · Oregon")+'</div></div></div><button class="mdl-close" onclick="closeM()" aria-label="Close"></button></div>';
   h+='<div style="text-align:right;margin:-8px 0 8px"><button class="btn-sm btn-line" style="font-size:11px;padding:5px 10px;border-radius:6px;border:0.5px solid var(--line);background:var(--surface);cursor:pointer;font-family:inherit;color:var(--accent);font-weight:600" onclick="event.stopPropagation();closeM();startCompare(\''+p.id+'\',\''+kind+'\')">Compare \u2194</button></div>';
 
   if(isPr){
@@ -2226,7 +2226,7 @@ window._recCard=function(p){
   h+=photoAv(p.player_name,"lg",p.photo_url);
   h+='<div style="flex:1;min-width:0">';
   h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px"><div style="font-size:16px;font-weight:600;flex:1;min-width:0">'+esc(p.player_name)+'</div>'+wlStarBtn(p.id)+addCrmBtn(p.id)+'</div>';
-  h+='<div style="font-size:11px;color:var(--ink-2);margin-bottom:6px;display:flex;align-items:center;gap:4px">'+schoolLogo(p.current_school,16)+'<span>'+esc(p.current_school||"")+(p.current_conference?" \u00b7 "+esc(p.current_conference):"")+'</span></div>';
+  h+='<div style="font-size:11px;color:var(--ink-2);margin-bottom:6px;display:flex;align-items:center;gap:4px">'+schoolLogo(p.current_school,24)+'<span>'+esc(p.current_school||"")+(p.current_conference?" \u00b7 "+esc(p.current_conference):"")+'</span></div>';
   h+='<div style="display:flex;gap:6px;flex-wrap:wrap">'+chip(p.position)+chip(p["class_year"],"chip-line")+(p.recruiting_class_year?chip("Class of "+p.recruiting_class_year,"chip-accent"):"")+chip((p.status||"").charAt(0).toUpperCase()+(p.status||"").slice(1),sc(p.status))+(p.priority_tier?chip("Tier "+p.priority_tier):"")+(lg.length?chip(lg.length+" logs","chip-accent"):"")+(scoreObj?chip("\u2605"+scoreObj.composite_score,"chip-gold"):"")+'</div>';
   h+='</div>';
   if(hasRank){
