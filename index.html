@@ -2078,7 +2078,7 @@ window.renderRoster=function(c){
   fl.forEach(function(p){
     h+='<div class="card" style="cursor:pointer" onclick="openP(\''+p.id+'\',\'r\')">';
     h+='<div style="display:flex;align-items:center;gap:12px">';
-    h+=photoAv(p.player_name,"md",p.photo_url);
+    h+=photoAv(p.player_name,"lg",p.photo_url);
     h+='<div style="flex:1;min-width:0"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:4px"><span style="font-size:15px;font-weight:600">#'+(p.jersey_number||"\u2014")+' '+esc(p.player_name)+'</span>';
     h+=chip(p.position)+chip(p["class_year"],"chip-line")+'</div>';
     h+='<div style="font-size:11px;color:var(--ink-2)">'+esc((p.role_description||"").substring(0,80))+'</div></div>';
@@ -2161,7 +2161,7 @@ window._recCard=function(p){
   var rankLabel=isPortal?'On3 Portal':'On3 Consensus';
   var h='<div class="card" style="cursor:pointer" onclick="openP(\''+p.id+'\',\'p\')">';
   h+='<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:8px">';
-  h+=photoAv(p.player_name,"md",p.photo_url);
+  h+=photoAv(p.player_name,"lg",p.photo_url);
   h+='<div style="flex:1;min-width:0">';
   h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px"><div style="font-size:16px;font-weight:600;flex:1;min-width:0">'+esc(p.player_name)+'</div>'+wlStarBtn(p.id)+addCrmBtn(p.id)+'</div>';
   h+='<div style="font-size:11px;color:var(--ink-2);margin-bottom:6px">'+esc(p.current_school||"")+(p.current_conference?" \u00b7 "+esc(p.current_conference):"")+'</div>';
@@ -2282,7 +2282,7 @@ window.renderCRM=function(c){
 
     h+='<div class="crm-player-card'+(isExp?" expanded":"")+'">';
     h+='<div class="crm-player-row" onclick="toggleCrmExp(\''+p.id+'\')">';
-    h+=photoAv(p.player_name,"md",p.photo_url);
+    h+=photoAv(p.player_name,"lg",p.photo_url);
     h+='<div class="crm-pmain">';
     h+='<div class="crm-pname">'+esc(p.player_name)+(s>0?stars(s,"sm",true,"setStars.bind(null,\\\''+p.id+'\\\')"):"")+'</div>';
     h+='<div class="crm-pmeta">'+esc(p.position||"")+' \u00b7 '+esc(p.current_school||"")+(p.class_year?" \u00b7 "+esc(p.class_year):"")+'</div>';
