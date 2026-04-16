@@ -150,7 +150,7 @@ textarea.inp{resize:vertical;min-height:70px}
 @media(max-width:520px){.mbg{padding:0;align-items:flex-end}.mdl{border-radius:22px 22px 0 0;max-height:92vh;padding:14px 18px 24px}}
 .mdl-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
 .mdl-title{font-family:var(--serif);font-size:22px;font-weight:500;letter-spacing:-0.4px;line-height:1.2}
-.mdl-sub{font-size:12px;color:var(--ink-2);margin-top:2px}
+.mdl-sub{font-size:13px;color:var(--ink-2);margin-top:2px}
 .mdl-close{background:var(--surface-3);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;color:var(--ink);position:relative}
 .mdl-close::before,.mdl-close::after{content:'';position:absolute;top:50%;left:50%;width:12px;height:1.5px;background:var(--ink);border-radius:1px}
 .mdl-close::before{transform:translate(-50%,-50%) rotate(45deg)}
@@ -1240,7 +1240,7 @@ window.openP=function(id,kind){
 
   var h='<div class="mbg" onclick="if(event.target===this)closeM()"><div class="mdl">';
   h+='<div class="mdl-grab"></div>';
-  h+='<div class="mdl-head"><div style="display:flex;align-items:center;gap:14px">'+photoAv(p.player_name,"hero",p.photo_url)+'<div><div class="mdl-title">'+esc(p.player_name)+'</div><div class="mdl-sub">'+schoolLogo(isPr?p.current_school:"Oregon",14)+' '+esc(p.position||"")+(cy?" · "+esc(cy):"")+(ht?" · "+ht:"")+(isPr&&p.current_school?" · "+esc(p.current_school):" · Oregon")+'</div></div></div><button class="mdl-close" onclick="closeM()" aria-label="Close"></button></div>';
+  h+='<div class="mdl-head"><div style="display:flex;align-items:center;gap:14px">'+photoAv(p.player_name,"hero",p.photo_url)+'<div><div class="mdl-title">'+esc(p.player_name)+'</div><div class="mdl-sub">'+schoolLogo(isPr?p.current_school:"Oregon",22)+' '+esc(p.position||"")+(cy?" · "+esc(cy):"")+(ht?" · "+ht:"")+(isPr&&p.current_school?" · "+esc(p.current_school):" · Oregon")+'</div></div></div><button class="mdl-close" onclick="closeM()" aria-label="Close"></button></div>';
   h+='<div style="text-align:right;margin:-8px 0 8px"><button class="btn-sm btn-line" style="font-size:11px;padding:5px 10px;border-radius:6px;border:0.5px solid var(--line);background:var(--surface);cursor:pointer;font-family:inherit;color:var(--accent);font-weight:600" onclick="event.stopPropagation();closeM();startCompare(\''+p.id+'\',\''+kind+'\')">Compare \u2194</button></div>';
 
   if(isPr){
