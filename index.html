@@ -141,11 +141,13 @@ textarea.inp{resize:vertical;min-height:70px}
 .badge{background:var(--neg);color:#fff;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;min-width:20px;text-align:center}
 .badge-gold{background:var(--gold);color:#fff}
 
-/* modal */
-.mbg{position:fixed;inset:0;background:rgba(10,14,26,0.42);z-index:400;overflow-y:auto;padding:0;display:flex;align-items:flex-end;justify-content:center}
-.mdl{background:var(--surface);border-radius:22px 22px 0 0;width:100%;max-width:520px;padding:6px 18px 24px;max-height:92vh;overflow-y:auto;animation:slideup 0.22s ease-out}
+/* modal — centered popIn */
+.mbg{position:fixed;inset:0;background:rgba(10,14,26,0.50);z-index:400;overflow-y:auto;padding:24px 16px;display:flex;align-items:center;justify-content:center;animation:fadein 0.18s ease-out}
+.mdl{background:var(--surface);border-radius:18px;width:100%;max-width:520px;padding:20px 18px 24px;max-height:calc(100vh - 48px);overflow-y:auto;animation:popIn 0.22s cubic-bezier(0.16,1,0.3,1);box-shadow:0 24px 60px rgba(10,14,26,0.20),0 4px 16px rgba(10,14,26,0.10)}
+@keyframes popIn{from{transform:scale(0.96) translateY(8px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
 @keyframes slideup{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
-.mdl-grab{width:36px;height:4px;background:var(--line);border-radius:2px;margin:8px auto 14px}
+.mdl-grab{display:none}
+@media(max-width:520px){.mbg{padding:0;align-items:flex-end}.mdl{border-radius:22px 22px 0 0;max-height:92vh;padding:14px 18px 24px}}
 .mdl-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
 .mdl-title{font-family:var(--serif);font-size:22px;font-weight:500;letter-spacing:-0.4px;line-height:1.2}
 .mdl-sub{font-size:12px;color:var(--ink-2);margin-top:2px}
@@ -318,6 +320,183 @@ select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50
   .tile-v{font-size:22px}
   .greet-line{font-size:24px}
 }
+
+/* ============================================
+   PHASE 5a — Design rebuild additions
+   ============================================ */
+
+/* BETA chips */
+.beta-chip{display:inline-block;font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.8px;color:var(--accent);background:var(--accent-bg);padding:3px 7px;border-radius:4px;vertical-align:middle;margin-left:8px;text-transform:uppercase;line-height:1}
+.beta-chip-sm{display:inline-block;font-family:var(--sans);font-size:8px;font-weight:700;letter-spacing:0.6px;color:var(--accent);background:var(--accent-bg);padding:2px 5px;border-radius:3px;vertical-align:middle;margin-left:6px;text-transform:uppercase;line-height:1}
+
+/* drawer NEW tag */
+.drawer-tag{display:inline-block;font-size:8px;font-weight:700;letter-spacing:0.6px;color:var(--gold);background:var(--gold-bg);padding:2px 5px;border-radius:3px;text-transform:uppercase;line-height:1;margin-left:8px;vertical-align:middle}
+
+/* SPLASH SCREEN */
+.splash-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);padding:32px 24px;text-align:center;animation:fadein 0.4s ease-out}
+.splash-brand{font-family:var(--serif);font-size:38px;font-weight:500;letter-spacing:-0.9px;color:var(--brand);margin-bottom:34px;display:flex;align-items:center;justify-content:center;gap:0}
+.splash-greet{font-family:var(--serif);font-size:30px;font-weight:500;letter-spacing:-0.6px;color:var(--ink);line-height:1.2;margin-bottom:10px;max-width:440px}
+.splash-sub{font-size:13px;color:var(--ink-2);letter-spacing:0.3px;margin-bottom:38px}
+.splash-cta{background:var(--brand);color:var(--brand-ink);border:none;border-radius:999px;padding:15px 32px;font-family:var(--sans);font-size:15px;font-weight:600;cursor:pointer;letter-spacing:0.1px;transition:transform 0.1s,box-shadow 0.2s;box-shadow:0 6px 18px rgba(11,37,64,0.18)}
+.splash-cta:active{transform:translateY(1px) scale(0.98)}
+.splash-foot{margin-top:auto;padding-top:48px;font-size:11px;color:var(--ink-3);letter-spacing:0.3px}
+
+/* PHOTO AVATARS — bigger sizes + photo-bg variant */
+.av-xl{width:64px;height:64px;font-size:20px}
+.av-xxl{width:88px;height:88px;font-size:26px}
+.av-photo{background-size:cover;background-position:center top;background-repeat:no-repeat;background-color:var(--brand);position:relative}
+.av-photo .av-fallback{display:none}
+
+/* ADD TO CRM button */
+.crm-add-btn{width:28px;height:28px;border-radius:50%;background:var(--accent-bg);color:var(--accent);border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;line-height:1;flex-shrink:0;font-family:inherit;transition:background 0.15s,color 0.15s,transform 0.1s}
+.crm-add-btn:active{transform:scale(0.92)}
+.crm-add-btn.added{background:var(--pos-bg);color:var(--pos);font-size:14px}
+
+/* WATCHLIST star toggle */
+.wl-star{background:none;border:none;cursor:pointer;font-size:18px;line-height:1;color:var(--ink-3);padding:4px 6px;font-family:inherit;transition:color 0.15s,transform 0.1s}
+.wl-star:active{transform:scale(0.85)}
+.wl-star.on{color:var(--gold)}
+.wl-empty{padding:48px 24px;text-align:center;color:var(--ink-3);font-size:13px}
+.wl-empty .wl-empty-star{font-size:32px;color:var(--gold);margin-bottom:12px;display:block}
+
+/* STARS component */
+.stars{display:inline-flex;gap:1px;align-items:center;line-height:1;font-family:inherit}
+.stars .st{cursor:default;color:var(--gold);line-height:1}
+.stars .st.off{color:var(--line)}
+.stars.interactive .st{cursor:pointer;padding:0 1px}
+.stars.sm .st{font-size:11px}
+.stars.md .st{font-size:14px}
+.stars.lg .st{font-size:17px}
+
+/* SMART SUGGESTIONS card */
+.smart-card{background:linear-gradient(135deg,var(--accent-bg) 0%,#F4F8FE 100%);border:0.5px solid rgba(23,88,232,0.18);border-radius:14px;padding:14px 16px;margin-bottom:18px}
+.smart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.smart-title{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:0.5px;text-transform:uppercase}
+.smart-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:0.5px solid rgba(23,88,232,0.10);font-size:13px;cursor:pointer}
+.smart-row:first-of-type{border-top:none;padding-top:6px}
+.smart-row .sr-dot{width:7px;height:7px;border-radius:50%;background:var(--neg);flex-shrink:0}
+.smart-row .sr-text{flex:1;color:var(--ink);line-height:1.35}
+.smart-row .sr-meta{color:var(--ink-3);font-size:11px;flex-shrink:0}
+
+/* APEX CRM PHONEBOOK */
+.crm-az-head{display:flex;align-items:baseline;justify-content:space-between;padding:8px 2px 10px;border-bottom:0.5px solid var(--line)}
+.crm-az-title{font-family:var(--serif);font-size:22px;font-weight:500;letter-spacing:-0.4px;color:var(--ink)}
+.crm-az-count{font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.crm-letter{position:sticky;top:60px;z-index:50;background:var(--bg);font-family:var(--serif);font-size:14px;font-weight:600;color:var(--ink-3);padding:14px 4px 6px;letter-spacing:-0.2px}
+.crm-player-card{background:var(--surface);border:0.5px solid var(--line);border-radius:12px;margin-bottom:8px;overflow:hidden;transition:box-shadow 0.15s}
+.crm-player-card.expanded{box-shadow:0 4px 16px rgba(10,14,26,0.06)}
+.crm-player-row{display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer}
+.crm-player-row .crm-pmain{flex:1;min-width:0}
+.crm-player-row .crm-pname{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:2px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.crm-player-row .crm-pmeta{font-size:11px;color:var(--ink-2);line-height:1.3}
+.crm-player-row .crm-pright{text-align:right;flex-shrink:0;font-size:11px;line-height:1.4}
+.crm-player-row .crm-pcount{color:var(--ink-2);font-weight:500}
+.crm-player-row .crm-plast{color:var(--ink-3);font-size:10px;margin-top:2px}
+.crm-player-row .crm-plast.overdue{color:var(--neg);font-weight:600}
+.crm-nested{padding:0 14px 12px 14px;border-top:0.5px dashed var(--line)}
+.crm-nested-row{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:0.5px solid var(--line-2);cursor:pointer}
+.crm-nested-row:last-child{border-bottom:none}
+.crm-nested-row .crm-nmain{flex:1;min-width:0}
+.crm-nested-row .crm-nname{font-size:13px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.crm-nested-row .crm-nrole{font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.4px;font-weight:600;background:var(--surface-3);padding:1px 5px;border-radius:3px}
+.crm-nested-row .crm-nmeta{font-size:10px;color:var(--ink-2);margin-top:2px}
+.crm-nested-row .crm-navs{display:flex}
+.crm-nested-row .crm-navs .av-sm+.av-sm{margin-left:-6px}
+.crm-fab{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:var(--brand);color:var(--brand-ink);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:300;box-shadow:0 8px 22px rgba(11,37,64,0.30);z-index:150;font-family:inherit}
+.crm-fab:active{transform:scale(0.94)}
+
+/* CONTACT PROFILE MODAL */
+.cp-header{margin:-20px -18px 16px;padding:24px 18px 18px;background:linear-gradient(135deg,var(--accent-bg) 0%,#F4F8FE 100%);position:relative}
+.cp-close{position:absolute;top:14px;right:14px}
+.cp-av-wrap{display:flex;justify-content:center;margin-bottom:14px}
+.cp-name{font-family:var(--serif);font-size:24px;font-weight:500;letter-spacing:-0.4px;color:var(--ink);text-align:center;line-height:1.15;margin-bottom:6px}
+.cp-role{font-size:12px;color:var(--ink-2);text-align:center;margin-bottom:10px}
+.cp-stars{display:flex;justify-content:center;margin-bottom:4px}
+.cp-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.cp-action{background:var(--surface-2);border:0.5px solid var(--line);border-radius:12px;padding:14px 8px;text-align:center;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;color:var(--ink);transition:background 0.15s}
+.cp-action:active{background:var(--surface-3)}
+.cp-action .cp-ai{font-size:20px;margin-bottom:4px;display:block}
+.cp-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:0.5px solid var(--line-2);font-size:13px;gap:12px}
+.cp-row .cp-l{color:var(--ink-3);font-size:12px;flex-shrink:0}
+.cp-row .cp-v{color:var(--ink);font-weight:500;text-align:right;word-break:break-word}
+.cp-section-h{font-size:11px;font-weight:700;color:var(--ink-3);letter-spacing:0.5px;text-transform:uppercase;margin:16px 0 8px}
+.cp-coaches{display:flex;flex-wrap:wrap;gap:6px}
+.cp-coach-chip{display:flex;align-items:center;gap:5px;padding:5px 10px 5px 5px;background:var(--surface-3);border:0.5px solid transparent;border-radius:999px;font-size:11px;font-weight:500;cursor:pointer}
+.cp-coach-chip.on{background:var(--accent-bg);border-color:rgba(23,88,232,0.20);color:var(--accent)}
+.cp-foot-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:18px}
+
+/* DATETIME-LOCAL input styling */
+.dt-inp{width:100%;font-family:inherit;font-size:13px;padding:10px 12px;border:0.5px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);margin-bottom:8px}
+
+/* CHIP-INPUT for editable competing schools */
+.chip-input{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 10px;border:0.5px solid var(--line);border-radius:10px;background:var(--surface);min-height:44px}
+.chip-input .ci-chip{display:inline-flex;align-items:center;gap:6px;background:var(--surface-3);color:var(--ink);font-size:11px;padding:4px 6px 4px 10px;border-radius:999px}
+.chip-input .ci-x{cursor:pointer;font-weight:600;color:var(--ink-3);font-size:14px;line-height:1;padding:0 2px}
+.chip-input .ci-x:hover{color:var(--neg)}
+.chip-input input{flex:1;min-width:120px;border:none;outline:none;font-family:inherit;font-size:12px;padding:4px 0;background:transparent;color:var(--ink)}
+
+/* APEX PATRONS module */
+.patron-tier{display:inline-block;font-size:9px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;padding:3px 7px;border-radius:4px;line-height:1}
+.tier-champion{background:#F1E8D6;color:#7A5800}
+.tier-platinum{background:#E8EAF0;color:#3A4258}
+.tier-gold{background:var(--gold-bg);color:var(--gold)}
+.tier-silver{background:#EEEEF1;color:#5C5F66}
+.tier-bronze{background:#F2E8DD;color:#8B5A2B}
+.donor-row{display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--surface);border:0.5px solid var(--line);border-radius:12px;margin-bottom:8px;cursor:pointer}
+.donor-row .dr-main{flex:1;min-width:0}
+.donor-row .dr-name{font-size:14px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:2px}
+.donor-row .dr-meta{font-size:11px;color:var(--ink-2)}
+.donor-row .dr-right{text-align:right;flex-shrink:0}
+.donor-row .dr-amt{font-size:14px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.donor-row .dr-last{font-size:10px;color:var(--ink-3);margin-top:2px}
+.camp-card{background:var(--surface);border:0.5px solid var(--line);border-radius:12px;padding:14px;margin-bottom:8px}
+.camp-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;gap:12px}
+.camp-name{font-size:14px;font-weight:600;color:var(--ink)}
+.camp-pct{font-size:13px;font-weight:600;color:var(--accent);font-variant-numeric:tabular-nums}
+.camp-bar{height:6px;background:var(--surface-3);border-radius:3px;overflow:hidden;margin-bottom:6px}
+.camp-fill{height:100%;background:var(--accent);border-radius:3px}
+.camp-fill.gold{background:var(--gold)}
+.camp-fill.pos{background:var(--pos)}
+.camp-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-2)}
+.travel-card{background:linear-gradient(135deg,var(--gold-bg) 0%,#FCF6E5 100%);border:0.5px solid rgba(184,138,0,0.18);border-radius:14px;padding:14px 16px;margin-bottom:18px}
+.travel-eyebrow{font-size:10px;color:var(--gold);font-weight:700;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px}
+.travel-text{font-size:13px;color:var(--ink);line-height:1.45}
+.donor-modal-head{margin:-20px -18px 16px;padding:24px 18px 18px;background:linear-gradient(135deg,var(--gold-bg) 0%,#FCF6E5 100%);position:relative}
+.risk-banner{background:var(--neg-bg);border:0.5px solid rgba(180,35,24,0.15);color:var(--neg);font-size:12px;font-weight:600;padding:10px 12px;border-radius:10px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.spark{display:flex;align-items:flex-end;gap:4px;height:60px;padding:8px 0}
+.spark-bar{flex:1;background:var(--accent);border-radius:2px 2px 0 0;min-height:4px;opacity:0.7}
+.spark-bar.last{background:var(--brand);opacity:1}
+.spark-card{background:var(--surface-2);border:0.5px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:14px}
+.spark-yrs{display:flex;justify-content:space-between;font-size:9px;color:var(--ink-3);margin-top:4px}
+.ai-prosp-input{display:flex;gap:8px;background:var(--surface-2);border:0.5px solid var(--line);border-radius:12px;padding:8px;margin-top:14px}
+.ai-prosp-input input{flex:1;border:none;outline:none;background:transparent;font-family:inherit;font-size:13px;padding:6px 8px;color:var(--ink)}
+.ai-prosp-input button{background:var(--brand);color:var(--brand-ink);border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+
+/* APEX OPS module */
+.ops-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:18px}
+.ops-tile{background:var(--surface);border:0.5px solid var(--line);border-radius:12px;padding:14px 12px;cursor:pointer;transition:background 0.15s}
+.ops-tile:active{background:var(--surface-2)}
+.ops-tile-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;letter-spacing:0.3px;margin-bottom:10px}
+.ops-tile-name{font-size:13px;font-weight:600;color:var(--ink);line-height:1.25;margin-bottom:3px}
+.ops-tile-count{font-size:10px;color:var(--ink-3);font-weight:500}
+.ic-ppt{background:#C8412B}
+.ic-pdf{background:#B42318}
+.ic-img{background:#0D7A3B}
+.ic-nil{background:var(--gold)}
+.ic-dd{background:var(--brand)}
+.ic-doc{background:var(--accent)}
+.act-feed{background:var(--surface);border:0.5px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:14px}
+.act-row{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:0.5px solid var(--line-2);font-size:12px}
+.act-row:last-child{border-bottom:none}
+.act-row .act-text{flex:1;color:var(--ink);line-height:1.35}
+.act-row .act-text b{color:var(--ink);font-weight:600}
+.act-row .act-time{color:var(--ink-3);font-size:10px;flex-shrink:0}
+.mat-row{display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--surface);border:0.5px solid var(--line);border-radius:12px;margin-bottom:8px;cursor:pointer}
+.mat-row .mat-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;letter-spacing:0.3px;flex-shrink:0}
+.mat-row .mat-main{flex:1;min-width:0}
+.mat-row .mat-name{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mat-row .mat-meta{font-size:10px;color:var(--ink-2)}
+.mat-row .mat-views{font-size:10px;color:var(--ink-3);text-align:right;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -325,7 +504,7 @@ select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50
 <!-- LOGIN -->
 <div id="login" class="login-wrap">
   <div class="login-box">
-    <div class="login-brand">Apex Intel</div>
+    <div class="login-brand">Apex Intel<span class="beta-chip">BETA</span></div>
     <div class="login-sub">Basketball operations</div>
     <input id="em" class="inp mb-sm" type="email" placeholder="Email" value="bigyog4@gmail.com" style="text-align:center;margin-bottom:10px">
     <input id="pw" class="inp mb-md" type="password" placeholder="Password" style="text-align:center;margin-bottom:14px">
@@ -335,11 +514,22 @@ select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50
   </div>
 </div>
 
+<!-- SPLASH -->
+<div id="splash" class="hide">
+  <div class="splash-wrap">
+    <div class="splash-brand">Apex Intel<span class="beta-chip">BETA</span></div>
+    <div class="splash-greet" id="splashGreet">Welcome back, Coach.</div>
+    <div class="splash-sub" id="splashSub">Oregon Ducks · 2025–26 season</div>
+    <button class="splash-cta" onclick="enterApp()">Build a Champion →</button>
+    <div class="splash-foot">Developed by Miles Stewart</div>
+  </div>
+</div>
+
 <!-- APP -->
 <div id="app" class="hide">
   <header class="topbar">
     <div class="brand-block" onclick="openSchoolPicker()">
-      <span class="brand-name">Apex Intel</span>
+      <span class="brand-name">Apex Intel<span class="beta-chip-sm">BETA</span></span>
       <span class="brand-sub" id="schoolLabel">Oregon Ducks · 2025–26 ▾</span>
     </div>
     <button class="hamb" onclick="openDrawer()" aria-label="Open menu">
@@ -354,7 +544,7 @@ select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50
   <div class="drawer-back" onclick="closeDrawer()"></div>
   <aside class="drawer">
     <div class="drawer-head">
-      <div class="brand-name" style="font-size:18px">Apex Intel</div>
+      <div class="brand-name" style="font-size:18px">Apex Intel<span class="beta-chip-sm">BETA</span></div>
       <button class="drawer-close" onclick="closeDrawer()" aria-label="Close"></button>
     </div>
     <div class="drawer-user">
@@ -369,7 +559,7 @@ select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50
       <div class="drawer-item" id="dr-home" onclick="navTo('home')">Home <span class="dot"></span></div>
       <div class="drawer-item" id="dr-roster" onclick="navTo('roster')">Roster</div>
       <div class="drawer-item" id="dr-recruiting" onclick="navTo('recruiting')">Recruiting</div>
-      <div class="drawer-item" id="dr-crm" onclick="navTo('crm')">CRM <span id="crmBadge" class="badge hide">0</span></div>
+      <div class="drawer-item" id="dr-crm" onclick="navTo('crm')">Apex CRM <span id="crmBadge" class="badge hide">0</span></div>
       <div class="drawer-item" id="dr-visits" onclick="navTo('visits')">Scheduled visits</div>
     </div>
     <div class="drawer-div"></div>
@@ -378,7 +568,13 @@ select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50
       <div class="drawer-item" id="dr-budget" onclick="navTo('budget')">NIL budget</div>
       <div class="drawer-item" id="dr-builder" onclick="navTo('builder')">Roster builder</div>
       <div class="drawer-item" id="dr-filter" onclick="navTo('filter')">Smart filter</div>
-      <div class="drawer-item" id="dr-scout" onclick="navTo('scout')">AI Scout <span style="font-family:var(--serif);font-size:11px;color:var(--gold);font-style:italic">Pro</span></div>
+      <div class="drawer-item" id="dr-scout" onclick="navTo('scout')">Apex Scout <span style="font-family:var(--serif);font-size:11px;color:var(--gold);font-style:italic">Pro</span></div>
+    </div>
+    <div class="drawer-div"></div>
+    <div class="drawer-group">
+      <div class="drawer-group-title">Operations</div>
+      <div class="drawer-item" id="dr-patrons" onclick="navTo('patrons')">Apex Patrons <span class="drawer-tag">NEW</span></div>
+      <div class="drawer-item" id="dr-ops" onclick="navTo('ops')">Apex Ops <span class="drawer-tag">NEW</span></div>
     </div>
     <div style="flex:1"></div>
     <div class="drawer-div" style="margin:0 22px"></div>
@@ -476,6 +672,59 @@ var tab="home",sq="",pf="ALL",sf="ALL",fPPG=0,fRPG=0,f3P=0,fP="ALL",cy="ALL",vSe
 var staff=STAFF_SEED.slice();
 
 /* ============================================
+   PHASE 5a — new state
+   ============================================ */
+var ADDED_TO_CRM=new Set();
+var WATCHLIST=new Set();
+var crmExpanded=new Set();
+var crmStarFilter="ALL";   /* ALL / 5 / 4 / 3 / 2 */
+var patronTier="ALL";      /* ALL / champion / platinum / gold / silver / bronze */
+
+/* DONORS — 12 seeded with realistic profile */
+var DONORS_SEED=[
+  {id:"d01",name:"Phil & Penny Knight",tier:"champion",company:"Nike co-founder",city:"Eugene, OR",alma:"Oregon '59",lifetime:185000000,ytd:4200000,last_gift:"$2.0M",last_gift_date:"Jan 14, 2026",last_contact:"Mar 2, 2026",officer:"DA",tag:null,giving:[3,4,6,7,9,12,14,18,22]},
+  {id:"d02",name:"Pat Kilkenny",tier:"champion",company:"Arrowhead Capital",city:"Eugene, OR",alma:"Oregon '74",lifetime:42000000,ytd:850000,last_gift:"$500K",last_gift_date:"Feb 8, 2026",last_contact:"Mar 18, 2026",officer:"KH",tag:null,giving:[2,3,4,4,5,6,7,8,9]},
+  {id:"d03",name:"Tinker Hatfield",tier:"platinum",company:"Nike VP Design",city:"Portland, OR",alma:"Oregon '77",lifetime:6800000,ytd:0,last_gift:"$250K",last_gift_date:"Aug 22, 2025",last_contact:"Sep 1, 2025",officer:"KH",tag:"Lapsed risk · stewardship overdue",giving:[1,1,2,2,3,4,4,5,0]},
+  {id:"d04",name:"Howard Slusher",tier:"platinum",company:"Slusher Sports",city:"Beverly Hills, CA",alma:"Oregon '60",lifetime:5400000,ytd:120000,last_gift:"$120K",last_gift_date:"Jan 3, 2026",last_contact:"Feb 11, 2026",officer:"DA",tag:null,giving:[1,1,2,3,3,4,4,5,1]},
+  {id:"d05",name:"Bev & Doug Beighle",tier:"gold",company:"Nike Senior VP",city:"Lake Oswego, OR",alma:"Oregon '68",lifetime:1900000,ytd:75000,last_gift:"$75K",last_gift_date:"Dec 12, 2025",last_contact:"Jan 22, 2026",officer:"TS",tag:null,giving:[1,1,1,2,2,2,3,3,1]},
+  {id:"d06",name:"Tim & Mary Boyle",tier:"gold",company:"Columbia Sportswear",city:"Portland, OR",alma:"Oregon '71",lifetime:1450000,ytd:0,last_gift:"$60K",last_gift_date:"Apr 18, 2025",last_contact:"May 14, 2025",officer:"DA",tag:"Lapsed risk · 12 months no contact",giving:[1,1,1,2,2,3,3,2,0]},
+  {id:"d07",name:"Aki Mostofi",tier:"gold",company:"Mostofi Capital",city:"San Francisco, CA",alma:"Oregon '94",lifetime:1100000,ytd:200000,last_gift:"$200K",last_gift_date:"Mar 4, 2026",last_contact:"Mar 28, 2026",officer:"KH",tag:null,giving:[1,1,1,1,2,2,2,3,2]},
+  {id:"d08",name:"Brent & Tara Kilbourn",tier:"silver",company:"Kilbourn Group",city:"Bend, OR",alma:"Oregon '88",lifetime:520000,ytd:45000,last_gift:"$45K",last_gift_date:"Feb 19, 2026",last_contact:"Mar 25, 2026",officer:"TS",tag:null,giving:[1,1,1,1,1,1,1,2,1]},
+  {id:"d09",name:"Sarah & Mike Pearson",tier:"silver",company:"Pearson Construction",city:"Salem, OR",alma:"Oregon '96",lifetime:380000,ytd:30000,last_gift:"$30K",last_gift_date:"Jan 28, 2026",last_contact:"Feb 28, 2026",officer:"JT",tag:null,giving:[1,1,1,1,1,1,1,1,1]},
+  {id:"d10",name:"Greg & Lisa Bell",tier:"bronze",company:"Bell Realty Group",city:"Tucson, AZ",alma:"Oregon '02",lifetime:175000,ytd:15000,last_gift:"$15K",last_gift_date:"Dec 5, 2025",last_contact:"Jan 11, 2026",officer:"JT",tag:null,giving:[0,0,1,1,1,1,1,1,1]},
+  {id:"d11",name:"Marcus & Aliyah Reed",tier:"bronze",company:"Reed & Co Law",city:"Los Angeles, CA",alma:"Oregon '08",lifetime:120000,ytd:10000,last_gift:"$10K",last_gift_date:"Mar 1, 2026",last_contact:"Mar 22, 2026",officer:"TS",tag:null,giving:[0,0,0,1,1,1,1,1,1]},
+  {id:"d12",name:"Eddie & June Watanabe",tier:"bronze",company:"Watanabe Family Office",city:"Honolulu, HI",alma:"Oregon '85",lifetime:95000,ytd:0,last_gift:"$8K",last_gift_date:"Jun 4, 2025",last_contact:"Jul 8, 2025",officer:"KH",tag:"Lapsed risk · stewardship overdue",giving:[0,0,1,1,1,1,1,1,0]}
+];
+
+var CAMPAIGNS_SEED=[
+  {id:"c1",name:"NIL Collective drive",goal:5000000,raised:3650000,kind:""},
+  {id:"c2",name:"Casanova Center renovation",goal:18000000,raised:12400000,kind:"gold"},
+  {id:"c3",name:"Annual fund — 2026",goal:2500000,raised:1180000,kind:"pos"}
+];
+
+/* OPS module */
+var OPS_CATS=[
+  {id:"deck",name:"Recruiting decks",cls:"ic-ppt",tag:"PPT",count:42},
+  {id:"scout",name:"Scouting reports",cls:"ic-pdf",tag:"PDF",count:28},
+  {id:"fam",name:"Family touchpoints",cls:"ic-img",tag:"IMG",count:67},
+  {id:"nil",name:"NIL pitch packets",cls:"ic-nil",tag:"NIL",count:19},
+  {id:"port",name:"Portal reports",cls:"ic-dd",tag:"DD",count:34},
+  {id:"team",name:"Team materials",cls:"ic-doc",tag:"DOC",count:51}
+];
+var OPS_RECENT=[
+  {who:"KH",what:"updated",item:"Jalen Washington — pitch deck v3.pptx",time:"12 min ago"},
+  {who:"DA",what:"shared",item:"Family welcome packet — Devonte Miles",time:"1h ago"},
+  {who:"TS",what:"created",item:"Portal report — April 13 wave",time:"3h ago"},
+  {who:"JT",what:"viewed",item:"NIL pitch — Tier A — 2026.pdf",time:"4h ago"},
+  {who:"KH",what:"uploaded",item:"Casanova facility tour deck.pptx",time:"yesterday"}
+];
+var OPS_DECKS=[
+  {name:"Jalen Washington — pitch deck v3.pptx",size:"4.2 MB",updated:"2d ago",author:"KH",views:18,type:"ppt"},
+  {name:"Devonte Miles — official visit packet.pptx",size:"6.8 MB",updated:"5d ago",author:"DA",views:12,type:"ppt"},
+  {name:"Kameron Ellis — JR scouting deck.pptx",size:"3.1 MB",updated:"1w ago",author:"TS",views:7,type:"ppt"}
+];
+
+/* ============================================
    HELPERS
    ============================================ */
 window.api=function(path,opt){
@@ -540,6 +789,175 @@ window.dateLong=function(d){
 };
 
 /* ============================================
+   PHASE 5a — helpers
+   ============================================ */
+
+/* Initials helper */
+window.initialsOf=function(name){
+  if(!name)return"?";
+  var parts=String(name).trim().split(/\s+/);
+  var first=parts[0]?parts[0][0]:"";
+  var last=parts.length>1?parts[parts.length-1][0]:"";
+  return (first+last).toUpperCase()||"?";
+};
+
+/* Photo avatar — single navy bg w/ initials, optional photoUrl */
+window.photoAv=function(name,size,photoUrl){
+  size=size||"md";
+  var ini=initialsOf(name);
+  var sizeCls=" av-"+size;
+  if(photoUrl){
+    return '<div class="av av-photo'+sizeCls+'" style="background-image:url(\''+esc(photoUrl)+'\')"><span class="av-fallback">'+ini+'</span></div>';
+  }
+  return '<div class="av'+sizeCls+'" style="background:var(--brand)">'+ini+'</div>';
+};
+
+/* Add-to-CRM button — frontend-only state via ADDED_TO_CRM Set */
+window.addCrmBtn=function(prospectId){
+  if(!prospectId)return"";
+  var added=ADDED_TO_CRM.has(prospectId);
+  return '<button class="crm-add-btn'+(added?" added":"")+'" onclick="event.stopPropagation();toggleAddCrm(\''+prospectId+'\')" aria-label="'+(added?"In CRM":"Add to CRM")+'" title="'+(added?"In CRM":"Add to CRM")+'">'+(added?"\u2713":"+")+'</button>';
+};
+window.toggleAddCrm=function(prospectId){
+  if(ADDED_TO_CRM.has(prospectId)){
+    ADDED_TO_CRM.delete(prospectId);
+    toast("Removed from CRM");
+  }else{
+    ADDED_TO_CRM.add(prospectId);
+    toast("Added to CRM");
+  }
+  render();
+};
+
+/* Stars component */
+window.stars=function(n,size,interactive,onClickFn){
+  size=size||"md";
+  n=Math.max(0,Math.min(5,parseInt(n)||0));
+  var cls="stars "+size+(interactive?" interactive":"");
+  var h='<span class="'+cls+'">';
+  for(var i=1;i<=5;i++){
+    var off=(i>n)?" off":"";
+    var click=interactive&&onClickFn?(' onclick="event.stopPropagation();'+onClickFn+'('+i+')"'):"";
+    h+='<span class="st'+off+'"'+click+'>\u2605</span>';
+  }
+  h+='</span>';
+  return h;
+};
+window.tierToStars=function(tier){
+  if(tier==="A")return 5;
+  if(tier==="B")return 4;
+  if(tier==="C")return 3;
+  if(tier==="D")return 2;
+  return 0;
+};
+window.starsToTier=function(n){
+  if(n>=5)return"A";
+  if(n>=4)return"B";
+  if(n>=3)return"C";
+  if(n>=2)return"D";
+  return null;
+};
+window.setStars=function(prospectId,n){
+  var p=prospects.filter(function(x){return x.id===prospectId;})[0];
+  if(!p)return;
+  var newTier=starsToTier(n);
+  p.priority_tier=newTier;
+  api("/rest/v1/prospect_shortlist?id=eq."+prospectId,{method:"PATCH",body:JSON.stringify({priority_tier:newTier}),prefer:"return=minimal"}).catch(function(){});
+  toast(newTier?"Set to "+newTier+" tier":"Cleared tier");
+  render();
+};
+
+/* Watchlist toggle */
+window.toggleWatch=function(prospectId){
+  if(WATCHLIST.has(prospectId)){
+    WATCHLIST.delete(prospectId);
+    toast("Removed from watchlist");
+  }else{
+    WATCHLIST.add(prospectId);
+    toast("Added to watchlist");
+  }
+  render();
+};
+window.wlStarBtn=function(prospectId){
+  if(!prospectId)return"";
+  var on=WATCHLIST.has(prospectId);
+  return '<button class="wl-star'+(on?" on":"")+'" onclick="event.stopPropagation();toggleWatch(\''+prospectId+'\')" aria-label="'+(on?"In watchlist":"Add to watchlist")+'" title="'+(on?"In watchlist":"Add to watchlist")+'">'+(on?"\u2605":"\u2606")+'</button>';
+};
+
+/* CRM expand/collapse */
+window.toggleCrmExp=function(prospectId){
+  if(crmExpanded.has(prospectId))crmExpanded.delete(prospectId);
+  else crmExpanded.add(prospectId);
+  render();
+};
+window.crmExpandAll=function(){
+  prospects.forEach(function(p){crmExpanded.add(p.id);});
+  render();
+};
+window.crmCollapseAll=function(){
+  crmExpanded.clear();
+  render();
+};
+window.setCrmStarFilter=function(v){crmStarFilter=v;render();};
+
+/* Auto-generated dummy contacts for prospects without real prospect_family rows.
+   HS prospects get HS coach + AAU coach. Portal prospects get agent. */
+window.dummyContactsFor=function(p){
+  if(!p)return[];
+  var out=[];
+  if(p.source==="high_school"){
+    out.push({id:"d-hsc-"+p.id,name:(p.current_school||"HS")+" Head Coach",role:"HS coach",dummy:true,phone:"\u2014",email:"\u2014"});
+    out.push({id:"d-aau-"+p.id,name:"AAU Coach (TBD)",role:"AAU coach",dummy:true,phone:"\u2014",email:"\u2014"});
+  }else if(p.source==="portal"){
+    out.push({id:"d-ag-"+p.id,name:"Agent (TBD)",role:"Agent",dummy:true,phone:"\u2014",email:"\u2014"});
+  }
+  return out;
+};
+
+/* Smart Suggestions — cadence-based contact reminders.
+   5 stars flag if 5+ days OR never contacted. 4 stars flag if 7+ days.
+   3 stars flag if 14+ days. Returns top 3 by urgency. */
+window.computeSmartSuggestions=function(){
+  var out=[];
+  var now=new Date();
+  prospects.forEach(function(p){
+    var s=tierToStars(p.priority_tier);
+    if(s<3)return;
+    var threshold=s>=5?5:(s>=4?7:14);
+    var logs=crmLogs[p.id]||[];
+    var lastLog=logs[0];
+    var daysSince=lastLog?Math.floor((now-new Date(lastLog.contact_date))/(1000*60*60*24)):999;
+    if(daysSince<threshold)return;
+    var lastMethod=lastLog?String(lastLog.method||"contact").toLowerCase():null;
+    var stext=daysSince>=999?"Never contacted":(daysSince+"d since "+(lastMethod||"contact"));
+    var urgency=daysSince-threshold;
+    out.push({
+      id:p.id,
+      name:p.player_name,
+      stars:s,
+      meta:stext,
+      urgency:urgency,
+      action:daysSince>=999?"Reach out":"Follow up"
+    });
+  });
+  out.sort(function(a,b){if(b.stars!==a.stars)return b.stars-a.stars;return b.urgency-a.urgency;});
+  return out.slice(0,3);
+};
+
+/* Splash screen entry — shows after login + loadData, hidden by ?splash=1 override */
+window.enterApp=function(){
+  document.getElementById("splash").className="hide";
+  document.getElementById("app").className="";
+  render();
+};
+window.populateSplash=function(){
+  var c=coachFor(CURRENT_SCHOOL_ID);
+  var ln=c.name?(c.name.split(" ").slice(-1)[0]):"";
+  if(ln.toLowerCase()==="coach")ln="";
+  document.getElementById("splashGreet").textContent="Welcome back, Coach"+(ln?" "+ln:"")+".";
+  document.getElementById("splashSub").textContent=CURRENT_SCHOOL_NAME+" \u00b7 2025\u201326 season";
+};
+/* ============================================
    AUTH
    ============================================ */
 window.doLogin=function(){
@@ -549,14 +967,26 @@ window.doLogin=function(){
   fetch(SU+"/auth/v1/token?grant_type=password",{method:"POST",headers:{apikey:SK,"Content-Type":"application/json"},body:JSON.stringify({email:em,password:pw})}).then(function(r){if(!r.ok)return r.json().then(function(e){throw new Error(e.error_description||"Login failed");});return r.json();}).then(function(d){
     T=d.access_token;UID=d.user.id;
     document.getElementById("login").className="hide";
-    document.getElementById("app").className="";
     return loadData();
-  }).then(function(){render();}).catch(function(e){document.getElementById("loginErr").textContent=e.message;});
+  }).then(function(){
+    /* Manual login: show splash. Auto-login bootstrap will skip splash via window.SKIP_SPLASH. */
+    if(window.SKIP_SPLASH){
+      document.getElementById("app").className="";
+      render();
+    }else{
+      populateSplash();
+      document.getElementById("splash").className="";
+    }
+  }).catch(function(e){
+    document.getElementById("login").className="login-wrap";
+    document.getElementById("loginErr").textContent=e.message;
+  });
 };
 document.getElementById("pw").onkeydown=function(e){if(e.key==="Enter")doLogin();};
 window.signOut=function(){
   T="";UID="";closeDrawer();
   document.getElementById("app").className="hide";
+  document.getElementById("splash").className="hide";
   document.getElementById("login").className="login-wrap";
 };
 
@@ -806,17 +1236,22 @@ window.openP=function(id,kind){
     h+='<div style="font-size:12px;color:var(--ink)">'+esc(p.transfer_risk_notes)+'</div></div>';
   }
 
+  /* Competing schools — editable chip input */
+  h+='<div style="font-size:12px;font-weight:600;margin-bottom:6px;margin-top:14px">Competing schools</div>';
+  h+='<div class="chip-input" id="csChips">';
   if(p.competing_schools){
-    h+='<div style="font-size:12px;font-weight:600;margin-bottom:6px">Competing schools</div>';
-    h+='<div style="margin-bottom:14px">';
     p.competing_schools.split(",").forEach(function(s){
-      h+='<span class="chip chip-line" style="margin:2px">'+esc(s.trim())+'</span>';
+      var clean=s.trim();if(!clean)return;
+      h+='<span class="ci-chip">'+esc(clean)+'<span class="ci-x" onclick="removeCompeting(\''+p.id+'\',\''+esc(clean).replace(/'/g,"\\'")+'\')">\u00d7</span></span>';
     });
-    h+='</div>';
   }
+  h+='<input id="csInput" placeholder="Type school + Enter" onkeydown="if(event.key===\'Enter\'){addCompeting(\''+p.id+'\',this.value);this.value=\'\';}">';
+  h+='</div>';
+  h+='<div style="height:14px"></div>';
 
   if(isPr){
     h+='<div style="font-size:12px;font-weight:600;margin-bottom:8px;margin-top:14px">Log contact</div>';
+    h+='<input type="datetime-local" id="cd" class="dt-inp" value="'+new Date().toISOString().slice(0,16)+'">';
     h+='<select id="cm" class="inp mb-sm"><option value="phone">Phone</option><option value="text">Text</option><option value="email">Email</option><option value="in_person">In person</option></select>';
     h+='<textarea id="cn" class="inp mb-sm" placeholder="Notes..."></textarea>';
     h+='<button class="btn btn-primary mb-md" onclick="logC(\''+p.id+'\')">Log contact</button>';
@@ -907,11 +1342,35 @@ window.logC=function(pid){
   var m=document.getElementById("cm").value;
   var n=document.getElementById("cn").value;
   if(!n.trim())return;
-  api("/rest/v1/crm_log",{method:"POST",body:JSON.stringify({prospect_id:pid,contact_date:new Date().toISOString(),method:m,content:n}),prefer:"return=minimal"}).then(function(){
+  var dtEl=document.getElementById("cd");
+  var dtIso=(dtEl&&dtEl.value)?new Date(dtEl.value).toISOString():new Date().toISOString();
+  api("/rest/v1/crm_log",{method:"POST",body:JSON.stringify({prospect_id:pid,contact_date:dtIso,method:m,content:n}),prefer:"return=minimal"}).then(function(){
     if(!crmLogs[pid])crmLogs[pid]=[];
-    crmLogs[pid].unshift({prospect_id:pid,contact_date:new Date().toISOString(),method:m,content:n});
+    crmLogs[pid].unshift({prospect_id:pid,contact_date:dtIso,method:m,content:n});
     openP(pid,"p");
   });
+};
+
+/* Competing schools — chip-input handlers */
+window.addCompeting=function(pid,val){
+  if(!val||!val.trim())return;
+  var p=prospects.filter(function(x){return x.id===pid;})[0]||roster.filter(function(x){return x.id===pid;})[0];
+  if(!p)return;
+  var list=p.competing_schools?p.competing_schools.split(",").map(function(s){return s.trim();}).filter(Boolean):[];
+  var clean=val.trim();
+  if(list.indexOf(clean)>=0){toast("Already added");return;}
+  list.push(clean);
+  p.competing_schools=list.join(",");
+  api("/rest/v1/prospect_shortlist?id=eq."+pid,{method:"PATCH",body:JSON.stringify({competing_schools:p.competing_schools}),prefer:"return=minimal"}).catch(function(){});
+  openP(pid,"p");
+};
+window.removeCompeting=function(pid,school){
+  var p=prospects.filter(function(x){return x.id===pid;})[0]||roster.filter(function(x){return x.id===pid;})[0];
+  if(!p||!p.competing_schools)return;
+  var list=p.competing_schools.split(",").map(function(s){return s.trim();}).filter(function(s){return s&&s!==school;});
+  p.competing_schools=list.join(",");
+  api("/rest/v1/prospect_shortlist?id=eq."+pid,{method:"PATCH",body:JSON.stringify({competing_schools:p.competing_schools}),prefer:"return=minimal"}).catch(function(){});
+  openP(pid,"p");
 };
 
 /* ============================================
@@ -961,8 +1420,8 @@ window.openScore=function(pid){
     var label=k.charAt(0).toUpperCase()+k.slice(1);
     h+='<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><label style="font-size:12px;color:var(--ink-2);font-weight:500">'+label+'</label><span id="lbl-'+k+'" style="color:var(--brand);font-weight:600;font-variant-numeric:tabular-nums">'+existing[k+"_score"]+'</span></div><input id="sc-'+k+'" type="range" min="1" max="10" step="0.5" value="'+existing[k+"_score"]+'" oninput="document.getElementById(\'lbl-'+k+'\').textContent=this.value"></div>';
   });
-  h+='<label style="font-size:12px;color:var(--ink-2);font-weight:500;margin-bottom:6px;display:block">Weighting</label>';
-  h+='<select id="sc-preset" class="inp mb-sm"><option value="equal"'+(existing.weighting_preset==="equal"?" selected":"")+'>Equal (25/25/25/25)</option><option value="production"'+(existing.weighting_preset==="production"?" selected":"")+'>Production (40/25/20/15)</option><option value="fit"'+(existing.weighting_preset==="fit"?" selected":"")+'>Fit-heavy (20/20/20/40)</option></select>';
+  h+='<label style="font-size:12px;color:var(--ink-2);font-weight:500;margin-bottom:6px;display:block">Notes</label>';
+  h+='<input type="hidden" id="sc-preset" value="equal">';
   h+='<textarea id="sc-notes" class="inp mb-md" placeholder="Notes...">'+esc(existing.notes||"")+'</textarea>';
   h+='<button class="btn btn-primary" onclick="saveScore(\''+pid+'\')">Save score</button>';
   h+='</div></div>';
@@ -1435,6 +1894,8 @@ window.render=function(){
   if(tab==="budget")return renderBudget(c);
   if(tab==="builder")return renderBuilder(c);
   if(tab==="scout")return renderScout(c);
+  if(tab==="patrons")return renderPatrons(c);
+  if(tab==="ops")return renderOps(c);
   c.innerHTML='<div class="empty">Screen not found</div>';
 };
 
@@ -1480,15 +1941,30 @@ window.renderHome=function(c,portal,hs){
   var _cln=coach.name?(coach.name.split(" ").slice(-1)[0]):"";if(_cln.toLowerCase()==="coach")_cln="";h+='<div class="greet-line">'+greet+", Coach"+(_cln?" "+_cln:"")+'.</div>';
   h+='</div>';
 
+  /* SMART SUGGESTIONS */
+  var sugg=computeSmartSuggestions();
+  if(sugg.length){
+    h+='<div class="smart-card">';
+    h+='<div class="smart-head"><span class="smart-title">Smart Suggestions</span><span style="font-size:11px;color:var(--ink-3);cursor:pointer" onclick="navTo(\'crm\')">Open CRM \u2192</span></div>';
+    sugg.forEach(function(s){
+      h+='<div class="smart-row" onclick="openP(\''+s.id+'\',\'p\')">';
+      h+='<span class="sr-dot"></span>';
+      h+='<span class="sr-text">'+s.action+' with <b>'+esc(s.name)+'</b> '+stars(s.stars,"sm")+'</span>';
+      h+='<span class="sr-meta">'+esc(s.meta)+'</span>';
+      h+='</div>';
+    });
+    h+='</div>';
+  }
+
   /* today's brief */
   h+='<div class="sec-head"><span class="sec-title">Today\'s brief</span><span style="font-size:12px;color:var(--ink-3)">'+new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})+'</span></div>';
   h+='<div class="tile-grid mb-lg">';
-  h+=tileHTML("Open scholarships",openSchols,"Of 13 · 2026–27","");
-  h+=tileHTML("NIL requests",pending,"Pending approval",pending>0?"tile-warn":"");
-  h+=tileHTML("CRM follow-ups",followups,followups>0?"Overdue today":"All caught up",followups>0?"tile-alert":"");
-  h+=tileHTML("Reminders today",remToday,remToday>0?"Next: "+nextRem:"None scheduled","");
-  h+=tileHTML("Portal churn · 24h","+"+portalChurn,"New entries","tile-info");
-  h+=tileHTML("Visits this week",visitsWk.length,officials+" official · "+unofficials+" unofficial","");
+  h+=tileHTML("Open scholarships",openSchols,"Of 13 \u00b7 2026\u201327","","builder");
+  h+=tileHTML("NIL requests",pending,"Pending approval",pending>0?"tile-warn":"","budget");
+  h+=tileHTML("CRM follow-ups",followups,followups>0?"Overdue today":"All caught up",followups>0?"tile-alert":"","crm");
+  h+=tileHTML("Reminders today",remToday,remToday>0?"Next: "+nextRem:"None scheduled","","crm");
+  h+=tileHTML("Portal churn \u00b7 24h","+"+portalChurn,"New entries","tile-info","recruiting");
+  h+=tileHTML("Visits this week",visitsWk.length,officials+" official \u00b7 "+unofficials+" unofficial","","visits");
   h+='</div>';
 
   /* next game */
@@ -1560,8 +2036,9 @@ window.renderHome=function(c,portal,hs){
 
   c.innerHTML=h;
 };
-window.tileHTML=function(label,value,sub,cls){
-  return '<div class="tile '+(cls||"")+'"><div class="tile-l">'+label+'</div><div class="tile-v">'+value+'</div><div class="tile-s">'+sub+'</div></div>';
+window.tileHTML=function(label,value,sub,cls,nav){
+  var clk=nav?(' onclick="navTo(\''+nav+'\')" style="cursor:pointer"'):"";
+  return '<div class="tile '+(cls||"")+'"'+clk+'><div class="tile-l">'+label+'</div><div class="tile-v">'+value+'</div><div class="tile-s">'+sub+'</div></div>';
 };
 
 /* ============================================
@@ -1576,7 +2053,9 @@ window.renderRoster=function(c){
   h+='<div style="font-size:11px;color:var(--ink-3);margin-bottom:10px">'+fl.length+' players</div>';
   fl.forEach(function(p){
     h+='<div class="card" style="cursor:pointer" onclick="openP(\''+p.id+'\',\'r\')">';
-    h+='<div style="display:flex;justify-content:space-between;align-items:center"><div style="flex:1"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:4px"><span style="font-size:15px;font-weight:600">#'+(p.jersey_number||"—")+' '+esc(p.player_name)+'</span>';
+    h+='<div style="display:flex;align-items:center;gap:12px">';
+    h+=photoAv(p.player_name,"md");
+    h+='<div style="flex:1;min-width:0"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:4px"><span style="font-size:15px;font-weight:600">#'+(p.jersey_number||"\u2014")+' '+esc(p.player_name)+'</span>';
     h+=chip(p.position)+chip(p["class_year"],"chip-line")+'</div>';
     h+='<div style="font-size:11px;color:var(--ink-2)">'+esc((p.role_description||"").substring(0,80))+'</div></div>';
     h+='<div class="row-right">';
@@ -1595,9 +2074,25 @@ window.renderRecruiting=function(c,portal,hs){
   srcTabs+='<div class="seg-item'+(recSrc==="portal"?" a":"")+'" onclick="setRecSrc(\'portal\')">Portal</div>';
   srcTabs+='<div class="seg-item'+(recSrc==="high_school"?" a":"")+'" onclick="setRecSrc(\'high_school\')">High school</div>';
   srcTabs+='<div class="seg-item'+(recSrc==="international"?" a":"")+'" onclick="setRecSrc(\'international\')">Intl</div>';
+  srcTabs+='<div class="seg-item'+(recSrc==="watchlist"?" a":"")+'" onclick="setRecSrc(\'watchlist\')">Watchlist'+(WATCHLIST.size?" ("+WATCHLIST.size+")":"")+'</div>';
   srcTabs+='</div>';
   if(recSrc==="international"){
     c.innerHTML=srcTabs+'<div class="empty">International recruits coming soon</div>';
+    return;
+  }
+  if(recSrc==="watchlist"){
+    var wl=prospects.filter(function(p){return WATCHLIST.has(p.id);});
+    var hh=srcTabs;
+    if(!wl.length){
+      hh+='<div class="wl-empty"><span class="wl-empty-star">\u2605</span>Tap the \u2606 on any prospect card to add them here.</div>';
+      c.innerHTML=hh;
+      return;
+    }
+    hh+='<div style="font-size:11px;color:var(--ink-3);margin-bottom:10px">'+wl.length+' watching</div>';
+    wl.forEach(function(p){
+      hh+=_recCard(p);
+    });
+    c.innerHTML=hh;
     return;
   }
   var pool=prospects.filter(function(p){return p.source===recSrc;});
@@ -1620,90 +2115,282 @@ window.renderRecruiting=function(c,portal,hs){
   }
   h+='<div class="fbar">'+posBtns()+'</div>';
   h+='<div style="font-size:11px;color:var(--ink-3);margin-bottom:10px">'+fl.length+(recSrc==="portal"?" targets":" recruits")+'</div>';
-  fl.forEach(function(p){
-    var ps=pStats[p.player_name]||{};
-    var mv=p._mv||0;var market=p.nil_estimate||0;var delta=mv-market;
-    var scoreObj=scoresMap[p.id];
-    var lg=crmLogs[p.id]||[];
-    var ht=p.height_inches?(Math.floor(p.height_inches/12)+"'"+(p.height_inches%12)+"\""):"";
-    var competing=p.competing_schools?p.competing_schools.split(",").length:0;
-    var metaBits=[];
-    if(ht)metaBits.push(ht);
-    if(p.hometown)metaBits.push(esc(p.hometown));
-    if(competing>1)metaBits.push(competing+" schools competing");
-    var scoutSnippet=p.fit_notes?esc(p.fit_notes).substring(0,110)+(p.fit_notes.length>110?"…":""):"";
-    var hasRank=p.on3_consensus_rank||p.on3_iri_score||p.espn_rank||p.sports247_rank;
-    var isPortal=p.source==='portal';
-    var rankLabel=isPortal?'On3 Portal':'On3 Consensus';
-    h+='<div class="card" style="cursor:pointer" onclick="openP(\''+p.id+'\',\'p\')">';
-    h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px"><div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:600;margin-bottom:2px">'+esc(p.player_name)+'</div><div style="font-size:11px;color:var(--ink-2);margin-bottom:6px">'+esc(p.current_school||"")+(p.current_conference?" · "+esc(p.current_conference):"")+'</div>';
-    h+='<div style="display:flex;gap:6px;flex-wrap:wrap">'+chip(p.position)+chip(p["class_year"],"chip-line")+(p.recruiting_class_year?chip("Class of "+p.recruiting_class_year,"chip-accent"):"")+chip((p.status||"").charAt(0).toUpperCase()+(p.status||"").slice(1),sc(p.status))+(p.priority_tier?chip("Tier "+p.priority_tier):"")+(lg.length?chip(lg.length+" logs","chip-accent"):"")+(scoreObj?chip("★"+scoreObj.composite_score,"chip-gold"):"")+'</div></div>';
-    if(hasRank){
-      h+='<div class="rank-callout"><div class="rc-l">'+rankLabel+'</div>';
-      h+='<div class="rc-n">'+(p.on3_consensus_rank?"#"+p.on3_consensus_rank:"—")+'</div>';
-      if(!isPortal&&p.on3_iri_score)h+='<div class="rc-s">IRI '+p.on3_iri_score+'</div>';
-      h+='</div>';
-    }
-    h+='</div>';
-    if(metaBits.length)h+='<div style="font-size:12px;color:var(--ink-2);margin-top:2px;margin-bottom:'+(scoutSnippet?"8px":"0")+'">'+metaBits.join(" · ")+'</div>';
-    if(scoutSnippet)h+='<div style="font-size:12px;color:var(--ink-2);line-height:1.5;font-style:italic">"'+scoutSnippet+'"</div>';
-    if(ps.ppg||ps.rpg||ps.three_pct){
-      h+='<div style="display:flex;gap:14px;padding-top:10px;border-top:0.5px solid var(--line-2);margin-top:10px">';
-      if(ps.ppg)h+='<span style="font-size:12px"><b style="color:var(--brand);font-size:14px">'+ps.ppg+'</b> <span style="color:var(--ink-3);font-size:11px">ppg</span></span>';
-      if(ps.rpg)h+='<span style="font-size:12px"><b style="color:var(--brand);font-size:14px">'+ps.rpg+'</b> <span style="color:var(--ink-3);font-size:11px">rpg</span></span>';
-      if(ps.three_pct)h+='<span style="font-size:12px"><b style="color:var(--brand);font-size:14px">'+(ps.three_pct*100).toFixed(0)+'%</b> <span style="color:var(--ink-3);font-size:11px">3PT</span></span>';
-      h+='</div>';
-    }
-    h+='</div>';
-  });
+  fl.forEach(function(p){h+=_recCard(p);});
   c.innerHTML=h;
+};
+
+/* Shared prospect card renderer used by recruiting tabs + watchlist */
+window._recCard=function(p){
+  var ps=pStats[p.player_name]||{};
+  var mv=p._mv||valueNil(p,ps).mid;var market=p.nil_estimate||0;
+  var scoreObj=scoresMap[p.id];
+  var lg=crmLogs[p.id]||[];
+  var ht=p.height_inches?(Math.floor(p.height_inches/12)+"'"+(p.height_inches%12)+"\""):"";
+  var competing=p.competing_schools?p.competing_schools.split(",").length:0;
+  var metaBits=[];
+  if(ht)metaBits.push(ht);
+  if(p.hometown)metaBits.push(esc(p.hometown));
+  if(competing>1)metaBits.push(competing+" schools competing");
+  var scoutSnippet=p.fit_notes?esc(p.fit_notes).substring(0,110)+(p.fit_notes.length>110?"\u2026":""):"";
+  var hasRank=p.on3_consensus_rank||p.on3_iri_score||p.espn_rank||p.sports247_rank;
+  var isPortal=p.source==='portal';
+  var rankLabel=isPortal?'On3 Portal':'On3 Consensus';
+  var h='<div class="card" style="cursor:pointer" onclick="openP(\''+p.id+'\',\'p\')">';
+  h+='<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:8px">';
+  h+=photoAv(p.player_name,"md");
+  h+='<div style="flex:1;min-width:0">';
+  h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px"><div style="font-size:16px;font-weight:600;flex:1;min-width:0">'+esc(p.player_name)+'</div>'+wlStarBtn(p.id)+addCrmBtn(p.id)+'</div>';
+  h+='<div style="font-size:11px;color:var(--ink-2);margin-bottom:6px">'+esc(p.current_school||"")+(p.current_conference?" \u00b7 "+esc(p.current_conference):"")+'</div>';
+  h+='<div style="display:flex;gap:6px;flex-wrap:wrap">'+chip(p.position)+chip(p["class_year"],"chip-line")+(p.recruiting_class_year?chip("Class of "+p.recruiting_class_year,"chip-accent"):"")+chip((p.status||"").charAt(0).toUpperCase()+(p.status||"").slice(1),sc(p.status))+(p.priority_tier?chip("Tier "+p.priority_tier):"")+(lg.length?chip(lg.length+" logs","chip-accent"):"")+(scoreObj?chip("\u2605"+scoreObj.composite_score,"chip-gold"):"")+'</div>';
+  h+='</div>';
+  if(hasRank){
+    h+='<div class="rank-callout"><div class="rc-l">'+rankLabel+'</div>';
+    h+='<div class="rc-n">'+(p.on3_consensus_rank?"#"+p.on3_consensus_rank:"\u2014")+'</div>';
+    if(!isPortal&&p.on3_iri_score)h+='<div class="rc-s">IRI '+p.on3_iri_score+'</div>';
+    h+='</div>';
+  }
+  h+='</div>';
+  if(metaBits.length)h+='<div style="font-size:12px;color:var(--ink-2);margin-top:2px;margin-bottom:'+(scoutSnippet?"8px":"0")+'">'+metaBits.join(" \u00b7 ")+'</div>';
+  if(scoutSnippet)h+='<div style="font-size:12px;color:var(--ink-2);line-height:1.5;font-style:italic">"'+scoutSnippet+'"</div>';
+  if(ps.ppg||ps.rpg||ps.three_pct){
+    h+='<div style="display:flex;gap:14px;padding-top:10px;border-top:0.5px solid var(--line-2);margin-top:10px">';
+    if(ps.ppg)h+='<span style="font-size:12px"><b style="color:var(--brand);font-size:14px">'+ps.ppg+'</b> <span style="color:var(--ink-3);font-size:11px">ppg</span></span>';
+    if(ps.rpg)h+='<span style="font-size:12px"><b style="color:var(--brand);font-size:14px">'+ps.rpg+'</b> <span style="color:var(--ink-3);font-size:11px">rpg</span></span>';
+    if(ps.three_pct)h+='<span style="font-size:12px"><b style="color:var(--brand);font-size:14px">'+(ps.three_pct*100).toFixed(0)+'%</b> <span style="color:var(--ink-3);font-size:11px">3PT</span></span>';
+    h+='</div>';
+  }
+  h+='</div>';
+  return h;
 };
 
 /* ============================================
    CRM
    ============================================ */
 window.renderCRM=function(c){
-  var all=prospects.slice();
-  if(sq)all=all.filter(function(p){return(p.player_name||"").toLowerCase().indexOf(sq)>=0;});
-  if(pf!=="ALL"&&["A","B","C","D"].indexOf(pf)>=0){all=all.filter(function(p){return p.priority_tier===pf;});}
-  all.sort(function(a,b){var ta=a.priority_tier||"Z",tb=b.priority_tier||"Z";if(ta!==tb)return ta.localeCompare(tb);return(a.player_name||"").localeCompare(b.player_name||"");});
+  /* Filter by star rating */
+  var filtered=prospects.slice();
+  if(crmStarFilter!=="ALL"){
+    var min=parseInt(crmStarFilter);
+    filtered=filtered.filter(function(p){return tierToStars(p.priority_tier)>=min;});
+  }
+  if(sq){
+    filtered=filtered.filter(function(p){return(p.player_name||"").toLowerCase().indexOf(sq)>=0;});
+  }
+  /* Sort A-Z by last name */
+  filtered.sort(function(a,b){
+    var an=(a.player_name||"").split(" ").slice(-1)[0]||"";
+    var bn=(b.player_name||"").split(" ").slice(-1)[0]||"";
+    return an.localeCompare(bn);
+  });
 
-  var h='<input class="inp mb-sm" placeholder="Search all prospects..." oninput="onSearch(this.value)">';
+  /* Total contacts count */
+  var totalContacts=0;
+  filtered.forEach(function(p){
+    totalContacts+=1; /* player */
+    totalContacts+=(familyMap[p.id]||[]).length;
+    totalContacts+=dummyContactsFor(p).length;
+  });
+
+  var h='';
+
+  /* Header */
+  h+='<div class="crm-az-head"><div class="crm-az-title">A \u2014 Z</div><div class="crm-az-count">'+filtered.length+' players \u00b7 '+totalContacts+' contacts</div></div>';
+  h+='<div style="height:14px"></div>';
+
+  /* Smart Suggestions */
+  var sugg=computeSmartSuggestions();
+  if(sugg.length){
+    h+='<div class="smart-card">';
+    h+='<div class="smart-head"><span class="smart-title">Smart Suggestions</span><span style="font-size:11px;color:var(--ink-3)">Top '+sugg.length+'</span></div>';
+    sugg.forEach(function(s){
+      h+='<div class="smart-row" onclick="openP(\''+s.id+'\',\'p\')">';
+      h+='<span class="sr-dot"></span>';
+      h+='<span class="sr-text">Time to text <b>'+esc(s.name)+'</b> '+stars(s.stars,"sm")+' \u2014 '+esc(s.meta)+'</span>';
+      h+='</div>';
+    });
+    h+='</div>';
+  }
+
+  /* Search */
+  h+='<input class="inp mb-sm" placeholder="Search players..." oninput="onSearch(this.value)">';
+
+  /* Star filter chips */
   h+='<div class="fbar">';
-  ["ALL","A","B","C","D"].forEach(function(t){
-    h+='<button class="fb'+(pf===t?" a":"")+'" onclick="onPF(\''+t+'\')">'+(t==="ALL"?"All tiers":"Tier "+t)+'</button>';
+  [["ALL","All"],["5","5\u2605"],["4","4\u2605+"],["3","3\u2605+"],["2","2\u2605+"]].forEach(function(t){
+    h+='<button class="fb'+(crmStarFilter===t[0]?" a":"")+'" onclick="setCrmStarFilter(\''+t[0]+'\')">'+t[1]+'</button>';
   });
   h+='</div>';
-  h+='<div style="font-size:11px;color:var(--ink-3);margin-bottom:10px">'+all.length+' prospects</div>';
-  all.forEach(function(p){
+
+  /* Action chips */
+  h+='<div class="fbar" style="margin-bottom:14px">';
+  h+='<button class="fb" onclick="crmExpandAll()">Expand all</button>';
+  h+='<button class="fb" onclick="crmCollapseAll()">Collapse all</button>';
+  h+='<button class="fb" onclick="toast(\'Import vCard \u2014 coming soon\')">Import vCard</button>';
+  h+='</div>';
+
+  if(!filtered.length){
+    h+='<div class="empty">No prospects match this filter.</div>';
+    h+='<button class="crm-fab" onclick="toast(\'New contact \u2014 coming soon\')" aria-label="New contact">+</button>';
+    c.innerHTML=h;
+    return;
+  }
+
+  /* A-Z sticky letter sections */
+  var lastLetter="";
+  var now=new Date();
+  filtered.forEach(function(p){
+    var lastName=(p.player_name||"").split(" ").slice(-1)[0]||"?";
+    var letter=lastName[0].toUpperCase();
+    if(letter!==lastLetter){
+      h+='<div class="crm-letter">'+letter+'</div>';
+      lastLetter=letter;
+    }
+    var isExp=crmExpanded.has(p.id);
     var fam=familyMap[p.id]||[];
+    var dummies=dummyContactsFor(p);
+    var nestedCount=1+fam.length+dummies.length;
     var logs=crmLogs[p.id]||[];
     var lastLog=logs[0];
-    var hasContact=p.cell_phone||p.email||fam.length>0;
-    var tierColor=p.priority_tier==="A"?"var(--pos)":p.priority_tier==="B"?"var(--accent)":p.priority_tier==="C"?"var(--gold)":"var(--ink-3)";
-    var hasRank=p.on3_consensus_rank||p.on3_iri_score||p.espn_rank||p.sports247_rank;
-    var isPortal=p.source==='portal';
-    var rankLabel=isPortal?'On3 Portal':'On3 Consensus';
-    h+='<div class="card" style="cursor:pointer;border-left:3px solid '+tierColor+'" onclick="openP(\''+p.id+'\',\'p\')">';
-    h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:6px"><div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:600">'+esc(p.player_name)+'</div><div style="font-size:11px;color:var(--ink-2)">'+esc(p.current_school||"")+'</div></div>';
-    if(hasRank){
-      h+='<div class="rank-callout"><div class="rc-l">'+rankLabel+'</div>';
-      h+='<div class="rc-n">'+(p.on3_consensus_rank?"#"+p.on3_consensus_rank:"—")+'</div>';
-      if(!isPortal&&p.on3_iri_score)h+='<div class="rc-s">IRI '+p.on3_iri_score+'</div>';
-      h+='</div>';
-    }
+    var s=tierToStars(p.priority_tier);
+    var daysSince=lastLog?Math.floor((now-new Date(lastLog.contact_date))/(1000*60*60*24)):null;
+    var threshold=s>=5?5:(s>=4?7:(s>=3?14:30));
+    var overdue=daysSince==null||daysSince>=threshold;
+
+    h+='<div class="crm-player-card'+(isExp?" expanded":"")+'">';
+    h+='<div class="crm-player-row" onclick="toggleCrmExp(\''+p.id+'\')">';
+    h+=photoAv(p.player_name,"md");
+    h+='<div class="crm-pmain">';
+    h+='<div class="crm-pname">'+esc(p.player_name)+(s>0?stars(s,"sm",true,"setStars.bind(null,\\\''+p.id+'\\\')"):"")+'</div>';
+    h+='<div class="crm-pmeta">'+esc(p.position||"")+' \u00b7 '+esc(p.current_school||"")+(p.class_year?" \u00b7 "+esc(p.class_year):"")+'</div>';
     h+='</div>';
-    h+='<div style="display:flex;gap:6px;flex-wrap:wrap">'+chip(p.position)+(p.priority_tier?chip("Tier "+p.priority_tier):chip("Untiered","chip-line"))+(hasContact?chip("Contact ✓","chip-pos"):chip("No contact","chip-neg"))+(fam.length?chip(fam.length+" family","chip-accent"):"")+'</div>';
-    if(p.cell_phone||p.email){
-      h+='<div style="display:flex;gap:12px;margin-top:10px;padding-top:8px;border-top:0.5px solid var(--line-2);font-size:11px;color:var(--ink-2)">';
-      if(p.cell_phone)h+='<span>☎ '+esc(p.cell_phone)+'</span>';
-      if(p.email)h+='<span>✉ '+esc(p.email)+'</span>';
+    h+='<div class="crm-pright">';
+    h+='<div class="crm-pcount">'+nestedCount+' contacts</div>';
+    h+='<div class="crm-plast'+(overdue&&s>=3?" overdue":"")+'">'+(daysSince==null?"No contact":(daysSince+"d ago"))+'</div>';
+    h+='</div>';
+    h+='</div>';
+
+    if(isExp){
+      h+='<div class="crm-nested">';
+      /* Player themselves */
+      h+='<div class="crm-nested-row" onclick="openContactProfile(\'self-'+p.id+'\',\''+p.id+'\')">';
+      h+=photoAv(p.player_name,"sm");
+      h+='<div class="crm-nmain">';
+      h+='<div class="crm-nname">'+esc(p.player_name)+' <span class="crm-nrole">PLAYER</span></div>';
+      h+='<div class="crm-nmeta">'+(p.cell_phone?esc(p.cell_phone):"\u2014")+(p.email?" \u00b7 "+esc(p.email):"")+'</div>';
+      h+='</div>';
+      h+='<div class="crm-navs">'+staffBlock("DA")+'</div>';
+      h+='</div>';
+      /* Real family */
+      fam.forEach(function(f){
+        h+='<div class="crm-nested-row" onclick="openContactProfile(\''+f.id+'\',\''+p.id+'\')">';
+        h+=photoAv(f.contact_name||f.name||"?","sm");
+        h+='<div class="crm-nmain">';
+        h+='<div class="crm-nname">'+esc(f.contact_name||f.name||"")+' <span class="crm-nrole">'+esc((f.relationship||"FAMILY").toUpperCase())+'</span></div>';
+        h+='<div class="crm-nmeta">'+(f.phone?esc(f.phone):(f.email?esc(f.email):"\u2014"))+'</div>';
+        h+='</div>';
+        h+='<div class="crm-navs">'+staffBlock("KH")+'</div>';
+        h+='</div>';
+      });
+      /* Dummy contacts */
+      dummies.forEach(function(d){
+        h+='<div class="crm-nested-row" onclick="openContactProfile(\''+d.id+'\',\''+p.id+'\')">';
+        h+=photoAv(d.name,"sm");
+        h+='<div class="crm-nmain">';
+        h+='<div class="crm-nname">'+esc(d.name)+' <span class="crm-nrole">'+esc(d.role.toUpperCase())+'</span></div>';
+        h+='<div class="crm-nmeta">Profile pending</div>';
+        h+='</div>';
+        h+='<div class="crm-navs">'+staffBlock("TS")+'</div>';
+        h+='</div>';
+      });
       h+='</div>';
     }
-    if(lastLog){h+='<div style="font-size:10px;color:var(--ink-3);margin-top:6px">Last: '+new Date(lastLog.contact_date).toLocaleDateString()+' · '+esc((lastLog.method||"").toUpperCase())+'</div>';}
     h+='</div>';
   });
+
+  h+='<button class="crm-fab" onclick="toast(\'New contact \u2014 coming soon\')" aria-label="New contact">+</button>';
   c.innerHTML=h;
+};
+
+/* Contact profile modal */
+window.openContactProfile=function(contactId,prospectId){
+  var p=prospects.filter(function(x){return x.id===prospectId;})[0];
+  if(!p)return;
+  var isPlayer=String(contactId).indexOf("self-")===0;
+  var fam=familyMap[prospectId]||[];
+  var dummies=dummyContactsFor(p);
+  var contact=null,role="",isDummy=false;
+  if(isPlayer){
+    contact={name:p.player_name,phone:p.cell_phone||"",email:p.email||""};
+    role="Player";
+  }else{
+    var f=fam.filter(function(x){return x.id===contactId;})[0];
+    if(f){
+      contact={name:f.contact_name||f.name||"",phone:f.phone||"",email:f.email||""};
+      role=f.relationship||"Family";
+    }else{
+      var d=dummies.filter(function(x){return x.id===contactId;})[0];
+      if(d){contact={name:d.name,phone:"",email:""};role=d.role;isDummy=true;}
+    }
+  }
+  if(!contact)return;
+  var nowIso=new Date().toISOString().slice(0,16);
+
+  var h='<div class="mbg" onclick="if(event.target===this)closeM()"><div class="mdl">';
+  h+='<div class="cp-header">';
+  h+='<button class="mdl-close cp-close" onclick="closeM()" aria-label="Close"></button>';
+  h+='<div class="cp-av-wrap">'+photoAv(contact.name,"xxl")+'</div>';
+  h+='<div class="cp-name">'+esc(contact.name)+'</div>';
+  h+='<div class="cp-role">'+esc(role)+(isPlayer?"":" \u00b7 linked to "+esc(p.player_name))+'</div>';
+  h+='<div class="cp-stars">'+stars(tierToStars(p.priority_tier),"lg",true,"setStars.bind(null,\\\''+p.id+'\\\')")+'</div>';
+  h+='</div>';
+
+  /* Action tiles */
+  h+='<div class="cp-actions">';
+  h+='<button class="cp-action" onclick="toast(\'Calling '+esc(contact.name)+'...\')"><span class="cp-ai">\u260E</span>Call</button>';
+  h+='<button class="cp-action" onclick="toast(\'Compose text\')"><span class="cp-ai">\u2709</span>Text</button>';
+  h+='<button class="cp-action" onclick="toast(\'Compose email\')"><span class="cp-ai">@</span>Email</button>';
+  h+='</div>';
+
+  /* Detail rows */
+  h+='<div>';
+  h+='<div class="cp-row"><span class="cp-l">Phone</span><span class="cp-v">'+(contact.phone?esc(contact.phone):"\u2014")+'</span></div>';
+  h+='<div class="cp-row"><span class="cp-l">Email</span><span class="cp-v">'+(contact.email?esc(contact.email):"\u2014")+'</span></div>';
+  h+='<div class="cp-row"><span class="cp-l">Social</span><span class="cp-v">\u2014</span></div>';
+  h+='<div class="cp-row"><span class="cp-l">Linked to</span><span class="cp-v">'+esc(p.player_name)+'</span></div>';
+  var lastLog=(crmLogs[prospectId]||[])[0];
+  h+='<div class="cp-row"><span class="cp-l">Last contact</span><span class="cp-v">'+(lastLog?new Date(lastLog.contact_date).toLocaleDateString()+" \u00b7 "+esc((lastLog.method||"").toUpperCase()):"\u2014")+'</span></div>';
+  h+='</div>';
+
+  /* Assigned coaches */
+  h+='<div class="cp-section-h">Assigned coaches</div>';
+  h+='<div class="cp-coaches">';
+  STAFF_SEED.forEach(function(s,i){
+    var on=i<2;
+    h+='<div class="cp-coach-chip'+(on?" on":"")+'" onclick="this.classList.toggle(\'on\')"><div class="av av-sm" style="background:'+s.color+'">'+s.initials+'</div>'+esc(s.name.split(" ").slice(-1)[0])+'</div>';
+  });
+  h+='</div>';
+
+  /* Log Contact with datetime-local */
+  h+='<div class="cp-section-h">Log contact</div>';
+  h+='<input type="datetime-local" id="cpLogDt" class="dt-inp" value="'+nowIso+'">';
+  h+='<div style="display:flex;gap:6px;flex-wrap:wrap">';
+  ["call","text","email","dm","in-person"].forEach(function(m){
+    h+='<button class="fb" onclick="logC(\''+prospectId+'\')">'+m+'</button>';
+  });
+  h+='</div>';
+
+  /* Footer buttons */
+  h+='<div class="cp-foot-btns">';
+  h+='<button class="btn btn-line" onclick="toast(\'Edit \u2014 coming soon\')">Edit contact</button>';
+  h+='<button class="btn btn-line" onclick="toast(\'vCard exported\')">Export vCard</button>';
+  h+='</div>';
+
+  if(isDummy){
+    h+='<div style="margin-top:14px;padding:10px 12px;background:var(--surface-3);border-radius:8px;font-size:11px;color:var(--ink-3);text-align:center">Auto-generated contact \u2014 will be replaced when prospect_contacts schema lands</div>';
+  }
+
+  h+='</div></div>';
+  document.getElementById("mc").innerHTML=h;
 };
 
 /* ============================================
@@ -1937,7 +2624,7 @@ window.renderFilter=function(c,portal){
     var ps=pStats[p.player_name]||{};
     var srcBadge=p.source==="portal"?chip("Portal","chip-navy"):p.source==="high_school"?chip(p.recruiting_class_year?"HS "+p.recruiting_class_year:"HS","chip-accent"):p.source==="intl"||p.source==="international"?chip("Intl","chip-gold"):"";
     h+='<div class="card" style="cursor:pointer" onclick="openP(\''+p.id+'\',\'p\')">';
-    h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px"><div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:600">'+esc(p.player_name)+'</div><div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">'+chip(p.position)+srcBadge+(p.priority_tier?chip("T"+p.priority_tier,"chip-gold"):"")+chip((p.status||"").toUpperCase(),sc(p.status))+'</div></div>';
+    h+='<div style="display:flex;align-items:flex-start;gap:10px"><div style="flex-shrink:0">'+photoAv(p.player_name,"sm")+'</div><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px"><div style="font-size:15px;font-weight:600;flex:1;min-width:0">'+esc(p.player_name)+'</div>'+addCrmBtn(p.id)+'</div><div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">'+chip(p.position)+srcBadge+(p.priority_tier?chip("T"+p.priority_tier,"chip-gold"):"")+chip((p.status||"").toUpperCase(),sc(p.status))+'</div></div>';
     if(p.nil_estimate)h+='<div style="font-size:14px;font-weight:600;color:var(--pos);font-variant-numeric:tabular-nums;flex-shrink:0">'+fmt$(p.nil_estimate)+'</div>';
     h+='</div><div style="font-size:11px;color:var(--ink-3);margin-top:6px">'+esc(p.current_school||"")+(p.on3_consensus_rank?" · On3 #"+p.on3_consensus_rank:"")+(p.height_inches?" · "+Math.floor(p.height_inches/12)+"'"+(p.height_inches%12)+"\"":"")+'</div>';
     h+='<div style="display:flex;gap:14px;margin-top:8px;padding-top:8px;border-top:0.5px solid var(--line-2);flex-wrap:wrap">';
@@ -2411,7 +3098,7 @@ window.renderScout=function(c){
     aiResults.results.forEach(function(p){
       var ps=pStats[p.player_name]||{};
       var mv=p._mv||0;var market=p.nil_estimate||0;var delta=mv-market;
-      h+='<div class="card" style="cursor:pointer" onclick="openP(\''+p.id+'\',\'p\')"><div style="display:flex;justify-content:space-between"><div><div style="font-size:15px;font-weight:600">'+esc(p.player_name)+'</div><div style="font-size:11px;color:var(--ink-2)">'+esc(p.current_school||"")+(p.current_conference?" \u00b7 "+esc(p.current_conference):"")+'</div><div style="display:flex;gap:6px;margin-top:6px">'+chip(p.position)+chip((p.source||"").toUpperCase().replace(/_/g," "),"chip-line")+'</div></div>';
+      h+='<div class="card" style="cursor:pointer" onclick="openP(\''+p.id+'\',\'p\')"><div style="display:flex;justify-content:space-between"><div style="display:flex;gap:10px;align-items:flex-start;flex:1;min-width:0">'+photoAv(p.player_name,"sm")+'<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px"><div style="font-size:15px;font-weight:600;flex:1;min-width:0">'+esc(p.player_name)+'</div>'+addCrmBtn(p.id)+'</div><div style="font-size:11px;color:var(--ink-2)">'+esc(p.current_school||"")+(p.current_conference?" \u00b7 "+esc(p.current_conference):"")+'</div><div style="display:flex;gap:6px;margin-top:6px">'+chip(p.position)+chip((p.source||"").toUpperCase().replace(/_/g," "),"chip-line")+'</div></div></div>';
       h+='<div style="text-align:right"><div style="font-size:14px;font-weight:600;color:var(--brand);font-variant-numeric:tabular-nums">'+fmt$(mv)+'</div><div style="font-size:10px;color:'+(delta>=0?"var(--pos)":"var(--neg)")+'">'+(delta>=0?"+":"\u2212")+fmt$(Math.abs(delta))+' vs mkt</div></div></div>';
       if(ps.ppg||ps.rpg||ps.three_pct){
         h+='<div style="display:flex;gap:12px;margin-top:8px;padding-top:8px;border-top:0.5px solid var(--line-2)">';
@@ -2426,6 +3113,222 @@ window.renderScout=function(c){
 
   c.innerHTML=h;
 };
+/* ============================================
+   PHASE 5a — APEX PATRONS module
+   ============================================ */
+window.renderPatrons=function(c){
+  var donors=DONORS_SEED.slice();
+  if(patronTier!=="ALL")donors=donors.filter(function(d){return d.tier===patronTier;});
+  donors.sort(function(a,b){return b.lifetime-a.lifetime;});
+
+  var lifetime=DONORS_SEED.reduce(function(a,d){return a+d.lifetime;},0);
+  var ytd=DONORS_SEED.reduce(function(a,d){return a+d.ytd;},0);
+  var active=DONORS_SEED.filter(function(d){return d.ytd>0;}).length;
+  var lapsed=DONORS_SEED.filter(function(d){return d.tag&&d.tag.indexOf("Lapsed")>=0;});
+  var lapsedAmt=lapsed.reduce(function(a,d){return a+d.lifetime;},0);
+
+  var h='';
+  h+='<div style="margin-bottom:18px">';
+  h+='<div style="font-size:11px;color:var(--gold);font-weight:700;letter-spacing:0.6px;text-transform:uppercase;margin-bottom:4px">APEX PATRONS</div>';
+  h+='<div class="greet-line" style="font-size:28px">Donor & development</div>';
+  h+='</div>';
+
+  /* KPI grid */
+  h+='<div class="tile-grid mb-lg">';
+  h+=tileHTML("Lifetime giving",fmt$(lifetime),"All donors","");
+  h+=tileHTML("YTD raised",fmt$(ytd),"Calendar year 2026","tile-info");
+  h+=tileHTML("Active donors",active,"Gave this year","");
+  h+=tileHTML("Lapsed (12mo+)",fmt$(lapsedAmt),lapsed.length+" at risk","tile-alert");
+  h+='</div>';
+
+  /* Smart Suggestions */
+  var risks=DONORS_SEED.filter(function(d){return d.tag;});
+  if(risks.length){
+    h+='<div class="smart-card">';
+    h+='<div class="smart-head"><span class="smart-title">Smart Suggestions</span><span style="font-size:11px;color:var(--ink-3)">'+risks.length+' alerts</span></div>';
+    risks.slice(0,3).forEach(function(d){
+      h+='<div class="smart-row" onclick="openDonor(\''+d.id+'\')">';
+      h+='<span class="sr-dot"></span>';
+      h+='<span class="sr-text"><b>'+esc(d.name)+'</b> \u2014 '+esc(d.tag)+'</span>';
+      h+='<span class="sr-meta">'+fmt$(d.lifetime)+'</span>';
+      h+='</div>';
+    });
+    h+='</div>';
+  }
+
+  /* Travel intel */
+  h+='<div class="travel-card">';
+  h+='<div class="travel-eyebrow">\u2192 Next road trip \u00b7 Mar 8</div>';
+  h+='<div class="travel-text">Eugene \u2192 Tucson. <b>7 donors</b> in the area worth $4.2M lifetime. Recommended: brunch with the Bell Realty Group + dinner stop with Marcus & Aliyah Reed (LA stopover).</div>';
+  h+='</div>';
+
+  /* Active campaigns */
+  h+='<div class="sec-head"><span class="sec-title">Active campaigns</span><span class="sec-link">All</span></div>';
+  CAMPAIGNS_SEED.forEach(function(camp){
+    var pct=Math.round(camp.raised/camp.goal*100);
+    h+='<div class="camp-card">';
+    h+='<div class="camp-head"><span class="camp-name">'+esc(camp.name)+'</span><span class="camp-pct">'+pct+'%</span></div>';
+    h+='<div class="camp-bar"><div class="camp-fill '+esc(camp.kind)+'" style="width:'+pct+'%"></div></div>';
+    h+='<div class="camp-meta"><span>'+fmt$(camp.raised)+' raised</span><span>Goal '+fmt$(camp.goal)+'</span></div>';
+    h+='</div>';
+  });
+
+  /* Tier filter */
+  h+='<div class="sec-head" style="margin-top:20px"><span class="sec-title">Donors</span><span style="font-size:11px;color:var(--ink-3)">'+donors.length+' showing</span></div>';
+  h+='<div class="fbar">';
+  [["ALL","All"],["champion","Champion"],["platinum","Platinum"],["gold","Gold"],["silver","Silver"],["bronze","Bronze"]].forEach(function(t){
+    h+='<button class="fb'+(patronTier===t[0]?" a":"")+'" onclick="patronTier=\''+t[0]+'\';render()">'+t[1]+'</button>';
+  });
+  h+='</div>';
+
+  donors.forEach(function(d){
+    h+='<div class="donor-row" onclick="openDonor(\''+d.id+'\')">';
+    h+=photoAv(d.name,"md");
+    h+='<div class="dr-main">';
+    h+='<div class="dr-name">'+esc(d.name)+' <span class="patron-tier tier-'+d.tier+'">'+d.tier+'</span></div>';
+    h+='<div class="dr-meta">'+esc(d.company)+' \u00b7 '+esc(d.city)+'</div>';
+    h+='</div>';
+    h+='<div class="dr-right">';
+    h+='<div class="dr-amt">'+fmt$(d.lifetime)+'</div>';
+    h+='<div class="dr-last">Last: '+esc(d.last_gift)+'</div>';
+    h+='</div>';
+    h+='</div>';
+  });
+
+  /* AI Prospecting */
+  h+='<div class="ai-prosp-input">';
+  h+='<input placeholder="Apex, find me Oregon alumni founders in PNW..." onkeydown="if(event.key===\'Enter\')toast(\'AI prospecting \u2014 coming soon\')">';
+  h+='<button onclick="toast(\'AI prospecting \u2014 coming soon\')">Search</button>';
+  h+='</div>';
+
+  c.innerHTML=h;
+};
+
+window.openDonor=function(donorId){
+  var d=DONORS_SEED.filter(function(x){return x.id===donorId;})[0];
+  if(!d)return;
+  var officer=STAFF_SEED.filter(function(s){return s.initials===d.officer;})[0]||{name:d.officer};
+  var maxGiving=Math.max.apply(null,d.giving);
+  var startYear=2017;
+
+  var h='<div class="mbg" onclick="if(event.target===this)closeM()"><div class="mdl">';
+  h+='<div class="donor-modal-head">';
+  h+='<button class="mdl-close cp-close" onclick="closeM()" aria-label="Close"></button>';
+  h+='<div class="cp-av-wrap">'+photoAv(d.name,"xxl")+'</div>';
+  h+='<div class="cp-name">'+esc(d.name)+'</div>';
+  h+='<div class="cp-role"><span class="patron-tier tier-'+d.tier+'">'+d.tier+'</span> \u00b7 '+esc(d.company)+'</div>';
+  h+='<div class="cp-role" style="margin-top:4px">'+esc(d.city)+' \u00b7 '+esc(d.alma)+'</div>';
+  h+='</div>';
+
+  if(d.tag){
+    h+='<div class="risk-banner">\u26A0 '+esc(d.tag)+'</div>';
+  }
+
+  /* Trio */
+  h+='<div class="trio">';
+  h+='<div class="trio-item trio-apex"><div class="trio-l">Lifetime</div><div class="trio-v">'+fmt$(d.lifetime)+'</div></div>';
+  h+='<div class="trio-item trio-mkt"><div class="trio-l">YTD</div><div class="trio-v">'+fmt$(d.ytd)+'</div></div>';
+  h+='<div class="trio-item '+(d.ytd>0?"trio-pos":"trio-neg")+'"><div class="trio-l">Last gift</div><div class="trio-v">'+esc(d.last_gift)+'</div></div>';
+  h+='</div>';
+
+  /* Sparkline */
+  h+='<div class="cp-section-h">9-year giving</div>';
+  h+='<div class="spark-card">';
+  h+='<div class="spark">';
+  d.giving.forEach(function(g,i){
+    var pct=maxGiving>0?(g/maxGiving*100):0;
+    var last=(i===d.giving.length-1)?" last":"";
+    h+='<div class="spark-bar'+last+'" style="height:'+pct+'%"></div>';
+  });
+  h+='</div>';
+  h+='<div class="spark-yrs">';
+  for(var y=0;y<d.giving.length;y++){h+='<span>\''+(String(startYear+y).slice(-2))+'</span>';}
+  h+='</div>';
+  h+='</div>';
+
+  /* Action tiles */
+  h+='<div class="cp-actions">';
+  h+='<button class="cp-action" onclick="toast(\'Outreach scheduled\')"><span class="cp-ai">\u2709</span>Outreach</button>';
+  h+='<button class="cp-action" onclick="toast(\'Visit added to itinerary\')"><span class="cp-ai">\u2708</span>Visit</button>';
+  h+='<button class="cp-action" onclick="toast(\'Gift entry opened\')"><span class="cp-ai">$</span>Gift</button>';
+  h+='</div>';
+
+  /* Touchpoints */
+  h+='<div class="cp-section-h">Touchpoints</div>';
+  h+='<div>';
+  h+='<div class="cp-row"><span class="cp-l">Last contact</span><span class="cp-v">'+esc(d.last_contact)+'</span></div>';
+  h+='<div class="cp-row"><span class="cp-l">Last gift</span><span class="cp-v">'+esc(d.last_gift_date)+'</span></div>';
+  h+='<div class="cp-row"><span class="cp-l">Officer</span><span class="cp-v">'+esc(officer.name)+'</span></div>';
+  h+='</div>';
+
+  /* Stewardship */
+  h+='<div class="cp-section-h">Next stewardship</div>';
+  h+='<div class="cp-foot-btns">';
+  h+='<button class="btn btn-line" onclick="toast(\'Note added\')">Add note</button>';
+  h+='<button class="btn btn-primary" onclick="toast(\'Stewardship task created\')">Create task</button>';
+  h+='</div>';
+
+  h+='</div></div>';
+  document.getElementById("mc").innerHTML=h;
+};
+
+/* ============================================
+   PHASE 5a — APEX OPS module
+   ============================================ */
+window.renderOps=function(c){
+  var h='';
+  h+='<div style="margin-bottom:18px">';
+  h+='<div style="font-size:11px;color:var(--accent);font-weight:700;letter-spacing:0.6px;text-transform:uppercase;margin-bottom:4px">APEX OPS</div>';
+  h+='<div class="greet-line" style="font-size:28px">Recruiting materials hub</div>';
+  h+='</div>';
+
+  /* Category grid */
+  h+='<div class="ops-grid">';
+  OPS_CATS.forEach(function(cat){
+    h+='<div class="ops-tile" onclick="toast(\''+esc(cat.name)+' \u2014 coming soon\')">';
+    h+='<div class="ops-tile-icon '+cat.cls+'">'+cat.tag+'</div>';
+    h+='<div class="ops-tile-name">'+esc(cat.name)+'</div>';
+    h+='<div class="ops-tile-count">'+cat.count+' files</div>';
+    h+='</div>';
+  });
+  h+='</div>';
+
+  /* AI Assist */
+  h+='<div class="ai-prosp-input" style="margin-bottom:18px">';
+  h+='<input placeholder="Apex, draft a recruiting deck for [player]..." onkeydown="if(event.key===\'Enter\')toast(\'AI deck generation \u2014 coming soon\')">';
+  h+='<button onclick="toast(\'AI deck generation \u2014 coming soon\')">Draft</button>';
+  h+='</div>';
+
+  /* Recent Activity */
+  h+='<div class="sec-head"><span class="sec-title">Recent activity</span></div>';
+  h+='<div class="act-feed">';
+  OPS_RECENT.forEach(function(a){
+    var staffMem=STAFF_SEED.filter(function(s){return s.initials===a.who;})[0]||{name:a.who,initials:a.who,color:"#888"};
+    h+='<div class="act-row">';
+    h+='<div class="av av-sm" style="background:'+staffMem.color+'">'+staffMem.initials+'</div>';
+    h+='<span class="act-text"><b>'+esc(staffMem.name.split(" ")[0])+'</b> '+esc(a.what)+' '+esc(a.item)+'</span>';
+    h+='<span class="act-time">'+esc(a.time)+'</span>';
+    h+='</div>';
+  });
+  h+='</div>';
+
+  /* Recent Decks */
+  h+='<div class="sec-head"><span class="sec-title">Recent decks</span><span class="sec-link">All decks</span></div>';
+  OPS_DECKS.forEach(function(deck){
+    var staffMem=STAFF_SEED.filter(function(s){return s.initials===deck.author;})[0]||{name:deck.author,initials:deck.author,color:"#888"};
+    h+='<div class="mat-row" onclick="toast(\'Open '+esc(deck.name)+'\')">';
+    h+='<div class="mat-icon ic-'+deck.type+'">'+deck.type.toUpperCase()+'</div>';
+    h+='<div class="mat-main">';
+    h+='<div class="mat-name">'+esc(deck.name)+'</div>';
+    h+='<div class="mat-meta">'+esc(deck.size)+' \u00b7 '+esc(deck.updated)+' \u00b7 '+esc(staffMem.name.split(" ")[0])+'</div>';
+    h+='</div>';
+    h+='<div class="mat-views">'+deck.views+' views</div>';
+    h+='</div>';
+  });
+
+  c.innerHTML=h;
+};
+
 </script>
 <script>
 /* ============================================
@@ -2447,6 +3350,8 @@ window.AUTO_LOGIN_PASSWORD = "ApexTest123";
       var emEl = document.getElementById("em");
       var pwEl = document.getElementById("pw");
       if (!loginEl || !emEl || !pwEl || typeof window.doLogin !== "function") return;
+      /* Auto-login skips splash unless ?splash=1 forces it */
+      window.SKIP_SPLASH = (params.get("splash") !== "1");
       loginEl.className = "hide";
       emEl.value = window.AUTO_LOGIN_EMAIL;
       pwEl.value = window.AUTO_LOGIN_PASSWORD;
