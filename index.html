@@ -344,6 +344,7 @@ select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50
 /* PHOTO AVATARS — bigger sizes + photo-bg variant */
 .av-xl{width:64px;height:64px;font-size:20px}
 .av-xxl{width:88px;height:88px;font-size:26px}
+.av-hero{width:120px;height:120px;font-size:34px}
 .av-photo{background-size:cover;background-position:center top;background-repeat:no-repeat;background-color:var(--brand);position:relative}
 .av-photo .av-fallback{display:none}
 
@@ -1179,7 +1180,7 @@ window.openP=function(id,kind){
 
   var h='<div class="mbg" onclick="if(event.target===this)closeM()"><div class="mdl">';
   h+='<div class="mdl-grab"></div>';
-  h+='<div class="mdl-head"><div style="display:flex;align-items:center;gap:14px">'+photoAv(p.player_name,"xxl",p.photo_url)+'<div><div class="mdl-title">'+esc(p.player_name)+'</div><div class="mdl-sub">'+esc(p.position||"")+(cy?" · "+esc(cy):"")+(ht?" · "+ht:"")+(isPr&&p.current_school?" · "+esc(p.current_school):" · Oregon")+'</div></div></div><button class="mdl-close" onclick="closeM()" aria-label="Close"></button></div>';
+  h+='<div class="mdl-head"><div style="display:flex;align-items:center;gap:14px">'+photoAv(p.player_name,"hero",p.photo_url)+'<div><div class="mdl-title">'+esc(p.player_name)+'</div><div class="mdl-sub">'+esc(p.position||"")+(cy?" · "+esc(cy):"")+(ht?" · "+ht:"")+(isPr&&p.current_school?" · "+esc(p.current_school):" · Oregon")+'</div></div></div><button class="mdl-close" onclick="closeM()" aria-label="Close"></button></div>';
 
   if(isPr){
     var mv=valueNil(p,ps).mid;
@@ -1311,7 +1312,7 @@ window.openScoutPlayer=function(idx){
   var pctFmt=function(v){var n=+v;if(n<=1)n=n*100;return n.toFixed(0);};
   var h='<div class="mbg" onclick="if(event.target===this)closeM()"><div class="mdl">';
   h+='<div class="mdl-grab"></div>';
-  h+='<div class="mdl-head"><div style="display:flex;align-items:center;gap:14px">'+photoAv(name,"xxl",data.photo_url)+'<div><div class="mdl-title">'+esc(name)+'</div><div class="mdl-sub">'+esc(pos||"")+(cls?" \u00b7 "+esc(cls):"")+(ht?" \u00b7 "+ht:"")+(school?" \u00b7 "+esc(school):"")+(conf?" \u00b7 "+esc(conf):"")+'</div></div></div><button class="mdl-close" onclick="closeM()" aria-label="Close"></button></div>';
+  h+='<div class="mdl-head"><div style="display:flex;align-items:center;gap:14px">'+photoAv(name,"hero",data.photo_url)+'<div><div class="mdl-title">'+esc(name)+'</div><div class="mdl-sub">'+esc(pos||"")+(cls?" \u00b7 "+esc(cls):"")+(ht?" \u00b7 "+ht:"")+(school?" \u00b7 "+esc(school):"")+(conf?" \u00b7 "+esc(conf):"")+'</div></div></div><button class="mdl-close" onclick="closeM()" aria-label="Close"></button></div>';
   /* Counting stats */
   var s1='';
   if(data.ppg!=null)s1+='<div class="stat-box"><div class="l">PPG</div><div class="v">'+(+data.ppg).toFixed(1)+'</div></div>';
