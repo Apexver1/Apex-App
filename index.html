@@ -2078,7 +2078,7 @@ window.renderRoster=function(c){
   fl.forEach(function(p){
     h+='<div class="card" style="cursor:pointer" onclick="openP(\''+p.id+'\',\'r\')">';
     h+='<div style="display:flex;align-items:center;gap:12px">';
-    h+=photoAv(p.player_name,"md");
+    h+=photoAv(p.player_name,"md",p.photo_url);
     h+='<div style="flex:1;min-width:0"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:4px"><span style="font-size:15px;font-weight:600">#'+(p.jersey_number||"\u2014")+' '+esc(p.player_name)+'</span>';
     h+=chip(p.position)+chip(p["class_year"],"chip-line")+'</div>';
     h+='<div style="font-size:11px;color:var(--ink-2)">'+esc((p.role_description||"").substring(0,80))+'</div></div>';
@@ -2161,7 +2161,7 @@ window._recCard=function(p){
   var rankLabel=isPortal?'On3 Portal':'On3 Consensus';
   var h='<div class="card" style="cursor:pointer" onclick="openP(\''+p.id+'\',\'p\')">';
   h+='<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:8px">';
-  h+=photoAv(p.player_name,"md");
+  h+=photoAv(p.player_name,"md",p.photo_url);
   h+='<div style="flex:1;min-width:0">';
   h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px"><div style="font-size:16px;font-weight:600;flex:1;min-width:0">'+esc(p.player_name)+'</div>'+wlStarBtn(p.id)+addCrmBtn(p.id)+'</div>';
   h+='<div style="font-size:11px;color:var(--ink-2);margin-bottom:6px">'+esc(p.current_school||"")+(p.current_conference?" \u00b7 "+esc(p.current_conference):"")+'</div>';
@@ -2282,7 +2282,7 @@ window.renderCRM=function(c){
 
     h+='<div class="crm-player-card'+(isExp?" expanded":"")+'">';
     h+='<div class="crm-player-row" onclick="toggleCrmExp(\''+p.id+'\')">';
-    h+=photoAv(p.player_name,"md");
+    h+=photoAv(p.player_name,"md",p.photo_url);
     h+='<div class="crm-pmain">';
     h+='<div class="crm-pname">'+esc(p.player_name)+(s>0?stars(s,"sm",true,"setStars.bind(null,\\\''+p.id+'\\\')"):"")+'</div>';
     h+='<div class="crm-pmeta">'+esc(p.position||"")+' \u00b7 '+esc(p.current_school||"")+(p.class_year?" \u00b7 "+esc(p.class_year):"")+'</div>';
@@ -2297,7 +2297,7 @@ window.renderCRM=function(c){
       h+='<div class="crm-nested">';
       /* Player themselves */
       h+='<div class="crm-nested-row" onclick="openContactProfile(\'self-'+p.id+'\',\''+p.id+'\')">';
-      h+=photoAv(p.player_name,"sm");
+      h+=photoAv(p.player_name,"sm",p.photo_url);
       h+='<div class="crm-nmain">';
       h+='<div class="crm-nname">'+esc(p.player_name)+' <span class="crm-nrole">PLAYER</span></div>';
       h+='<div class="crm-nmeta">'+(p.cell_phone?esc(p.cell_phone):"\u2014")+(p.email?" \u00b7 "+esc(p.email):"")+'</div>';
@@ -2648,7 +2648,7 @@ window.renderFilter=function(c,portal){
     var ps=pStats[p.player_name]||{};
     var srcBadge=p.source==="portal"?chip("Portal","chip-navy"):p.source==="high_school"?chip(p.recruiting_class_year?"HS "+p.recruiting_class_year:"HS","chip-accent"):p.source==="intl"||p.source==="international"?chip("Intl","chip-gold"):"";
     h+='<div class="card" style="cursor:pointer" onclick="openP(\''+p.id+'\',\'p\')">';
-    h+='<div style="display:flex;align-items:flex-start;gap:10px"><div style="flex-shrink:0">'+photoAv(p.player_name,"sm")+'</div><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px"><div style="font-size:15px;font-weight:600;flex:1;min-width:0">'+esc(p.player_name)+'</div>'+addCrmBtn(p.id)+'</div><div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">'+chip(p.position)+srcBadge+(p.priority_tier?chip("T"+p.priority_tier,"chip-gold"):"")+chip((p.status||"").toUpperCase(),sc(p.status))+'</div></div>';
+    h+='<div style="display:flex;align-items:flex-start;gap:10px"><div style="flex-shrink:0">'+photoAv(p.player_name,"sm",p.photo_url)+'</div><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px"><div style="font-size:15px;font-weight:600;flex:1;min-width:0">'+esc(p.player_name)+'</div>'+addCrmBtn(p.id)+'</div><div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">'+chip(p.position)+srcBadge+(p.priority_tier?chip("T"+p.priority_tier,"chip-gold"):"")+chip((p.status||"").toUpperCase(),sc(p.status))+'</div></div>';
     if(p.nil_estimate)h+='<div style="font-size:14px;font-weight:600;color:var(--pos);font-variant-numeric:tabular-nums;flex-shrink:0">'+fmt$(p.nil_estimate)+'</div>';
     h+='</div><div style="font-size:11px;color:var(--ink-3);margin-top:6px">'+esc(p.current_school||"")+(p.on3_consensus_rank?" · On3 #"+p.on3_consensus_rank:"")+(p.height_inches?" · "+Math.floor(p.height_inches/12)+"'"+(p.height_inches%12)+"\"":"")+'</div>';
     h+='<div style="display:flex;gap:14px;margin-top:8px;padding-top:8px;border-top:0.5px solid var(--line-2);flex-wrap:wrap">';
@@ -3122,7 +3122,7 @@ window.renderScout=function(c){
     aiResults.results.forEach(function(p){
       var ps=pStats[p.player_name]||{};
       var mv=p._mv||0;var market=p.nil_estimate||0;var delta=mv-market;
-      h+='<div class="card" style="cursor:pointer" onclick="openP(\''+p.id+'\',\'p\')"><div style="display:flex;justify-content:space-between"><div style="display:flex;gap:10px;align-items:flex-start;flex:1;min-width:0">'+photoAv(p.player_name,"sm")+'<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px"><div style="font-size:15px;font-weight:600;flex:1;min-width:0">'+esc(p.player_name)+'</div>'+addCrmBtn(p.id)+'</div><div style="font-size:11px;color:var(--ink-2)">'+esc(p.current_school||"")+(p.current_conference?" \u00b7 "+esc(p.current_conference):"")+'</div><div style="display:flex;gap:6px;margin-top:6px">'+chip(p.position)+chip((p.source||"").toUpperCase().replace(/_/g," "),"chip-line")+'</div></div></div>';
+      h+='<div class="card" style="cursor:pointer" onclick="openP(\''+p.id+'\',\'p\')"><div style="display:flex;justify-content:space-between"><div style="display:flex;gap:10px;align-items:flex-start;flex:1;min-width:0">'+photoAv(p.player_name,"sm",p.photo_url)+'<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px"><div style="font-size:15px;font-weight:600;flex:1;min-width:0">'+esc(p.player_name)+'</div>'+addCrmBtn(p.id)+'</div><div style="font-size:11px;color:var(--ink-2)">'+esc(p.current_school||"")+(p.current_conference?" \u00b7 "+esc(p.current_conference):"")+'</div><div style="display:flex;gap:6px;margin-top:6px">'+chip(p.position)+chip((p.source||"").toUpperCase().replace(/_/g," "),"chip-line")+'</div></div></div>';
       h+='<div style="text-align:right"><div style="font-size:14px;font-weight:600;color:var(--brand);font-variant-numeric:tabular-nums">'+fmt$(mv)+'</div><div style="font-size:10px;color:'+(delta>=0?"var(--pos)":"var(--neg)")+'">'+(delta>=0?"+":"\u2212")+fmt$(Math.abs(delta))+' vs mkt</div></div></div>';
       if(ps.ppg||ps.rpg||ps.three_pct){
         h+='<div style="display:flex;gap:12px;margin-top:8px;padding-top:8px;border-top:0.5px solid var(--line-2)">';
