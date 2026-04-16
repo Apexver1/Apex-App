@@ -831,7 +831,7 @@ window.toggleAddCrm=function(prospectId){
   }else{
     ADDED_TO_CRM.add(prospectId);
     render();
-    api("/rest/v1/crm_added",{method:"POST",body:JSON.stringify({prospect_id:prospectId,school_id:CURRENT_SCHOOL_ID}),prefer:"return=minimal"}).then(function(){
+    api("/rest/v1/crm_added",{method:"POST",body:JSON.stringify({user_id:UID,prospect_id:prospectId,school_id:CURRENT_SCHOOL_ID}),prefer:"return=minimal"}).then(function(){
       toast("Added to CRM");
     }).catch(function(){
       ADDED_TO_CRM.delete(prospectId);render();toast("Sync failed — undone","warn");
@@ -891,7 +891,7 @@ window.toggleWatch=function(prospectId){
   }else{
     WATCHLIST.add(prospectId);
     render();
-    api("/rest/v1/watchlist",{method:"POST",body:JSON.stringify({prospect_id:prospectId,school_id:CURRENT_SCHOOL_ID}),prefer:"return=minimal"}).then(function(){
+    api("/rest/v1/watchlist",{method:"POST",body:JSON.stringify({user_id:UID,prospect_id:prospectId,school_id:CURRENT_SCHOOL_ID}),prefer:"return=minimal"}).then(function(){
       toast("Added to watchlist");
     }).catch(function(){
       WATCHLIST.delete(prospectId);render();toast("Sync failed — undone","warn");
