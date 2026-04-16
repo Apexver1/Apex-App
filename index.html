@@ -2371,9 +2371,21 @@ window.openContactProfile=function(contactId,prospectId){
 
   /* Action tiles */
   h+='<div class="cp-actions">';
-  h+='<button class="cp-action" onclick="toast(\'Calling '+esc(contact.name)+'...\')"><span class="cp-ai">\u260E</span>Call</button>';
-  h+='<button class="cp-action" onclick="toast(\'Compose text\')"><span class="cp-ai">\u2709</span>Text</button>';
-  h+='<button class="cp-action" onclick="toast(\'Compose email\')"><span class="cp-ai">@</span>Email</button>';
+  if(contact.phone){
+    h+='<a class="cp-action" href="tel:'+esc(contact.phone)+'" style="text-decoration:none;color:inherit"><span class="cp-ai">\u260E</span>Call</a>';
+  }else{
+    h+='<button class="cp-action" onclick="toast(\'No phone number on file\')"><span class="cp-ai">\u260E</span>Call</button>';
+  }
+  if(contact.phone){
+    h+='<a class="cp-action" href="sms:'+esc(contact.phone)+'" style="text-decoration:none;color:inherit"><span class="cp-ai">\u2709</span>Text</a>';
+  }else{
+    h+='<button class="cp-action" onclick="toast(\'No phone number on file\')"><span class="cp-ai">\u2709</span>Text</button>';
+  }
+  if(contact.email){
+    h+='<a class="cp-action" href="mailto:'+esc(contact.email)+'" style="text-decoration:none;color:inherit"><span class="cp-ai">@</span>Email</a>';
+  }else{
+    h+='<button class="cp-action" onclick="toast(\'No email on file\')"><span class="cp-ai">@</span>Email</button>';
+  }
   h+='</div>';
 
   /* Detail rows */
@@ -3041,6 +3053,7 @@ window.renderScout=function(c){
 
         h+='<div class="card" '+clickAttr+'>';
         h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">';
+        h+='<div style="flex-shrink:0">'+photoAv(name,"lg",p.photo_url)+'</div>';
         h+='<div style="flex:1;min-width:0">';
         h+='<div style="font-size:15px;font-weight:600">'+esc(name)+(existing?' <span style="font-size:9px;color:var(--pos);font-weight:600;letter-spacing:0.3px;margin-left:4px;vertical-align:middle">\u2022 ON SHORTLIST</span>':'')+'</div>';
         if(school||conf)h+='<div style="font-size:11px;color:var(--ink-2);margin-top:2px">'+esc(school)+(conf?" \u00b7 "+esc(conf):"")+'</div>';
