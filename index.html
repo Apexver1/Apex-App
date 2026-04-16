@@ -557,9 +557,9 @@ select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50
     </div>
     <div class="drawer-group">
       <div class="drawer-group-title">Main</div>
-      <div class="drawer-item" id="dr-home" onclick="navTo('home')">Home <span class="dot"></span></div>
+      <div class="drawer-item" id="dr-home" onclick="navTo('home')">Home <span id="homeBadge" class="badge hide">0</span></div>
       <div class="drawer-item" id="dr-roster" onclick="navTo('roster')">Roster</div>
-      <div class="drawer-item" id="dr-recruiting" onclick="navTo('recruiting')">Recruiting</div>
+      <div class="drawer-item" id="dr-recruiting" onclick="navTo('recruiting')">Recruiting <span id="recBadge" class="badge hide">0</span></div>
       <div class="drawer-item" id="dr-crm" onclick="navTo('crm')">Apex CRM <span id="crmBadge" class="badge hide">0</span></div>
       <div class="drawer-item" id="dr-visits" onclick="navTo('visits')">Scheduled visits</div>
     </div>
@@ -680,6 +680,8 @@ var WATCHLIST=new Set();
 var crmExpanded=new Set();
 var crmStarFilter="ALL";   /* ALL / 5 / 4 / 3 / 2 */
 var patronTier="ALL";      /* ALL / champion / platinum / gold / silver / bronze */
+var schoolEspnMap={};
+var compareTarget=null;
 
 /* DONORS — 12 seeded with realistic profile */
 var DONORS_SEED=[
@@ -814,6 +816,47 @@ window.photoAv=function(name,size,photoUrl){
 };
 
 /* Add-to-CRM button — frontend-only state via ADDED_TO_CRM Set */
+window.schoolLogo=function(name,size){
+  if(!name)return"";
+  var eid=schoolEspnMap[(name||"").toLowerCase()];
+  if(!eid)return"";
+  var px=size||20;
+  return '<img src="https://a.espncdn.com/i/teamlogos/ncaa/500/'+eid+'.png" width="'+px+'" height="'+px+'" style="border-radius:3px;vertical-align:middle;object-fit:contain" alt="" onerror="this.style.display=\'none\'">';
+};
+window.startCompare=function(id,kind){
+  compareTarget={id:id,kind:kind};
+  toast("Now tap another player to compare");
+};
+window.showComparison=function(a,b){
+  var psA=pStats[a.player_name]||{};var psB=pStats[b.player_name]||{};
+  var htA=a.height_inches?(Math.floor(a.height_inches/12)+"'"+(a.height_inches%12)+"\""):"";
+  var htB=b.height_inches?(Math.floor(b.height_inches/12)+"'"+(b.height_inches%12)+"\""):"";
+  var h='<div class="mbg" onclick="if(event.target===this)closeM()"><div class="mdl" style="max-width:480px">';
+  h+='<div class="mdl-grab"></div>';
+  h+='<div class="mdl-head"><div class="mdl-title">Player Comparison</div><button class="mdl-close" onclick="compareTarget=null;closeM()" aria-label="Close"></button></div>';
+  h+='<div style="display:flex;gap:12px;margin-bottom:16px">';
+  h+='<div style="flex:1;text-align:center">'+photoAv(a.player_name,"xl",a.photo_url)+'<div style="font-size:14px;font-weight:600;margin-top:8px">'+esc(a.player_name)+'</div><div style="font-size:11px;color:var(--ink-2)">'+esc(a.position||"")+' · '+esc(a.current_school||"Oregon")+'</div></div>';
+  h+='<div style="display:flex;align-items:center;font-size:18px;font-weight:700;color:var(--ink-3)">vs</div>';
+  h+='<div style="flex:1;text-align:center">'+photoAv(b.player_name,"xl",b.photo_url)+'<div style="font-size:14px;font-weight:600;margin-top:8px">'+esc(b.player_name)+'</div><div style="font-size:11px;color:var(--ink-2)">'+esc(b.position||"")+' · '+esc(b.current_school||"Oregon")+'</div></div>';
+  h+='</div>';
+  var rows=[["PPG",psA.ppg,psB.ppg],["RPG",psA.rpg,psB.rpg],["APG",psA.apg,psB.apg],["3PT%",psA.three_pct?((psA.three_pct*100).toFixed(0)+"%"):null,psB.three_pct?((psB.three_pct*100).toFixed(0)+"%"):null],["Height",htA||null,htB||null],["NIL Value",a.nil_estimate?fmt$(a.nil_estimate):null,b.nil_estimate?fmt$(b.nil_estimate):null]];
+  rows.forEach(function(r){
+    var label=r[0],va=r[1],vb=r[2];
+    if(va==null&&vb==null)return;
+    var nA=parseFloat(va)||0,nB=parseFloat(vb)||0;
+    var clsA=(nA>nB&&va!=null&&vb!=null)?"color:var(--pos);font-weight:700":"";
+    var clsB=(nB>nA&&va!=null&&vb!=null)?"color:var(--pos);font-weight:700":"";
+    h+='<div style="display:flex;align-items:center;padding:10px 0;border-bottom:0.5px solid var(--line-2);font-size:13px">';
+    h+='<div style="flex:1;text-align:center;font-variant-numeric:tabular-nums'+(clsA?";"+clsA:"")+'">'+(va||"\u2014")+'</div>';
+    h+='<div style="flex:0 0 80px;text-align:center;font-size:11px;color:var(--ink-3);font-weight:600">'+label+'</div>';
+    h+='<div style="flex:1;text-align:center;font-variant-numeric:tabular-nums'+(clsB?";"+clsB:"")+'">'+(vb||"\u2014")+'</div>';
+    h+='</div>';
+  });
+  h+='<button class="btn btn-line" style="margin-top:16px" onclick="compareTarget=null;closeM()">Done</button>';
+  h+='</div></div>';
+  compareTarget=null;
+  document.getElementById("mc").innerHTML=h;
+};
 window.addCrmBtn=function(prospectId){
   if(!prospectId)return"";
   var added=ADDED_TO_CRM.has(prospectId);
@@ -1029,7 +1072,7 @@ window.loadData=function(){
     api("/rest/v1/prospect_scores?select=*"),
     api("/rest/v1/prospect_family?select=*"),
     api("/rest/v1/contact_reminders?select=*&status=eq.pending&order=scheduled_for.asc"),
-    fetch(SU+"/rest/v1/schools?select=id,name,conference,city,state,head_coach_name&conference=not.is.null&order=name.asc&limit=2000",{headers:{apikey:SK,Authorization:"Bearer "+T,"Range-Unit":"items",Range:"0-1999"}}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SU+"/rest/v1/schools?select=id,name,conference,city,state,head_coach_name,espn_id&conference=not.is.null&order=name.asc&limit=2000",{headers:{apikey:SK,Authorization:"Bearer "+T,"Range-Unit":"items",Range:"0-1999"}}).then(function(r){return r.json();}).catch(function(){return[];}),
     api("/rest/v1/crm_added?select=prospect_id").catch(function(){return[];}),
     api("/rest/v1/watchlist?select=prospect_id").catch(function(){return[];})
   ]).then(function(r){
@@ -1038,6 +1081,7 @@ window.loadData=function(){
     scoresMap={};(r[8]||[]).forEach(function(s){scoresMap[s.prospect_id]=s;});
     familyMap={};(r[9]||[]).forEach(function(f){if(!familyMap[f.prospect_id])familyMap[f.prospect_id]=[];familyMap[f.prospect_id].push(f);});
     reminders=r[10]||[];schools=r[11]||[];
+    schoolEspnMap={};schools.forEach(function(s){if(s.espn_id)schoolEspnMap[(s.name||"").toLowerCase()]=s.espn_id;});
     ADDED_TO_CRM=new Set();(r[12]||[]).forEach(function(x){if(x&&x.prospect_id)ADDED_TO_CRM.add(x.prospect_id);});
     WATCHLIST=new Set();(r[13]||[]).forEach(function(x){if(x&&x.prospect_id)WATCHLIST.add(x.prospect_id);});
     var idMap={};prospects.forEach(function(p){idMap[p.id]=p.player_name;});
@@ -1067,6 +1111,14 @@ window.updateCrmBadge=function(){
   var overdue=countOverdueFollowups();
   var b=document.getElementById("crmBadge");
   if(overdue>0){b.classList.remove("hide");b.textContent=overdue;}else{b.classList.add("hide");}
+  /* Recruiting badge: portal players in_portal status */
+  var portalCount=prospects.filter(function(p){return p.source==="portal"&&(p.portal_status==="in_portal"||p.status==="watching");}).length;
+  var rb=document.getElementById("recBadge");
+  if(rb){if(portalCount>0){rb.classList.remove("hide");rb.textContent=portalCount;}else{rb.classList.add("hide");}}
+  /* Home badge: pending reminders */
+  var rc=countRemindersToday();
+  var hb=document.getElementById("homeBadge");
+  if(hb){if(rc>0){hb.classList.remove("hide");hb.textContent=rc;}else{hb.classList.add("hide");}}
 };
 window.countOverdueFollowups=function(){
   var now=new Date();
@@ -1171,6 +1223,14 @@ window.openP=function(id,kind){
   if(kind==="r"){p=roster.filter(function(x){return x.id===id;})[0];}
   else{p=prospects.filter(function(x){return x.id===id;})[0];}
   if(!p)return;
+  /* Compare intercept — if a first player was selected, show comparison */
+  if(compareTarget&&compareTarget.id!==id){
+    var a;
+    if(compareTarget.kind==="r")a=roster.filter(function(x){return x.id===compareTarget.id;})[0];
+    else a=prospects.filter(function(x){return x.id===compareTarget.id;})[0];
+    if(a){showComparison(a,p);return;}
+  }
+  compareTarget=null;
   var isPr=kind==="p";
   var ps=pStats[p.player_name]||{};
   var logs=crmLogs[p.id]||[];
@@ -1180,7 +1240,8 @@ window.openP=function(id,kind){
 
   var h='<div class="mbg" onclick="if(event.target===this)closeM()"><div class="mdl">';
   h+='<div class="mdl-grab"></div>';
-  h+='<div class="mdl-head"><div style="display:flex;align-items:center;gap:14px">'+photoAv(p.player_name,"hero",p.photo_url)+'<div><div class="mdl-title">'+esc(p.player_name)+'</div><div class="mdl-sub">'+esc(p.position||"")+(cy?" · "+esc(cy):"")+(ht?" · "+ht:"")+(isPr&&p.current_school?" · "+esc(p.current_school):" · Oregon")+'</div></div></div><button class="mdl-close" onclick="closeM()" aria-label="Close"></button></div>';
+  h+='<div class="mdl-head"><div style="display:flex;align-items:center;gap:14px">'+photoAv(p.player_name,"hero",p.photo_url)+'<div><div class="mdl-title">'+esc(p.player_name)+'</div><div class="mdl-sub">'+schoolLogo(isPr?p.current_school:"Oregon",14)+' '+esc(p.position||"")+(cy?" · "+esc(cy):"")+(ht?" · "+ht:"")+(isPr&&p.current_school?" · "+esc(p.current_school):" · Oregon")+'</div></div></div><button class="mdl-close" onclick="closeM()" aria-label="Close"></button></div>';
+  h+='<div style="text-align:right;margin:-8px 0 8px"><button class="btn-sm btn-line" style="font-size:11px;padding:5px 10px;border-radius:6px;border:0.5px solid var(--line);background:var(--surface);cursor:pointer;font-family:inherit;color:var(--accent);font-weight:600" onclick="event.stopPropagation();closeM();startCompare(\''+p.id+'\',\''+kind+'\')">Compare \u2194</button></div>';
 
   if(isPr){
     var mv=valueNil(p,ps).mid;
@@ -2165,7 +2226,7 @@ window._recCard=function(p){
   h+=photoAv(p.player_name,"lg",p.photo_url);
   h+='<div style="flex:1;min-width:0">';
   h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px"><div style="font-size:16px;font-weight:600;flex:1;min-width:0">'+esc(p.player_name)+'</div>'+wlStarBtn(p.id)+addCrmBtn(p.id)+'</div>';
-  h+='<div style="font-size:11px;color:var(--ink-2);margin-bottom:6px">'+esc(p.current_school||"")+(p.current_conference?" \u00b7 "+esc(p.current_conference):"")+'</div>';
+  h+='<div style="font-size:11px;color:var(--ink-2);margin-bottom:6px;display:flex;align-items:center;gap:4px">'+schoolLogo(p.current_school,16)+'<span>'+esc(p.current_school||"")+(p.current_conference?" \u00b7 "+esc(p.current_conference):"")+'</span></div>';
   h+='<div style="display:flex;gap:6px;flex-wrap:wrap">'+chip(p.position)+chip(p["class_year"],"chip-line")+(p.recruiting_class_year?chip("Class of "+p.recruiting_class_year,"chip-accent"):"")+chip((p.status||"").charAt(0).toUpperCase()+(p.status||"").slice(1),sc(p.status))+(p.priority_tier?chip("Tier "+p.priority_tier):"")+(lg.length?chip(lg.length+" logs","chip-accent"):"")+(scoreObj?chip("\u2605"+scoreObj.composite_score,"chip-gold"):"")+'</div>';
   h+='</div>';
   if(hasRank){
