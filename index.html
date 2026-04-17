@@ -630,38 +630,39 @@ function s2rng(seed){var s=seed>>>0||1;return function(){s^=s<<13;s^=s>>>17;s^=s
 function s2pick(arr,rng){return arr[Math.floor(rng()*arr.length)];}
 
 /* curated 25-school metadata — arena, mascot, city, conference-aware opponents */
+/* Keyed by schools.name (short form as stored in Supabase); 'full' field holds display name with mascot */
 var SCHOOL_META={
   /* Big Ten */
-  "Oregon Ducks":{arena:"Matthew Knight Arena",mascot:"Ducks",city:"Eugene, OR",state:"OR",conf:"Big Ten"},
-  "UCLA Bruins":{arena:"Pauley Pavilion",mascot:"Bruins",city:"Los Angeles, CA",state:"CA",conf:"Big Ten"},
-  "USC Trojans":{arena:"Galen Center",mascot:"Trojans",city:"Los Angeles, CA",state:"CA",conf:"Big Ten"},
-  "Washington Huskies":{arena:"Alaska Airlines Arena",mascot:"Huskies",city:"Seattle, WA",state:"WA",conf:"Big Ten"},
-  "Michigan Wolverines":{arena:"Crisler Center",mascot:"Wolverines",city:"Ann Arbor, MI",state:"MI",conf:"Big Ten"},
-  "Michigan State Spartans":{arena:"Breslin Center",mascot:"Spartans",city:"East Lansing, MI",state:"MI",conf:"Big Ten"},
-  "Purdue Boilermakers":{arena:"Mackey Arena",mascot:"Boilermakers",city:"West Lafayette, IN",state:"IN",conf:"Big Ten"},
-  "Illinois Fighting Illini":{arena:"State Farm Center",mascot:"Fighting Illini",city:"Champaign, IL",state:"IL",conf:"Big Ten"},
-  "Indiana Hoosiers":{arena:"Assembly Hall",mascot:"Hoosiers",city:"Bloomington, IN",state:"IN",conf:"Big Ten"},
-  "Wisconsin Badgers":{arena:"Kohl Center",mascot:"Badgers",city:"Madison, WI",state:"WI",conf:"Big Ten"},
+  "Oregon":{full:"Oregon Ducks",arena:"Matthew Knight Arena",mascot:"Ducks",city:"Eugene, OR",state:"OR",conf:"Big Ten"},
+  "UCLA":{full:"UCLA Bruins",arena:"Pauley Pavilion",mascot:"Bruins",city:"Los Angeles, CA",state:"CA",conf:"Big Ten"},
+  "USC":{full:"USC Trojans",arena:"Galen Center",mascot:"Trojans",city:"Los Angeles, CA",state:"CA",conf:"Big Ten"},
+  "Washington":{full:"Washington Huskies",arena:"Alaska Airlines Arena",mascot:"Huskies",city:"Seattle, WA",state:"WA",conf:"Big Ten"},
+  "Michigan":{full:"Michigan Wolverines",arena:"Crisler Center",mascot:"Wolverines",city:"Ann Arbor, MI",state:"MI",conf:"Big Ten"},
+  "Michigan State":{full:"Michigan State Spartans",arena:"Breslin Center",mascot:"Spartans",city:"East Lansing, MI",state:"MI",conf:"Big Ten"},
+  "Purdue":{full:"Purdue Boilermakers",arena:"Mackey Arena",mascot:"Boilermakers",city:"West Lafayette, IN",state:"IN",conf:"Big Ten"},
+  "Illinois":{full:"Illinois Fighting Illini",arena:"State Farm Center",mascot:"Fighting Illini",city:"Champaign, IL",state:"IL",conf:"Big Ten"},
+  "Indiana":{full:"Indiana Hoosiers",arena:"Assembly Hall",mascot:"Hoosiers",city:"Bloomington, IN",state:"IN",conf:"Big Ten"},
+  "Wisconsin":{full:"Wisconsin Badgers",arena:"Kohl Center",mascot:"Badgers",city:"Madison, WI",state:"WI",conf:"Big Ten"},
   /* ACC */
-  "Duke Blue Devils":{arena:"Cameron Indoor Stadium",mascot:"Blue Devils",city:"Durham, NC",state:"NC",conf:"ACC"},
-  "North Carolina Tar Heels":{arena:"Dean E. Smith Center",mascot:"Tar Heels",city:"Chapel Hill, NC",state:"NC",conf:"ACC"},
-  "Virginia Cavaliers":{arena:"John Paul Jones Arena",mascot:"Cavaliers",city:"Charlottesville, VA",state:"VA",conf:"ACC"},
-  "Louisville Cardinals":{arena:"KFC Yum! Center",mascot:"Cardinals",city:"Louisville, KY",state:"KY",conf:"ACC"},
+  "Duke":{full:"Duke Blue Devils",arena:"Cameron Indoor Stadium",mascot:"Blue Devils",city:"Durham, NC",state:"NC",conf:"ACC"},
+  "North Carolina":{full:"North Carolina Tar Heels",arena:"Dean E. Smith Center",mascot:"Tar Heels",city:"Chapel Hill, NC",state:"NC",conf:"ACC"},
+  "Virginia":{full:"Virginia Cavaliers",arena:"John Paul Jones Arena",mascot:"Cavaliers",city:"Charlottesville, VA",state:"VA",conf:"ACC"},
+  "Louisville":{full:"Louisville Cardinals",arena:"KFC Yum! Center",mascot:"Cardinals",city:"Louisville, KY",state:"KY",conf:"ACC"},
   /* Big 12 */
-  "Kansas Jayhawks":{arena:"Allen Fieldhouse",mascot:"Jayhawks",city:"Lawrence, KS",state:"KS",conf:"Big 12"},
-  "Houston Cougars":{arena:"Fertitta Center",mascot:"Cougars",city:"Houston, TX",state:"TX",conf:"Big 12"},
-  "Baylor Bears":{arena:"Foster Pavilion",mascot:"Bears",city:"Waco, TX",state:"TX",conf:"Big 12"},
-  "Iowa State Cyclones":{arena:"Hilton Coliseum",mascot:"Cyclones",city:"Ames, IA",state:"IA",conf:"Big 12"},
+  "Kansas":{full:"Kansas Jayhawks",arena:"Allen Fieldhouse",mascot:"Jayhawks",city:"Lawrence, KS",state:"KS",conf:"Big 12"},
+  "Houston":{full:"Houston Cougars",arena:"Fertitta Center",mascot:"Cougars",city:"Houston, TX",state:"TX",conf:"Big 12"},
+  "Baylor":{full:"Baylor Bears",arena:"Foster Pavilion",mascot:"Bears",city:"Waco, TX",state:"TX",conf:"Big 12"},
+  "Iowa State":{full:"Iowa State Cyclones",arena:"Hilton Coliseum",mascot:"Cyclones",city:"Ames, IA",state:"IA",conf:"Big 12"},
   /* SEC */
-  "Kentucky Wildcats":{arena:"Rupp Arena",mascot:"Wildcats",city:"Lexington, KY",state:"KY",conf:"SEC"},
-  "Auburn Tigers":{arena:"Neville Arena",mascot:"Tigers",city:"Auburn, AL",state:"AL",conf:"SEC"},
-  "Tennessee Volunteers":{arena:"Thompson-Boling Arena",mascot:"Volunteers",city:"Knoxville, TN",state:"TN",conf:"SEC"},
+  "Kentucky":{full:"Kentucky Wildcats",arena:"Rupp Arena",mascot:"Wildcats",city:"Lexington, KY",state:"KY",conf:"SEC"},
+  "Auburn":{full:"Auburn Tigers",arena:"Neville Arena",mascot:"Tigers",city:"Auburn, AL",state:"AL",conf:"SEC"},
+  "Tennessee":{full:"Tennessee Volunteers",arena:"Thompson-Boling Arena",mascot:"Volunteers",city:"Knoxville, TN",state:"TN",conf:"SEC"},
   /* Big East */
-  "UConn Huskies":{arena:"Gampel Pavilion",mascot:"Huskies",city:"Storrs, CT",state:"CT",conf:"Big East"},
-  "Villanova Wildcats":{arena:"Finneran Pavilion",mascot:"Wildcats",city:"Villanova, PA",state:"PA",conf:"Big East"},
+  "UConn":{full:"UConn Huskies",arena:"Gampel Pavilion",mascot:"Huskies",city:"Storrs, CT",state:"CT",conf:"Big East"},
+  "Villanova":{full:"Villanova Wildcats",arena:"Finneran Pavilion",mascot:"Wildcats",city:"Villanova, PA",state:"PA",conf:"Big East"},
   /* WCC (audit-specific mid-majors) */
-  "Gonzaga Bulldogs":{arena:"McCarthey Athletic Center",mascot:"Bulldogs",city:"Spokane, WA",state:"WA",conf:"WCC"},
-  "Saint Mary's Gaels":{arena:"University Credit Union Pavilion",mascot:"Gaels",city:"Moraga, CA",state:"CA",conf:"WCC"}
+  "Gonzaga":{full:"Gonzaga Bulldogs",arena:"McCarthey Athletic Center",mascot:"Bulldogs",city:"Spokane, WA",state:"WA",conf:"WCC"},
+  "Saint Mary's":{full:"Saint Mary's Gaels",arena:"University Credit Union Pavilion",mascot:"Gaels",city:"Moraga, CA",state:"CA",conf:"WCC"}
 };
 
 /* conference opponents pool — used when picking a "next up" rival */
@@ -685,17 +686,16 @@ var CONF_OPPONENTS={
 function s2meta(sid){
   if(!sid)return null;
   var row=null;try{row=schools.filter(function(s){return s.id===sid;})[0];}catch(e){}
-  var name=row&&row.name?row.name:(sid===CURRENT_SCHOOL_ID?CURRENT_SCHOOL_NAME:"");
+  var name=row&&row.name?row.name:(sid===CURRENT_SCHOOL_ID?CURRENT_SCHOOL_NAME.replace(/ Ducks$/,""):"");
   var m=SCHOOL_META[name];
   if(m)return Object.assign({name:name,curated:true},m);
   /* generic fallback: derive what we can from the schools row */
-  var base=name?name.split(" ").slice(0,2).join(" "):"School"; /* strip nickname for cleaner display */
-  var mascotGuess=name&&name.indexOf(" ")>0?name.split(" ").slice(-1)[0]:"";
   return {
     name:name||"School",
+    full:name||"School",
     curated:false,
-    arena:base+" Arena",
-    mascot:mascotGuess,
+    arena:(name?name:"School")+" Arena",
+    mascot:"",
     city:row&&row.city?(row.city+(row.state?", "+row.state:"")):"",
     state:row&&row.state?row.state:"",
     conf:row&&row.conference?row.conference:""
@@ -705,9 +705,8 @@ function s2meta(sid){
 /* short name (strip nickname) for display in "vs X" contexts */
 function s2short(sid){
   var m=s2meta(sid);if(!m)return"School";
-  /* If curated, strip mascot; if generic, already stripped in base */
-  if(m.curated){var parts=m.name.split(" ");return parts.slice(0,Math.max(1,parts.length-1)).join(" ");}
-  return m.name.split(" ").slice(0,2).join(" ");
+  /* schools.name is already short-form in Supabase; return as-is */
+  return m.name||"School";
 }
 
 /* pick a conference opponent deterministically, excluding self */
@@ -1363,6 +1362,9 @@ window.loadData=function(){
       COACH_FALLBACK[CURRENT_SCHOOL_ID]={name:"Head Coach",role:"Head coach",initials:ini};
     }
     updateDrawerIdentity();
+    /* Session 2: refresh per-school seeds — staff, visits */
+    staff=s2staff(CURRENT_SCHOOL_ID);
+    visits=s2visits(CURRENT_SCHOOL_ID);
     updateCrmBadge();
   }).catch(function(e){console.error("loadData error:",e);});
 };
@@ -2728,7 +2730,7 @@ window.openContactProfile=function(contactId,prospectId){
   /* Assigned coaches */
   h+='<div class="cp-section-h">Assigned coaches</div>';
   h+='<div class="cp-coaches">';
-  STAFF_SEED.forEach(function(s,i){
+  staff.forEach(function(s,i){
     var on=i<2;
     h+='<div class="cp-coach-chip'+(on?" on":"")+'" onclick="this.classList.toggle(\'on\')"><div class="av av-sm" style="background:'+s.color+'">'+s.initials+'</div>'+esc(s.name.split(" ").slice(-1)[0])+'</div>';
   });
@@ -3667,8 +3669,8 @@ window.renderOps=function(c){
   /* Recent Activity */
   h+='<div class="sec-head"><span class="sec-title">Recent activity</span></div>';
   h+='<div class="act-feed">';
-  OPS_RECENT.forEach(function(a){
-    var staffMem=STAFF_SEED.filter(function(s){return s.initials===a.who;})[0]||{name:a.who,initials:a.who,color:"#888"};
+  s2opsRecent(CURRENT_SCHOOL_ID).forEach(function(a){
+    var staffMem=staff.filter(function(s){return s.initials===a.who;})[0]||{name:a.who,initials:a.who,color:"#888"};
     h+='<div class="act-row">';
     h+='<div class="av av-sm" style="background:'+staffMem.color+'">'+staffMem.initials+'</div>';
     h+='<span class="act-text"><b>'+esc(staffMem.name.split(" ")[0])+'</b> '+esc(a.what)+' '+esc(a.item)+'</span>';
@@ -3679,8 +3681,8 @@ window.renderOps=function(c){
 
   /* Recent Decks */
   h+='<div class="sec-head"><span class="sec-title">Recent decks</span><span class="sec-link">All decks</span></div>';
-  OPS_DECKS.forEach(function(deck){
-    var staffMem=STAFF_SEED.filter(function(s){return s.initials===deck.author;})[0]||{name:deck.author,initials:deck.author,color:"#888"};
+  s2opsDecks(CURRENT_SCHOOL_ID).forEach(function(deck){
+    var staffMem=staff.filter(function(s){return s.initials===deck.author;})[0]||{name:deck.author,initials:deck.author,color:"#888"};
     h+='<div class="mat-row" onclick="toast(\'Open '+esc(deck.name)+'\')">';
     h+='<div class="mat-icon ic-'+deck.type+'">'+deck.type.toUpperCase()+'</div>';
     h+='<div class="mat-main">';
