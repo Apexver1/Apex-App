@@ -1,6 +1,6 @@
 # BACKLOG.md — Deferred work, named projects, ideas
 
-**Updated:** 2026-04-17 (after Session 3 KenPom backend ingestion)
+**Updated:** 2026-04-17 (after Session 4a KenPom frontend — Home surfaces)
 **Updated by:** Claude when items get added or moved
 **Promotion rule:** Items move from backlog into the active 14-day plan only by explicit decision in a session. Do not silently slip them in.
 
@@ -73,8 +73,8 @@
 
 ### From Session 1 audit
 - **B3:** Howard `head_coach_name` is NULL → drawer shows blank name + "Coach." greeting with no last name. Fix options: (a) backfill missing head coach data across the schools table, (b) make the fallback in `loadData()` ~line 1101 more defensive, (c) both. Probably 30 min.
-- **B4:** Avg PPG = 0.0 on non-Oregon schools in Roster Pulse. Either `depth_chart_position` is unset post-materialization or PPG fields are NULL. Investigation + fix probably 1 session.
-- **B6:** School picker doesn't find "Saint Mary's" when searching "st." — needs alias-aware search or data-side normalization. Cosmetic but a real UX issue. ~30 min.
+- **B4:** Avg PPG = 0.0 on non-Oregon schools in Roster Pulse. Either `depth_chart_position` is unset post-materialization or PPG fields are NULL. Investigation + fix probably 1 session. Session 4a observation: Oregon shows `On roster: 17` but DATA-STATUS says 78 — likely same root cause (starter/active filter). Related.
+- **B6:** School picker doesn't find "Saint Mary's" when searching "st." — needs alias-aware search or data-side normalization. Session 4a observation: searching "saint" does return Saint Mary's correctly, so the bug may be narrower than originally specced. Worth a 5-min probe to confirm which prefix variants fail. ~30 min.
 - **B7:** Avatar bg color isn't school-themed. Map school primary color → avatar bg. Pleasant polish. ~1 session if we want to do it across all 365 schools.
 - **Defer-from-S1:** Per-screen audit of Roster, Recruiting, Roster Builder, Smart Filter, Apex Scout across non-Oregon schools — Session 1 only audited Home/Visits/Drawer. Could surface more bugs.
 - **CRM attribution row** ("added by …") — was on Session 1 list, deferred. Probably 1 session standalone.
@@ -87,7 +87,13 @@
 - **S3-minor-1:** KenPom data freshness. `scripts/kenpom_sync.py` in the `apex-intel` repo is idempotent and safe to re-run. Should be re-run weekly during the season (Oct–Apr) to pull updated ranks. Not yet wired to a cron job. If/when we want auto-refresh, candidate paths: Supabase Edge Function on a schedule, GitHub Action cron, local launchd plist. ~1 session to automate, or manual monthly re-run is fine for MVP.
 - **S3-minor-2:** `scripts/kenpom_sync.py` uses `fuzz.ratio` (character-level) for Pass 3 fuzzy fallback, deliberately chosen over `fuzz.token_set_ratio` because the latter caused 6 wrong-row writes where short KenPom names like "Miami OH" scored 100 against longer DB names like "Miami". Pass 3 is currently unused (override + normalize-exact cover 365/365), but if KenPom adds new names we don't have overrides for, the script should still be safe. Documented here so future me doesn't "helpfully" switch back to token_set_ratio.
 - **S3-minor-3:** `KENPOM_TO_SCHOOL_OVERRIDES` in `kenpom_sync.py` has 62 entries, hand-coded against the current `schools.name` set. If `schools` table is ever renamed/reloaded (e.g., a future data-vendor swap), these overrides may silently break. Defensive option: add a startup check that every override target EXISTS in `schools.name` and fail fast if not. ~15 min.
-- **S3-minor-4:** 8 more `kenpom_*` columns added to `schools`. Session 4's frontend work will want a `schoolKenPomMap` / `kenpomFor(schoolName)` helper. Pattern mirrors existing `schoolEspnMap`.
+- **S3-minor-4:** 8 more `kenpom_*` columns added to `schools`. Session 4's frontend work will want a `schoolKenPomMap` / `kenpomFor(schoolName)` helper. Pattern mirrors existing `schoolEspnMap`. **RESOLVED Session 4a** — helper shipped, Home surfaces wired.
+
+### From Session 4a (2026-04-17) — KenPom frontend Home surfaces
+- **S4a-minor-1:** `node` not installed on Mac. `node --check` syntax validation fails (`-bash: node: command not found`) during patch workflow. Session 4a fell back to Python regex brace/paren balance check against extracted `<script>` bodies, which worked — but a proper JS syntax check is a better safety net. Options: (a) `brew install node`, (b) switch to `esbuild --check` or similar Python-based JS parser, (c) keep the Python balance check and accept lighter guarantees. ~10 min for option (a).
+- **S4a-minor-2:** `CURRENT_SCHOOL_NAME` global holds the full "Oregon Ducks" form. `schoolKenPomMap` + `schoolEspnMap` are keyed by the shorter `schools.name` form ("Oregon"). Session 4a worked around this by deriving the canonical name via `schools.filter(s=>s.id===CURRENT_SCHOOL_ID)[0].name` inside the Roster Pulse patch. Cleaner would be: store `CURRENT_SCHOOL_CANONICAL` alongside `CURRENT_SCHOOL_NAME`, updated in the same setters. Or key both maps off `id` not `name`. Not urgent but will repay itself across 4b/4c.
+- **S4a-minor-3:** Session 4a left `index.html.s4a-backup-20260417-043201` in `~/code/Apex-App/` as untracked. Add `*-backup-*` or similar to frontend repo's `.gitignore` to prevent pollution. Combines naturally with the existing "Session 3 repo hygiene" item for the frontend repo.
+- **S4a-minor-4:** Session 4a observation — Oregon `On roster: 17` mismatches DATA-STATUS's documented 78 Oregon players in `my_roster`. Likely a filter upstream of Roster Pulse (probably active/starter-only). If B4 (Avg PPG = 0 non-Oregon) turns out to share a root cause, fixing both at once is cheap. Flag for the B4 investigation session.
 
 ### Carryover from previous sessions
 - Empty-state skeletons for seed-data screens (lower priority once dummy fallback ships in Session 2)
@@ -106,7 +112,7 @@
 
 ### Repo hygiene
 - **✅ DONE 2026-04-17 (Session 3):** Cleaned up uncommitted clutter in `~/code/apex-intel/` — `.env.backup`, `*.bak`, `*.backup` files gitignored + 2 real commits extracted (Scout 1.2 refactor, Bart Torvik ingestion script).
-- Remaining: `.gitignore` hygiene on `~/code/Apex-App/` frontend repo (no `*.bak*`, `*.sb-*` Sublime swap, `*.rtf`)
+- Remaining: `.gitignore` hygiene on `~/code/Apex-App/` frontend repo (no `*.bak*`, `*.sb-*` Sublime swap, `*.rtf`, `*-backup-*`). Session 4a added the backup-timestamp pattern — promote to a full pass at some point.
 - Standard commit message format
 
 ---

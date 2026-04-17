@@ -5,3 +5,7 @@ index.html.pre-*
 *.bak*
 *.rtf
 *.sb-*
+
+# Session backup safety files (local only)
+index.html.*-backup-*
+*.s4a-backup-*
