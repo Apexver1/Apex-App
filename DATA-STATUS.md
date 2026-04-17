@@ -1,6 +1,6 @@
 # DATA-STATUS.md — Real vs Dummy data tracker
 
-**Updated:** 2026-04-17 (after Session 1 audit + badge removal)
+**Updated:** 2026-04-17 (after Session 3 KenPom backend ingestion)
 **Updated by:** Claude at end of every session
 
 This doc tracks the **truth** of what data is real vs dummy across the app, per screen and per school. Source of truth for Claude across sessions. Not visible to end users — visual indicators (the "Sample" badges shipped in 5f) were removed in Session 1; gaps are now tracked here only.
@@ -27,121 +27,80 @@ This doc tracks the **truth** of what data is real vs dummy across the app, per 
 - Drawer badges (Home reminders, Recruiting count, CRM overdue): 🔴 BROKEN — globally counted, not school-scoped (see B5)
 - iPhone scroll: ✅ FIXED in Session 5f
 - "Logged in as · Coach Stewart · HC" indicator: ✅ NEW in Session 1 (Option C — separate row below school-coach card)
-- **Gap (B3):** Howard `head_coach_name` is NULL — drawer shows blank name + bare "Head coach · Howard"; greeting reads "Good morning, Coach." with no last name. The fallback to "Head Coach" + initials in `loadData()` line ~1101 is not actually rendering. Fix: data backfill OR make fallback more defensive.
+- **Gap (B3):** Howard `head_coach_name` is NULL — drawer shows blank name. Fix: data backfill OR more defensive fallback.
 
 ### Home — Smart Suggestions
 - **Status:** ✅ REAL
 - Computed from prospects + CRM logs
 
 ### Home — Today's Brief tiles
-- **Status:** 🔴 BROKEN (downgraded from 🟠 PARTIAL — see B5)
-- Open scholarships: 🔴 BROKEN (Supabase query has `is_seed_data=eq.true` filter, no `school_id` filter — every school shows the same "7 of 13")
-- NIL requests: 🔴 BROKEN (no school filter — every school shows same global count)
-- CRM follow-ups: 🔴 BROKEN (`crm_log` has no school filter)
-- Reminders today: 🔴 BROKEN (`contact_reminders` has no school filter)
-- Visits this week: 🟡 DUMMY (from `VISITS_SEED`, Oregon-only — see B2)
-- Portal churn: 🟡 DUMMY (hardcoded `12` in renderHome)
-- **Root cause:** `loadData()` lines 1074–1087 — 4 of 14 queries lack `school_id` filtering. Architectural fix, not cosmetic. See BACKLOG named project "School-scope the global queries."
+- **Status:** 🔴 BROKEN (see BACKLOG → "School-scope the global queries")
+- 4 of 14 `loadData()` queries lack `school_id` filtering
+- Scholarships / NIL requests / CRM follow-ups / Reminders all show globally-identical numbers across schools
 
 ### Home — Next Up game
-- **Status:** 🟡 DUMMY (Sample badge removed Session 1)
-- `NEXT_GAME` constant, Oregon-vs-Arizona hardcoded — shows on EVERY school (B1 confirmed)
-- **Fix:** Session 2 — per-school generator
+- **Status:** 🟡 DUMMY (per-school generator shipped Session 2)
+- `s2nextGame(schoolId)` — curated arena + conf opponent for 25 schools, generic fallback rest
 
 ### Home — Roster Pulse
 - **Status:** 🟠 PARTIAL → 🔴 BROKEN for non-Oregon (B4)
-- On roster count: ✅ REAL (varies per school: Oregon 17 / Duke 14 / Kansas 16 / Howard 16)
-- Avg PPG (starters): 🔴 BROKEN — Oregon "12.9" but Duke/Kansas/Howard all show "0.0". Either depth_chart_position is unset for non-Oregon or PPG fields are NULL post-materialization.
-- Depth score "B+": 🟡 DUMMY (hardcoded — every school shows B+)
-- NIL committed/cap: ✅ REAL for Oregon, default `$0 / $10.0M` for others (acceptable until Session 8)
+- On roster count: ✅ REAL
+- Avg PPG (starters): 🔴 BROKEN non-Oregon (data gap — `depth_chart_position` or PPG NULL)
+- Depth score "B+": 🟡 DUMMY (hardcoded)
+- NIL committed/cap: ✅ REAL Oregon, default for others until Session 8
 
 ### Home — Hot in the portal
 - **Status:** ✅ REAL
-- Pulled from `prospect_shortlist` filtered to portal source (`qSchool` filter present)
 
 ### Home — Your shortlist
 - **Status:** ✅ REAL
 
 ### Home — College basketball news
-- **Status:** 🟡 DUMMY (Sample badge removed Session 1)
-- `NEWS_SEED` constant, generic basketball headlines
-- **Fix:** Session 2 — per-school generator
+- **Status:** 🟡 DUMMY — `s2news(schoolId)` per-school generator (Session 2)
 
 ### Roster
-- **Status:** ✅ REAL for schools we've loaded
-- Audit: not screenshot-tested across schools in Session 1 (deferred — known good per Phase 4 work)
-- Photos: 5,136 of 7,580 players have ESPN photos
-- Photo coverage gap: 9 of 78 Oregon roster players missing photos (ESPN data gaps, not bugs)
+- **Status:** ✅ REAL (5,136 of 7,580 players have ESPN photos)
 
 ### Recruiting (Portal / HS / Watchlist tabs)
-- **Status:** ✅ REAL
-- 1,192 portal players + 657 HS prospects in `school_rosters`
-- Photos propagated to `prospect_shortlist`
-- Drawer badge "Recruiting 42" shown across all schools — likely also affected by lack of school-scoping in `prospects` query result (verify in Session 2)
+- **Status:** ✅ REAL (1,192 portal + 657 HS)
 
 ### Player cards / detail modal
-- **Status:** ✅ REAL
-- Hero-size photos, school logos, KenPom rank section ❌ MISSING (placeholder text — Session 4 to wire)
-- Comparison mode: ✅ REAL (shipped in 5e)
+- **Status:** 🟠 PARTIAL
+- Photos + logos ✅
+- **KenPom rank section on player card:** Data now exists in backend (Session 3), **not yet surfaced in UI** — Session 4's job
 
 ### Apex CRM
-- **Status:** ✅ REAL
-- `crm_added` and `watchlist` tables persist across sessions
-- **Gap:** user-scoped not school-scoped (cross-school bleed) — backlogged
-- **Gap:** no attribution shown ("added by ...") — was on Session 1 list, deferred to dedicated session
+- **Status:** ✅ REAL (user-scoped; school-scoping backlogged)
 
 ### Scheduled visits
-- **Status:** 🟡 DUMMY (Oregon-only, Sample badge removed Session 1)
-- `VISITS_SEED` constant, hardcoded Jalen Washington / Casanova / Knight Arena (Oregon facilities)
-- Calendar header subtitle correctly reflects current school name + date — but visit cards below are Oregon data on every school (B2 confirmed)
-- Calendar dots on Apr 25 + Apr 29 same root cause
-- **Fix:** Session 2 — per-school generator
+- **Status:** 🟡 DUMMY — `s2visits(schoolId)` per-school generator (Session 2)
 
 ### NIL Budget
-- **Status:** 🟠 PARTIAL
-- ✅ REAL for Oregon (loaded in Phase 4)
-- ❌ MISSING for other 363 schools (no `nil_budget` row → defaults to `$0 / $10.0M`)
-- **Fix:** Session 8 — default budget materialization on first school switch
+- **Status:** 🟠 PARTIAL (Oregon ✅, others default — Session 8 fix)
 
 ### Roster Builder
 - **Status:** ✅ REAL
-- Reads from `my_roster` + `nil_budget` for current school
-- Audit: not screenshot-tested across schools in Session 1
 
 ### Smart Filter
 - **Status:** 🟠 PARTIAL
-- Filter engine: ✅ REAL
-- Filter results: ✅ REAL (from `prospect_shortlist`)
-- KenPom-based filtering: ❌ MISSING (no KenPom data in DB) — Sessions 3+4 unblock
-- Torvik-based filtering: ❌ MISSING — Session 5 unblocks
-- Apex Picks preset strip: ❌ MISSING — Session 7 ships
+- Source / position / class filters ✅
+- **KenPom "bottom-50" / "top-X" filtering:** backend data ready (Session 3), surfacing deferred to Session 4 + Apex Picks strip in Session 7
 
 ### Apex Scout
-- **Status:** 🟠 PARTIAL
-- LLM-mode and rules-mode both work
-- Result cards have photos
-- KenPom + Torvik integration: ❌ MISSING (Sessions 4 + 5 unblock)
+- **Status:** ✅ REAL (Scout 1.2 tool-use refactor shipped in `apex-intel` Session 3 cleanup)
 - Polish pass: pending Session 6
 
 ### Apex Patrons
-- **Status:** 🟡 DUMMY (Oregon-only — `DONORS_SEED`, `CAMPAIGNS_SEED`)
-- Sample badge removed Session 1
-- **Fix:** Session 9 — Power 5 schools get unique seeded data; non-P5 = "Enable Patrons" empty state
+- **Status:** 🟡 DUMMY (Oregon-only — Session 9 fixes for P5)
 
 ### Apex Ops
-- **Status:** 🟡 DUMMY (Oregon-only — `OPS_CATS`, `OPS_RECENT`, `OPS_DECKS`)
-- Sample badge removed Session 1
-- **Fix:** Session 2 — per-school generator (originally planned for later, but lumped with Visits/News)
+- **Status:** 🟡 DUMMY — `s2opsRecent` / `s2opsDecks` per-school generators (Session 2)
 
 ### School picker
-- **Status:** ✅ REAL with one search bug
-- 365 D1 programs filterable by name + conference
-- **Bug B6:** Searching "st." doesn't match Saint Mary's (Gaels) because their DB row uses full word "Saint" not "St." Cosmetic search-UX issue. Fix: alias-aware search OR data-side normalization.
+- **Status:** ✅ REAL with B6 search bug ("st." doesn't match Saint Mary's)
 
 ### NIL Vault (NEW — does not yet exist)
-- **Status:** ❌ NOT BUILT
-- **Session 9** ships stub: drawer entry + one Oregon player with sample contract + static AI-extracted view
-- Real spec: BACKLOG → "NIL Contract Vault" project
+- **Status:** ❌ NOT BUILT (Session 9 stub)
 
 ---
 
@@ -150,9 +109,9 @@ This doc tracks the **truth** of what data is real vs dummy across the app, per 
 ### Supabase tables (22 total)
 | Table | Coverage | School-scoped in loadData()? | Notes |
 |---|---|---|---|
-| schools | ✅ 1,518 rows, 365 with `espn_id` + conference | N/A (universe) | KenPom cols pending Session 3 |
+| schools | ✅ 1,518 rows; 365 D1 with conference; **365 with KenPom data (Session 3)** | N/A (universe) | 8 new kenpom_* columns |
 | school_rosters | ✅ 7,580 players | ✅ via my_roster query | 5,136 with photos |
-| my_roster | ✅ Oregon (78) | ✅ Yes | other schools materialized via RPC on switch |
+| my_roster | ✅ Oregon (78) | ✅ Yes | other schools materialized via RPC |
 | prospect_shortlist | ✅ 50 Oregon prospects | ✅ Yes | school-agnostic via `school_id` |
 | prospect_stats | ✅ | ❌ No (`is_seed_data` filter only) | |
 | prospect_scores | ✅ | ❌ No | |
@@ -163,7 +122,7 @@ This doc tracks the **truth** of what data is real vs dummy across the app, per 
 | crm_added | ✅ | user-scoped not school-scoped | already in BACKLOG |
 | watchlist | ✅ | user-scoped not school-scoped | already in BACKLOG |
 | contact_reminders | ✅ | 🔴 NO — bug B5 | |
-| team_strategy | partial | ❌ No (`is_seed_data` filter only) | |
+| team_strategy | partial | ❌ No | |
 | nil_budget | 🟠 | ✅ Yes | Oregon only — fix Session 8 |
 | nil_budget_requests | ✅ | 🔴 NO — bug B5 | |
 | scholarships | ✅ | 🔴 NO — bug B5 | |
@@ -179,7 +138,7 @@ This doc tracks the **truth** of what data is real vs dummy across the app, per 
 | ESPN (photos + roster + logos) | ✅ Active | 5,136 photos, 365 logos |
 | BallDontLie | ✅ Active (NCAA) | not currently surfaced |
 | CBBD | ✅ Active | not currently surfaced |
-| KenPom | ❌ Not yet wired | Sessions 3+4 |
+| **KenPom** | ✅ **Active — wired Session 3 (2026-04-17)** | **365 of 365 D1 schools synced** |
 | Torvik | ❌ Not yet wired | Session 5 |
 | 247Sports (HS + portal) | ✅ Phase 4 ingested | 657 HS + 1,192 portal |
 | NCAA-API | ✅ Verified | not currently surfaced |
@@ -188,89 +147,40 @@ This doc tracks the **truth** of what data is real vs dummy across the app, per 
 
 ## Audit-discovered bug list (Session 1)
 
-Tested across Oregon, Duke, Kansas, Howard. Saint Mary's not tested (search bug B6 prevented).
-
 | ID | Severity | Surface | Description | Fix path |
 |---|---|---|---|---|
-| B1 | High | Home → Next up | "Oregon vs Arizona" hardcoded on every school | Session 2 |
-| B2 | High | Visits | Jalen Washington + Oregon facilities show on every school | Session 2 |
-| B3 | Medium | Drawer | Howard shows blank head coach name (NULL in DB); fallback not rendering | BACKLOG |
-| B4 | Medium | Home → Roster pulse | Avg PPG = 0.0 on Duke/Kansas/Howard (Oregon shows real 12.9) | BACKLOG |
-| B5 | High (architectural) | Home → Today's brief | 4 of 14 loadData queries lack school_id filter; 4 tiles show identical numbers across all schools | BACKLOG (named project) |
-| B6 | Low | School picker | Searching "st." doesn't match Saint Mary's (uses "Saint" full-word) | BACKLOG |
-| B7 | Cosmetic | Drawer | Avatar bg color isn't school-themed | BACKLOG |
+| B1 | High | Home → Next up | "Oregon vs Arizona" hardcoded on every school | ✅ RESOLVED Session 2 |
+| B2 | High | Visits | Jalen Washington + Oregon facilities show on every school | ✅ RESOLVED Session 2 |
+| B3 | Medium | Drawer | Howard shows blank head coach name (NULL in DB) | BACKLOG |
+| B4 | Medium | Home → Roster pulse | Avg PPG = 0.0 on Duke/Kansas/Howard | BACKLOG |
+| B5 | High (architectural) | Home → Today's brief | 4 of 14 loadData queries lack school_id filter | BACKLOG (named project) |
+| B6 | Low | School picker | "st." doesn't match Saint Mary's | BACKLOG |
+| B7 | Cosmetic | Drawer | Avatar bg color not school-themed | BACKLOG |
 
 ---
 
 ## Session log (append at end of each session)
 
 ### Session 0 — Phase 5f shipped (2026-04-16)
-- iPhone drawer scrolls
-- Sample badges added to seed-data screens (will be removed in Session 1)
-- DATA-STATUS.md created
-- 14-day plan locked
+- iPhone drawer scrolls; Sample badges added; DATA-STATUS.md created; 14-day plan locked
 
 ### Session 1 — Audit + badge removal + current-user indicator (2026-04-17)
-- All 5 Sample badges removed (Home Next Up, Home News, Visits, Patrons, Ops eyebrows) + 4 demo-note paragraphs
-- `.chip-demo` / `.demo-note` CSS rules retained for potential Session 2 reuse
-- Current-user indicator added to drawer (Option C — separate row below school-coach card, "Logged in as · Coach Stewart · HC")
-- Color palette confirmed byte-identical to Phase 5f
-- Audit completed across Oregon, Duke, Kansas, Howard (Saint Mary's blocked by B6)
-- 7 bugs catalogued (B1–B7); B1+B2 already in Session 2 plan, B5 escalated to named BACKLOG project
+- 5 Sample badges + 4 demo-note paragraphs removed
+- Current-user indicator added to drawer (Option C — "Logged in as · Coach Stewart · HC")
+- Audit across Oregon, Duke, Kansas, Howard; 7 bugs catalogued (B1–B7)
 - Session shipped as `index-s1.html` → `index.html` on main
-- Out of scope (deferred): per-screen audit of Roster, Recruiting, Roster Builder, Smart Filter, Apex Scout — Session 1 focused on Home/Visits/Drawer where the badges lived
-# Session 2 — Universal dummy-data fallback pattern (shipped 2026-04-18)
 
-## Status changes
+### Session 2 — Universal dummy-data fallback pattern (2026-04-18)
+- Per-school generators: `s2nextGame`, `s2news`, `s2staff`, `s2visits`, `s2opsRecent`, `s2opsDecks`
+- 25 curated schools + generic fallback for remaining ~340
+- B1 + B2 resolved
+- Oregon pilot demo byte-identical (verified diff)
 
-| Surface | Before | After |
-|---|---|---|
-| Home → Next up | 🔴 Oregon-hardcoded on every school (B1) | 🟡 Per-school generated — curated arena+conference opponent for 25 schools, generic fallback for rest |
-| Home → College basketball news | 🔴 Oregon-named in 2 of 4 headlines on every school | 🟡 Per-school generated — program-specific headline templates, conference-aware league news |
-| Visits → Scheduled visits | 🔴 Jalen Washington + Eugene, OR + Altman residence on every school (B2) | 🟡 Per-school generated — prospect names from rotating pool, arena + HC residence + city from school meta |
-| Roster → Assigned coaches chips | 🔴 Altman/Hoffman/Stubblefield/Traylor on every school | 🟡 Per-school generated — HC from `schools.head_coach_name`, 3 generic assistants from deterministic pool |
-| Ops → Recent activity | 🔴 Oregon staff initials + Oregon prospect names | 🟡 Per-school generated — uses this-school staff initials + rotating prospect pool |
-| Ops → Recent decks | 🔴 Jalen/Devonte/Kameron deck names on every school | 🟡 Per-school generated — rotating prospect pool + this-school author initials |
-
-Legend: 🔴 broken · 🟡 convincing dummy (invisible to viewer, tracked here) · 🟢 real data
-
-## Oregon pilot demo preserved
-
-Every generator short-circuits to the original hardcoded seeds when `CURRENT_SCHOOL_ID === OREGON_SID`. Oregon's audit screens are byte-identical to Session 1 output.
-
-## Curated school coverage (25)
-
-Big Ten (10): Oregon, UCLA, USC, Washington, Michigan, Michigan State, Purdue, Illinois, Indiana, Wisconsin
-ACC (4): Duke, North Carolina, Virginia, Louisville
-Big 12 (4): Kansas, Houston, Baylor, Iowa State
-SEC (3): Kentucky, Auburn, Tennessee
-Big East (2): UConn, Villanova
-WCC (2): Gonzaga, Saint Mary's
-
-Non-curated (~340 schools): generic `"{School} Arena"`, conference opponent from conference-keyed pool, `head_coach_name` from DB if present.
-
-## Not touched this session (still dummy, intentionally)
-
-- `portalChurn=12` placeholder on Home — waits for KenPom/Torvik (Sessions 3–5)
-- `OPS_CATS` file counts ("42 files" etc.) — generic enough across schools
-- `DONORS_SEED` / `CAMPAIGNS_SEED` — Oregon-only by design, Session 9 (Patrons feature)
-- Date in "Next up" still uses Nov dates regardless of calendar — matches Oregon baseline; calendar-aware scheduling is a separate concern
-
-## Bugs resolved this session
-
-- **B1 (High)** — Home "Next up" no longer shows Oregon vs Arizona on other schools ✅
-- **B2 (High)** — Visits no longer shows Jalen Washington + Oregon facilities on other schools ✅
-
-## Bugs still open
-
-- **B3 (Medium)** — Howard blank head_coach_name → still backlogged (S2 generator renders as "Head Coach" gracefully; real fix is data backfill)
-- **B4 (Medium)** — Avg PPG = 0.0 on non-Oregon schools → still backlogged (data problem, not seed)
-- **B5 (High, architectural)** — 4 of 14 loadData queries lack school_id filter → still the named backlog project "School-scope the global queries"
-- **B6 (Low)** — School picker "st." → Saint Mary's search → backlog
-- **B7 (Cosmetic)** — Avatar bg color not school-themed → backlog
-
-## New minor items added to backlog
-
-- **S2-minor-1:** Three new hex colors introduced for assistant-coach avatars (`#146E8A`, `#7A2E8F`, `#C24A1F`). If Apex's design system tightens, these should be promoted to CSS variables. Low priority.
-- **S2-minor-2:** "Next up" dates hardcoded to November regardless of actual calendar. Affects Oregon too. Deferred until seasonally-aware scheduling needed.
-
+### Session 3 — KenPom backend ingestion (2026-04-17, overnight)
+- **Backend repo cleanup (apex-intel):** 3 commits to main — .gitignore tightened (`.env.backup` security risk neutralized), Scout 1.2 tool-use refactor committed, Bart Torvik ingestion script committed
+- **Supabase SUPABASE_SERVICE_ROLE_KEY rotated** after accidental screenshot exposure (old key disabled, new `apex_backend` key issued)
+- **Schema migration:** 8 new columns on `schools` — `kenpom_rank`, `kenpom_adj_em`, `kenpom_adj_o`, `kenpom_adj_d`, `kenpom_tempo`, `kenpom_season`, `kenpom_team_id`, `kenpom_last_sync`
+- **`scripts/kenpom_sync.py` shipped** in `apex-intel` — 3-pass resolver: hand-coded KenPom→Supabase overrides (62 entries) → normalize-exact (St. → State) → fuzzy-fallback (`fuzz.ratio`, 94/4 threshold+margin; 0 fuzzy hits in final run)
+- **Sync result:** 365 of 365 D1 schools matched. 62 override, 303 normalize-exact, 0 fuzzy, 0 update errors. DataThrough 2026-04-06.
+- **Spot-check:** Oregon rank 101 / AdjEM 7.08 (matches API probe baseline); all 10 edge-case schools (Miami vs Miami OH, USC vs South Carolina Upstate, Tennessee vs UT Martin, etc.) landed on correct rows; distinct ranks = 365 (no wrong-row duplicates)
+- **Frontend NOT yet surfacing KenPom** — that's Session 4's job

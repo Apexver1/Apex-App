@@ -1,6 +1,6 @@
 # BACKLOG.md — Deferred work, named projects, ideas
 
-**Updated:** 2026-04-17
+**Updated:** 2026-04-17 (after Session 3 KenPom backend ingestion)
 **Updated by:** Claude when items get added or moved
 **Promotion rule:** Items move from backlog into the active 14-day plan only by explicit decision in a session. Do not silently slip them in.
 
@@ -78,9 +78,17 @@
 - **B7:** Avatar bg color isn't school-themed. Map school primary color → avatar bg. Pleasant polish. ~1 session if we want to do it across all 365 schools.
 - **Defer-from-S1:** Per-screen audit of Roster, Recruiting, Roster Builder, Smart Filter, Apex Scout across non-Oregon schools — Session 1 only audited Home/Visits/Drawer. Could surface more bugs.
 - **CRM attribution row** ("added by …") — was on Session 1 list, deferred. Probably 1 session standalone.
+
 ### From Session 2 (2026-04-18)
 - **S2-minor-1:** Session 2 introduced three new hex colors hardcoded in the `S2_ASSISTANT_COLORS` array (`#146E8A`, `#7A2E8F`, `#C24A1F`) to diversify non-Oregon assistant-coach avatars. If/when the design system tightens or dark-mode lands, these should be promoted to `--coach-accent-*` CSS variables. Low priority; currently only visible on Visits coach-chip strip and Ops activity avatars. ~15 min.
 - **S2-minor-2:** Seasonally-aware "Next up" scheduling. Current `s2nextGame` generator (and the original Oregon `NEXT_GAME` constant) both produce November dates regardless of the actual calendar. During a real April/May demo, a beta tester could flag that the season's over. Fix: pick dates based on current month. Affects Oregon too. ~1 session.
+
+### From Session 3 (2026-04-17, overnight) — KenPom backend
+- **S3-minor-1:** KenPom data freshness. `scripts/kenpom_sync.py` in the `apex-intel` repo is idempotent and safe to re-run. Should be re-run weekly during the season (Oct–Apr) to pull updated ranks. Not yet wired to a cron job. If/when we want auto-refresh, candidate paths: Supabase Edge Function on a schedule, GitHub Action cron, local launchd plist. ~1 session to automate, or manual monthly re-run is fine for MVP.
+- **S3-minor-2:** `scripts/kenpom_sync.py` uses `fuzz.ratio` (character-level) for Pass 3 fuzzy fallback, deliberately chosen over `fuzz.token_set_ratio` because the latter caused 6 wrong-row writes where short KenPom names like "Miami OH" scored 100 against longer DB names like "Miami". Pass 3 is currently unused (override + normalize-exact cover 365/365), but if KenPom adds new names we don't have overrides for, the script should still be safe. Documented here so future me doesn't "helpfully" switch back to token_set_ratio.
+- **S3-minor-3:** `KENPOM_TO_SCHOOL_OVERRIDES` in `kenpom_sync.py` has 62 entries, hand-coded against the current `schools.name` set. If `schools` table is ever renamed/reloaded (e.g., a future data-vendor swap), these overrides may silently break. Defensive option: add a startup check that every override target EXISTS in `schools.name` and fail fast if not. ~15 min.
+- **S3-minor-4:** 8 more `kenpom_*` columns added to `schools`. Session 4's frontend work will want a `schoolKenPomMap` / `kenpomFor(schoolName)` helper. Pattern mirrors existing `schoolEspnMap`.
+
 ### Carryover from previous sessions
 - Empty-state skeletons for seed-data screens (lower priority once dummy fallback ships in Session 2)
 - CRM/Watchlist school-scoping (cross-school bleed) — currently user-scoped, should be school+user-scoped
@@ -97,8 +105,8 @@
 - Patrons data for non-Oregon Power 5 (now slated for Session 9)
 
 ### Repo hygiene
-- `.gitignore` for `.DS_Store`, `*.bak*`, `*.sb-*` (Sublime swap files), `*.rtf`
-- Clean up uncommitted clutter in `~/code/Apex-App/`
+- **✅ DONE 2026-04-17 (Session 3):** Cleaned up uncommitted clutter in `~/code/apex-intel/` — `.env.backup`, `*.bak`, `*.backup` files gitignored + 2 real commits extracted (Scout 1.2 refactor, Bart Torvik ingestion script).
+- Remaining: `.gitignore` hygiene on `~/code/Apex-App/` frontend repo (no `*.bak*`, `*.sb-*` Sublime swap, `*.rtf`)
 - Standard commit message format
 
 ---
