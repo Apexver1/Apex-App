@@ -132,6 +132,9 @@ textarea.inp{resize:vertical;min-height:70px}
 .drawer-user{margin:0 22px 24px;padding:14px;background:var(--surface-3);border-radius:12px;display:flex;align-items:center;gap:12px}
 .drawer-user-name{font-size:14px;font-weight:600}
 .drawer-user-sub{font-size:11px;color:var(--ink-2);margin-top:2px}
+.drawer-meuser{margin:-16px 22px 18px;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--ink-3)}
+.drawer-meuser-label{letter-spacing:0.4px;text-transform:uppercase;font-size:10px}
+.drawer-meuser-val{color:var(--gold);font-weight:600}
 .drawer-group{padding:0 22px 6px}
 .drawer-group-title{font-size:10px;color:var(--ink-3);letter-spacing:0.6px;text-transform:uppercase;margin-bottom:8px;font-weight:600}
 .drawer-item{padding:12px 14px;font-size:15px;color:var(--ink);cursor:pointer;border-radius:10px;display:flex;align-items:center;justify-content:space-between;font-weight:500}
@@ -557,6 +560,10 @@ select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50
         <div class="drawer-user-name" id="drwName">Dana Altman</div>
         <div class="drawer-user-sub" id="drwRole">Head coach · Oregon</div>
       </div>
+    </div>
+    <div class="drawer-meuser" id="drwMeUser">
+      <span class="drawer-meuser-label">Logged in as</span>
+      <span class="drawer-meuser-val" id="drwMeUserVal">Coach Stewart · HC</span>
     </div>
     <div class="drawer-group">
       <div class="drawer-group-title">Main</div>
@@ -2057,8 +2064,7 @@ window.renderHome=function(c,portal,hs){
   h+='</div>';
 
   /* next game */
-  h+='<div class="sec-head"><span class="sec-title">Next up <span class="chip-demo">Sample</span></span><span class="sec-link">Season schedule</span></div>';
-  h+='<div class="demo-note">Sample game data — ESPN schedule feed in progress.</div>';
+  h+='<div class="sec-head"><span class="sec-title">Next up</span><span class="sec-link">Season schedule</span></div>';
   h+='<div class="game-hero mb-lg">';
   h+='<div class="game-head"><span class="game-date">'+NEXT_GAME.date+'</span><span class="chip">'+NEXT_GAME.venue+'</span></div>';
   h+='<div class="game-vs"><div class="game-team"><div class="game-team-name">'+NEXT_GAME.home.name+'</div><div class="game-team-meta">KenPom #'+NEXT_GAME.home.kpom+'</div></div>';
@@ -2115,8 +2121,7 @@ window.renderHome=function(c,portal,hs){
   }
 
   /* news feed */
-  h+='<div class="sec-head"><span class="sec-title">College basketball <span class="chip-demo">Sample</span></span><span class="sec-link">All news</span></div>';
-  h+='<div class="demo-note">Sample headlines — RSS / news API integration in progress.</div>';
+  h+='<div class="sec-head"><span class="sec-title">College basketball</span><span class="sec-link">All news</span></div>';
   NEWS_SEED.forEach(function(n){
     h+='<div class="news-card">';
     h+='<div class="news-src">'+esc(n.src)+' · '+esc(n.age)+'</div>';
@@ -2511,7 +2516,7 @@ window.renderVisits=function(c){
   }
 
   var h='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">';
-  h+='<div><div style="font-family:var(--serif);font-size:22px;font-weight:500;letter-spacing:-0.4px">Scheduled visits <span class="chip-demo" style="vertical-align:middle;margin-left:6px">Sample</span></div><div style="font-size:11px;color:var(--ink-3)">'+CURRENT_SCHOOL_NAME.replace(/ Ducks| Wildcats.*$/,"")+' · '+(new Date().toLocaleDateString([],{month:"long",year:"numeric"}))+'</div></div>';
+  h+='<div><div style="font-family:var(--serif);font-size:22px;font-weight:500;letter-spacing:-0.4px">Scheduled visits</div><div style="font-size:11px;color:var(--ink-3)">'+CURRENT_SCHOOL_NAME.replace(/ Ducks| Wildcats.*$/,"")+' · '+(new Date().toLocaleDateString([],{month:"long",year:"numeric"}))+'</div></div>';
   h+='<button class="btn btn-primary btn-sm" style="padding:8px 14px;width:auto" onclick="newVisit()">+ New</button>';
   h+='</div>';
 
@@ -3233,9 +3238,8 @@ window.renderPatrons=function(c){
 
   var h='';
   h+='<div style="margin-bottom:18px">';
-  h+='<div style="font-size:11px;color:var(--gold);font-weight:700;letter-spacing:0.6px;text-transform:uppercase;margin-bottom:4px">APEX PATRONS <span class="chip-demo" style="margin-left:4px">Sample</span></div>';
+  h+='<div style="font-size:11px;color:var(--gold);font-weight:700;letter-spacing:0.6px;text-transform:uppercase;margin-bottom:4px">APEX PATRONS</div>';
   h+='<div class="greet-line" style="font-size:28px">Donor & development</div>';
-  h+='<div class="demo-note" style="margin-top:6px">Sample donor data — CRM integration in progress.</div>';
   h+='</div>';
 
   /* KPI grid */
@@ -3383,9 +3387,8 @@ window.openDonor=function(donorId){
 window.renderOps=function(c){
   var h='';
   h+='<div style="margin-bottom:18px">';
-  h+='<div style="font-size:11px;color:var(--accent);font-weight:700;letter-spacing:0.6px;text-transform:uppercase;margin-bottom:4px">APEX OPS <span class="chip-demo" style="margin-left:4px">Sample</span></div>';
+  h+='<div style="font-size:11px;color:var(--accent);font-weight:700;letter-spacing:0.6px;text-transform:uppercase;margin-bottom:4px">APEX OPS</div>';
   h+='<div class="greet-line" style="font-size:28px">Recruiting materials hub</div>';
-  h+='<div class="demo-note" style="margin-top:6px">Sample materials — document pipeline in progress.</div>';
   h+='</div>';
 
   /* Category grid */
