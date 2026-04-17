@@ -1,3 +1,7 @@
 
 # Local working-copy backups from surgical patch workflow
 index.html.pre-*
+.DS_Store
+*.bak*
+*.rtf
+*.sb-*
