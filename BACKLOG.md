@@ -1,12 +1,25 @@
 # BACKLOG.md — Deferred work, named projects, ideas
 
-**Updated:** 2026-04-16
+**Updated:** 2026-04-17
 **Updated by:** Claude when items get added or moved
 **Promotion rule:** Items move from backlog into the active 14-day plan only by explicit decision in a session. Do not silently slip them in.
 
 ---
 
 ## Named projects (multi-session efforts)
+
+### School-scope the global queries  ← NEW from Session 1 audit
+**Estimated scope:** 2–3 sessions
+**Why it matters:** Today's brief tiles (scholarships / NIL requests / CRM follow-ups / reminders) show identical numbers on every school because 4 of 14 queries in `loadData()` (lines 1074–1087 of index.html) lack `school_id` filtering. This makes the app *look* like it has fake data even on screens where the underlying records are real. It's the single biggest "this isn't a real product" tell across the audit.
+**Status:** Identified Session 1 (bug B5). Architectural fix, not cosmetic.
+
+**Full scope:**
+- Audit each table to confirm whether `school_id` column exists; ALTER TABLE + backfill where missing
+- Tables to fix: `scholarships`, `crm_log`, `nil_budget_requests`, `contact_reminders`, `prospect_stats` (verify if needed), `prospect_scores`, `prospect_family`, `team_strategy`
+- Update each query line in `loadData()` to include `qSchool`
+- RLS policy review — ensure school-scoping is enforced at the policy level, not just the query level
+- Acceptance: every Today's brief tile shows different numbers across Oregon vs Duke vs Kansas, OR shows zero with an empty state for non-Oregon
+- Decide policy for empty: do we materialize defaults (like nil_budget plan in Session 8) or show "0" plus polished empty?
 
 ### NIL Contract Vault
 **Estimated scope:** 4–6 sessions over 2–3 weeks
@@ -21,16 +34,16 @@
   - Performance incentive triggers (e.g., "$100K bonus if averages 14+ PPG")
   - Compliance clauses
 - Live incentive tracking — pulls player stats, computes whether triggers are hit
-- Notifications: coach → player ("you have an Instagram post due Friday"), system → coach ("Trayce hit his 14 PPG threshold last night, $100K incentive triggered")
+- Notifications: coach → player, system → coach when triggers hit
 - Audit log: who uploaded what, who viewed dollar amounts, who approved what
 - Schema: `nil_contracts` (header), `nil_contract_terms` (extracted line items), `nil_contract_events` (notifications, status changes), `nil_contract_files` (storage refs)
 
-**Sample contracts:** Michael has real Oregon contracts to use for development. Bring into the next chat.
+**Sample contracts:** Michael has real Oregon contracts to use for development. Bring into the Session 9 chat.
 
 ### Role-based access control (RBAC)
 **Estimated scope:** 1–2 weeks
-**Why it matters:** Apex Intel is for entire basketball staffs (HC, assistants, GM, DOBO, GA, managers) — different roles see different data. A GA shouldn't see NIL dollar amounts; a HC sees everything.
-**Status:** 14-day plan ships a lightweight "current user" indicator (Session 1) but no real permissions. Full RBAC deferred.
+**Why it matters:** Apex Intel is for entire basketball staffs (HC, assistants, GM, DOBO, GA, managers) — different roles see different data.
+**Status:** Session 1 shipped a lightweight "Logged in as · Coach Stewart · HC" indicator (drawer row) but no real permissions. Full RBAC deferred.
 
 **Full scope (when built):**
 - `users` table: name, role (head_coach / assistant_coach / gm / dobo / ga / manager), school_id, permissions JSON
@@ -40,16 +53,11 @@
 - Data masking: NIL dollar amounts hidden from non-financial roles
 - Activity attribution: every CRM log, watchlist add, NIL approval shows who did it
 - Audit log: every sensitive action recorded with role + user
+- Replace the hardcoded "Coach Stewart · HC" indicator with the actual logged-in user
 
 ### Live transfer portal feed
 **Estimated scope:** 3–4 sessions
-**Why it matters:** Portal moves fast. Static 247Sports snapshot from Phase 4 will go stale.
 **Status:** Pulled once in Phase 4 (1,192 entries). No live refresh wired.
-
-**Full scope:**
-- Schedule daily 247Sports refresh
-- Diff vs prior snapshot → alert coaches to new entries
-- Push notifications when watched players enter portal
 
 ### Push notifications
 **Estimated scope:** 2 sessions
@@ -57,12 +65,19 @@
 
 ### Multi-user real-time collaboration
 **Estimated scope:** Large — 1+ month
-**Why it matters:** A staff working a recruit together should see each other's notes update live.
 **Status:** Not built. Supabase Realtime channel-based; would also require RBAC done first.
 
 ---
 
 ## Smaller items (single-session or less)
+
+### From Session 1 audit
+- **B3:** Howard `head_coach_name` is NULL → drawer shows blank name + "Coach." greeting with no last name. Fix options: (a) backfill missing head coach data across the schools table, (b) make the fallback in `loadData()` ~line 1101 more defensive, (c) both. Probably 30 min.
+- **B4:** Avg PPG = 0.0 on non-Oregon schools in Roster Pulse. Either `depth_chart_position` is unset post-materialization or PPG fields are NULL. Investigation + fix probably 1 session.
+- **B6:** School picker doesn't find "Saint Mary's" when searching "st." — needs alias-aware search or data-side normalization. Cosmetic but a real UX issue. ~30 min.
+- **B7:** Avatar bg color isn't school-themed. Map school primary color → avatar bg. Pleasant polish. ~1 session if we want to do it across all 365 schools.
+- **Defer-from-S1:** Per-screen audit of Roster, Recruiting, Roster Builder, Smart Filter, Apex Scout across non-Oregon schools — Session 1 only audited Home/Visits/Drawer. Could surface more bugs.
+- **CRM attribution row** ("added by …") — was on Session 1 list, deferred. Probably 1 session standalone.
 
 ### Carryover from previous sessions
 - Empty-state skeletons for seed-data screens (lower priority once dummy fallback ships in Session 2)
