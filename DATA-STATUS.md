@@ -219,3 +219,58 @@ Tested across Oregon, Duke, Kansas, Howard. Saint Mary's not tested (search bug 
 - 7 bugs catalogued (B1–B7); B1+B2 already in Session 2 plan, B5 escalated to named BACKLOG project
 - Session shipped as `index-s1.html` → `index.html` on main
 - Out of scope (deferred): per-screen audit of Roster, Recruiting, Roster Builder, Smart Filter, Apex Scout — Session 1 focused on Home/Visits/Drawer where the badges lived
+# Session 2 — Universal dummy-data fallback pattern (shipped 2026-04-18)
+
+## Status changes
+
+| Surface | Before | After |
+|---|---|---|
+| Home → Next up | 🔴 Oregon-hardcoded on every school (B1) | 🟡 Per-school generated — curated arena+conference opponent for 25 schools, generic fallback for rest |
+| Home → College basketball news | 🔴 Oregon-named in 2 of 4 headlines on every school | 🟡 Per-school generated — program-specific headline templates, conference-aware league news |
+| Visits → Scheduled visits | 🔴 Jalen Washington + Eugene, OR + Altman residence on every school (B2) | 🟡 Per-school generated — prospect names from rotating pool, arena + HC residence + city from school meta |
+| Roster → Assigned coaches chips | 🔴 Altman/Hoffman/Stubblefield/Traylor on every school | 🟡 Per-school generated — HC from `schools.head_coach_name`, 3 generic assistants from deterministic pool |
+| Ops → Recent activity | 🔴 Oregon staff initials + Oregon prospect names | 🟡 Per-school generated — uses this-school staff initials + rotating prospect pool |
+| Ops → Recent decks | 🔴 Jalen/Devonte/Kameron deck names on every school | 🟡 Per-school generated — rotating prospect pool + this-school author initials |
+
+Legend: 🔴 broken · 🟡 convincing dummy (invisible to viewer, tracked here) · 🟢 real data
+
+## Oregon pilot demo preserved
+
+Every generator short-circuits to the original hardcoded seeds when `CURRENT_SCHOOL_ID === OREGON_SID`. Oregon's audit screens are byte-identical to Session 1 output.
+
+## Curated school coverage (25)
+
+Big Ten (10): Oregon, UCLA, USC, Washington, Michigan, Michigan State, Purdue, Illinois, Indiana, Wisconsin
+ACC (4): Duke, North Carolina, Virginia, Louisville
+Big 12 (4): Kansas, Houston, Baylor, Iowa State
+SEC (3): Kentucky, Auburn, Tennessee
+Big East (2): UConn, Villanova
+WCC (2): Gonzaga, Saint Mary's
+
+Non-curated (~340 schools): generic `"{School} Arena"`, conference opponent from conference-keyed pool, `head_coach_name` from DB if present.
+
+## Not touched this session (still dummy, intentionally)
+
+- `portalChurn=12` placeholder on Home — waits for KenPom/Torvik (Sessions 3–5)
+- `OPS_CATS` file counts ("42 files" etc.) — generic enough across schools
+- `DONORS_SEED` / `CAMPAIGNS_SEED` — Oregon-only by design, Session 9 (Patrons feature)
+- Date in "Next up" still uses Nov dates regardless of calendar — matches Oregon baseline; calendar-aware scheduling is a separate concern
+
+## Bugs resolved this session
+
+- **B1 (High)** — Home "Next up" no longer shows Oregon vs Arizona on other schools ✅
+- **B2 (High)** — Visits no longer shows Jalen Washington + Oregon facilities on other schools ✅
+
+## Bugs still open
+
+- **B3 (Medium)** — Howard blank head_coach_name → still backlogged (S2 generator renders as "Head Coach" gracefully; real fix is data backfill)
+- **B4 (Medium)** — Avg PPG = 0.0 on non-Oregon schools → still backlogged (data problem, not seed)
+- **B5 (High, architectural)** — 4 of 14 loadData queries lack school_id filter → still the named backlog project "School-scope the global queries"
+- **B6 (Low)** — School picker "st." → Saint Mary's search → backlog
+- **B7 (Cosmetic)** — Avatar bg color not school-themed → backlog
+
+## New minor items added to backlog
+
+- **S2-minor-1:** Three new hex colors introduced for assistant-coach avatars (`#146E8A`, `#7A2E8F`, `#C24A1F`). If Apex's design system tightens, these should be promoted to CSS variables. Low priority.
+- **S2-minor-2:** "Next up" dates hardcoded to November regardless of actual calendar. Affects Oregon too. Deferred until seasonally-aware scheduling needed.
+

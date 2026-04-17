@@ -78,7 +78,9 @@
 - **B7:** Avatar bg color isn't school-themed. Map school primary color → avatar bg. Pleasant polish. ~1 session if we want to do it across all 365 schools.
 - **Defer-from-S1:** Per-screen audit of Roster, Recruiting, Roster Builder, Smart Filter, Apex Scout across non-Oregon schools — Session 1 only audited Home/Visits/Drawer. Could surface more bugs.
 - **CRM attribution row** ("added by …") — was on Session 1 list, deferred. Probably 1 session standalone.
-
+### From Session 2 (2026-04-18)
+- **S2-minor-1:** Session 2 introduced three new hex colors hardcoded in the `S2_ASSISTANT_COLORS` array (`#146E8A`, `#7A2E8F`, `#C24A1F`) to diversify non-Oregon assistant-coach avatars. If/when the design system tightens or dark-mode lands, these should be promoted to `--coach-accent-*` CSS variables. Low priority; currently only visible on Visits coach-chip strip and Ops activity avatars. ~15 min.
+- **S2-minor-2:** Seasonally-aware "Next up" scheduling. Current `s2nextGame` generator (and the original Oregon `NEXT_GAME` constant) both produce November dates regardless of the actual calendar. During a real April/May demo, a beta tester could flag that the season's over. Fix: pick dates based on current month. Affects Oregon too. ~1 session.
 ### Carryover from previous sessions
 - Empty-state skeletons for seed-data screens (lower priority once dummy fallback ships in Session 2)
 - CRM/Watchlist school-scoping (cross-school bleed) — currently user-scoped, should be school+user-scoped
