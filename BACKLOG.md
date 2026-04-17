@@ -1,6 +1,6 @@
 # BACKLOG.md — Deferred work, named projects, ideas
 
-**Updated:** 2026-04-17 (after Session 4a KenPom frontend — Home surfaces)
+**Updated:** 2026-04-17 (after Session 4b KenPom frontend — recruiting cards + player modal)
 **Updated by:** Claude when items get added or moved
 **Promotion rule:** Items move from backlog into the active 14-day plan only by explicit decision in a session. Do not silently slip them in.
 
@@ -8,7 +8,20 @@
 
 ## Named projects (multi-session efforts)
 
-### School-scope the global queries  ← NEW from Session 1 audit
+### Prospect pipeline reconciliation  ← NEW Session 4b (bug B8)
+**Estimated scope:** 1–2 sessions
+**Why it matters:** DATA-STATUS has claimed 1,192 portal + 657 HS prospects for weeks, but `prospect_shortlist` has only 100 rows — all with NULL `source_tag`, all with `school_id` pointing at Oregon. Either (a) a Phase 4 ingestion landed in a different table that never got joined in, (b) the 247Sports ingestion was never actually run against production and the numbers come from a staging log, or (c) the data's been there all along but gets filtered out upstream. Either way the product "feels" like an Oregon demo even when switched to Duke because the prospect universe is all Oregon-tagged.
+
+**Investigation order:**
+- Re-run `apex-intel/scripts/ingest_247*.py` (or whatever the portal ingestion script was in Phase 4) against live Supabase and see what happens
+- If the script has been run, check for a `staging_prospects` or similar parallel table that never got merged
+- Audit the seed script that populated the 100 existing rows — understand why they all got Oregon as `school_id`
+- Once counts are fixed: re-confirm `current_school` text form is clean (not "Uncommitted" / "Committed - Oregon" compound strings)
+- Decide: should `school_id` FK point at prospect's CURRENT school (where they're playing) or their COMMITTED school? Today it's neither — it's Oregon for everyone.
+
+**Related:** unlocks Variant B "Committed: #X [school]" chip testing in Session 4b, which was code-reviewed but never fired against live data because `committed_to_school_id` is NULL on all 100 rows.
+
+### School-scope the global queries
 **Estimated scope:** 2–3 sessions
 **Why it matters:** Today's brief tiles (scholarships / NIL requests / CRM follow-ups / reminders) show identical numbers on every school because 4 of 14 queries in `loadData()` (lines 1074–1087 of index.html) lack `school_id` filtering. This makes the app *look* like it has fake data even on screens where the underlying records are real. It's the single biggest "this isn't a real product" tell across the audit.
 **Status:** Identified Session 1 (bug B5). Architectural fix, not cosmetic.
@@ -57,7 +70,7 @@
 
 ### Live transfer portal feed
 **Estimated scope:** 3–4 sessions
-**Status:** Pulled once in Phase 4 (1,192 entries). No live refresh wired.
+**Status:** Pulled once in Phase 4 (1,192 entries per historical record). See "Prospect pipeline reconciliation" above before re-opening this — the 1,192 figure is now in question.
 
 ### Push notifications
 **Estimated scope:** 2 sessions
@@ -73,9 +86,10 @@
 
 ### From Session 1 audit
 - **B3:** Howard `head_coach_name` is NULL → drawer shows blank name + "Coach." greeting with no last name. Fix options: (a) backfill missing head coach data across the schools table, (b) make the fallback in `loadData()` ~line 1101 more defensive, (c) both. Probably 30 min.
-- **B4:** Avg PPG = 0.0 on non-Oregon schools in Roster Pulse. Either `depth_chart_position` is unset post-materialization or PPG fields are NULL. Investigation + fix probably 1 session. Session 4a observation: Oregon shows `On roster: 17` but DATA-STATUS says 78 — likely same root cause (starter/active filter). Related.
+- **B4:** Avg PPG = 0.0 on non-Oregon schools in Roster Pulse. Either `depth_chart_position` is unset post-materialization or PPG fields are NULL. Investigation + fix probably 1 session. Session 4a observation: Oregon shows `On roster: 17` but DATA-STATUS says 78 — likely same root cause (starter/active filter). Session 4b did NOT re-surface this; still believed to be related to B4.
 - **B6:** School picker doesn't find "Saint Mary's" when searching "st." — needs alias-aware search or data-side normalization. Session 4a observation: searching "saint" does return Saint Mary's correctly, so the bug may be narrower than originally specced. Worth a 5-min probe to confirm which prefix variants fail. ~30 min.
 - **B7:** Avatar bg color isn't school-themed. Map school primary color → avatar bg. Pleasant polish. ~1 session if we want to do it across all 365 schools.
+- **B8:** ⚠️ NEW — prospect pipeline reconciliation. See named project above.
 - **Defer-from-S1:** Per-screen audit of Roster, Recruiting, Roster Builder, Smart Filter, Apex Scout across non-Oregon schools — Session 1 only audited Home/Visits/Drawer. Could surface more bugs.
 - **CRM attribution row** ("added by …") — was on Session 1 list, deferred. Probably 1 session standalone.
 
@@ -87,13 +101,20 @@
 - **S3-minor-1:** KenPom data freshness. `scripts/kenpom_sync.py` in the `apex-intel` repo is idempotent and safe to re-run. Should be re-run weekly during the season (Oct–Apr) to pull updated ranks. Not yet wired to a cron job. If/when we want auto-refresh, candidate paths: Supabase Edge Function on a schedule, GitHub Action cron, local launchd plist. ~1 session to automate, or manual monthly re-run is fine for MVP.
 - **S3-minor-2:** `scripts/kenpom_sync.py` uses `fuzz.ratio` (character-level) for Pass 3 fuzzy fallback, deliberately chosen over `fuzz.token_set_ratio` because the latter caused 6 wrong-row writes where short KenPom names like "Miami OH" scored 100 against longer DB names like "Miami". Pass 3 is currently unused (override + normalize-exact cover 365/365), but if KenPom adds new names we don't have overrides for, the script should still be safe. Documented here so future me doesn't "helpfully" switch back to token_set_ratio.
 - **S3-minor-3:** `KENPOM_TO_SCHOOL_OVERRIDES` in `kenpom_sync.py` has 62 entries, hand-coded against the current `schools.name` set. If `schools` table is ever renamed/reloaded (e.g., a future data-vendor swap), these overrides may silently break. Defensive option: add a startup check that every override target EXISTS in `schools.name` and fail fast if not. ~15 min.
-- **S3-minor-4:** 8 more `kenpom_*` columns added to `schools`. Session 4's frontend work will want a `schoolKenPomMap` / `kenpomFor(schoolName)` helper. Pattern mirrors existing `schoolEspnMap`. **RESOLVED Session 4a** — helper shipped, Home surfaces wired.
+- **S3-minor-4:** 8 more `kenpom_*` columns added to `schools`. Session 4's frontend work will want a `schoolKenPomMap` / `kenpomFor(schoolName)` helper. Pattern mirrors existing `schoolEspnMap`. **RESOLVED Session 4a** — helper shipped, Home surfaces wired. **Also RESOLVED Session 4b** — recruiting cards + player modal wired.
 
 ### From Session 4a (2026-04-17) — KenPom frontend Home surfaces
-- **S4a-minor-1:** `node` not installed on Mac. `node --check` syntax validation fails (`-bash: node: command not found`) during patch workflow. Session 4a fell back to Python regex brace/paren balance check against extracted `<script>` bodies, which worked — but a proper JS syntax check is a better safety net. Options: (a) `brew install node`, (b) switch to `esbuild --check` or similar Python-based JS parser, (c) keep the Python balance check and accept lighter guarantees. ~10 min for option (a).
-- **S4a-minor-2:** `CURRENT_SCHOOL_NAME` global holds the full "Oregon Ducks" form. `schoolKenPomMap` + `schoolEspnMap` are keyed by the shorter `schools.name` form ("Oregon"). Session 4a worked around this by deriving the canonical name via `schools.filter(s=>s.id===CURRENT_SCHOOL_ID)[0].name` inside the Roster Pulse patch. Cleaner would be: store `CURRENT_SCHOOL_CANONICAL` alongside `CURRENT_SCHOOL_NAME`, updated in the same setters. Or key both maps off `id` not `name`. Not urgent but will repay itself across 4b/4c.
-- **S4a-minor-3:** Session 4a left `index.html.s4a-backup-20260417-043201` in `~/code/Apex-App/` as untracked. Add `*-backup-*` or similar to frontend repo's `.gitignore` to prevent pollution. Combines naturally with the existing "Session 3 repo hygiene" item for the frontend repo.
-- **S4a-minor-4:** Session 4a observation — Oregon `On roster: 17` mismatches DATA-STATUS's documented 78 Oregon players in `my_roster`. Likely a filter upstream of Roster Pulse (probably active/starter-only). If B4 (Avg PPG = 0 non-Oregon) turns out to share a root cause, fixing both at once is cheap. Flag for the B4 investigation session.
+- **S4a-minor-1:** `node` not installed on Mac. `node --check` syntax validation fails (`-bash: node: command not found`) during patch workflow. Session 4a/4b both fell back to Python regex brace/paren balance check against extracted `<script>` bodies, which worked — but a proper JS syntax check is a better safety net. Options: (a) `brew install node`, (b) switch to `esbuild --check` or similar Python-based JS parser, (c) keep the Python balance check and accept lighter guarantees. ~10 min for option (a).
+- **S4a-minor-2:** `CURRENT_SCHOOL_NAME` global holds the full "Oregon Ducks" form. `schoolKenPomMap` + `schoolEspnMap` are keyed by the shorter `schools.name` form ("Oregon"). Session 4a worked around this by deriving the canonical name via `schools.filter(s=>s.id===CURRENT_SCHOOL_ID)[0].name` inside the Roster Pulse patch. Session 4b repeated the same pattern in `kenpomChipHTML`. Cleaner would be: store `CURRENT_SCHOOL_CANONICAL` alongside `CURRENT_SCHOOL_NAME`, updated in the same setters. Or key both maps off `id` not `name`. Session 4b also shipped a parallel `schoolKenPomById` map keyed by UUID, which partially addresses this. Not urgent but will repay itself across future sessions.
+- **S4a-minor-3:** Session 4a left `index.html.s4a-backup-20260417-043201` in `~/code/Apex-App/` as untracked. Session 4b also left `index.html.s4b-backup-20260417-112411`. The `*.s4b-backup-*` gitignore pattern added in Session 4a's close DOES appear to catch both (Session 4b's `git status` at commit time showed neither backup as untracked). Consider broadening the pattern to `*-backup-*` or `index.html.*-backup-*` for future-proofing. ~5 min.
+- **S4a-minor-4:** Oregon `On roster: 17` vs DATA-STATUS's 78 Oregon players in `my_roster`. Likely a filter upstream (probably active/starter-only). Related to B4; fix together.
+
+### From Session 4b (2026-04-17) — KenPom frontend cards + modal
+- **S4b-minor-1:** Chip size initially shipped at 10px, bumped to 11px after user feedback that it read too recessive next to 11px subtitle text. Final spec lives in `.kp-chip` CSS. Worth noting as a reference for future chip styling decisions — 11px is the "present but subordinate" size in this typography scale.
+- **S4b-minor-2:** Patch-script anchor brittleness. Three rebuilds needed during 4b because (a) PATCH C expected 2 matches but only 1 exists in source (I conflated declaration and populate loops), (b) PATCH E expected 1 but 2 prospect-card renderers share the anchor string, (c) PATCH F used `\u00b7` escape form but source file stores literal U+00B7 middot character. All caught by idempotency guard before any write. Lesson: grep anchor counts BEFORE authoring `expect=` values in the patch script, not after. Not actionable — just a process note for future patch-heavy sessions.
+- **S4b-minor-3:** `kenpomChipHTML(p, isPr)` takes an `isPr` boolean. When `isPr === false` (Oregon roster player viewing their own modal), the function derives the user's school via `schools.filter(s=>s.id===CURRENT_SCHOOL_ID)`. Uncovered edge case: if `CURRENT_SCHOOL_ID` ever becomes null or stale between renders, the chip silently hides. Defensive — not a bug today, but flag if we ever see roster modals missing the chip unexpectedly.
+- **S4b-minor-4:** Variant B ("Committed: #X [school]") is code-reviewed but UNTESTED against live data. Zero `prospect_shortlist` rows have `committed_to_school_id` populated. When the named project "Prospect pipeline reconciliation" (B8 above) lands real data, re-check Oregon HS tab for the committed chip rendering correctly. No code changes expected — just live verification.
+- **S4b-minor-5:** Prospect-school name normalization deferred (user chose "proceed with graceful hide" over "add normalizer in kenpomFor"). Edge cases observed in live data: `"Cal"` (should match "California"), `"USC"` (should match "Southern California"), `"Committed - Oregon"` (compound string, no KenPom match). Fix would be a ~20-line normalizer table in `kenpomFor` OR a data-side pass updating `current_school` to canonical names. Filed here for future data-cleaning session.
 
 ### Carryover from previous sessions
 - Empty-state skeletons for seed-data screens (lower priority once dummy fallback ships in Session 2)
@@ -112,7 +133,8 @@
 
 ### Repo hygiene
 - **✅ DONE 2026-04-17 (Session 3):** Cleaned up uncommitted clutter in `~/code/apex-intel/` — `.env.backup`, `*.bak`, `*.backup` files gitignored + 2 real commits extracted (Scout 1.2 refactor, Bart Torvik ingestion script).
-- Remaining: `.gitignore` hygiene on `~/code/Apex-App/` frontend repo (no `*.bak*`, `*.sb-*` Sublime swap, `*.rtf`, `*-backup-*`). Session 4a added the backup-timestamp pattern — promote to a full pass at some point.
+- **✅ DONE 2026-04-17 (Session 4a):** Added `*.s4a-backup-*` gitignore pattern in `~/code/Apex-App/`. Session 4b confirms it also catches `*.s4b-backup-*` via matching wildcard.
+- Remaining: consider broadening the backup pattern to `index.html.*-backup-*` for future-proofing. ~5 min.
 - Standard commit message format
 
 ---
