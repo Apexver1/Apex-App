@@ -725,8 +725,10 @@ function s2nextGame(sid){
   if(sid===OREGON_SID)return NEXT_GAME; /* preserve pilot demo */
   var m=s2meta(sid);var rng=s2rng(s2hash((sid||"x")+"nx"));
   var dates=["Sat · Nov 8 · 7:00 PM","Tue · Nov 11 · 8:00 PM","Sat · Nov 15 · 2:00 PM","Wed · Nov 19 · 7:00 PM","Sat · Nov 22 · 6:00 PM"];
-  var homeKpom=20+Math.floor(rng()*60);
-  var awayKpom=15+Math.floor(rng()*60);
+  var _hKP=(window.kenpomFor?window.kenpomFor(s2short(sid)):{});
+  var _aKP=(window.kenpomFor?window.kenpomFor(s2opponent(sid)):{});
+  var homeKpom=(_hKP.rank!=null)?_hKP.rank:(20+Math.floor(rng()*60));
+  var awayKpom=(_aKP.rank!=null)?_aKP.rank:(15+Math.floor(rng()*60));
   var winprob=35+Math.floor(rng()*30);
   return{
     date:s2pick(dates,rng)+" ET",
@@ -944,7 +946,7 @@ var WATCHLIST=new Set();
 var crmExpanded=new Set();
 var crmStarFilter="ALL";   /* ALL / 5 / 4 / 3 / 2 */
 var patronTier="ALL";      /* ALL / champion / platinum / gold / silver / bronze */
-var schoolEspnMap={};
+var schoolEspnMap={};var schoolKenPomMap={};
 var compareTarget=null;
 
 /* DONORS — 12 seeded with realistic profile */
@@ -1087,7 +1089,7 @@ window.schoolLogo=function(name,size){
   var px=size||20;
   return '<img src="https://a.espncdn.com/i/teamlogos/ncaa/500/'+eid+'.png" width="'+px+'" height="'+px+'" style="border-radius:3px;vertical-align:middle;object-fit:contain" alt="" onerror="this.style.display=\'none\'">';
 };
-window.startCompare=function(id,kind){
+window.kenpomFor=function(name){if(!name)return{};return schoolKenPomMap[(name||"").toLowerCase()]||{};};window.startCompare=function(id,kind){
   compareTarget={id:id,kind:kind};
   toast("Now tap another player to compare");
 };
@@ -1336,7 +1338,7 @@ window.loadData=function(){
     api("/rest/v1/prospect_scores?select=*"),
     api("/rest/v1/prospect_family?select=*"),
     api("/rest/v1/contact_reminders?select=*&status=eq.pending&order=scheduled_for.asc"),
-    fetch(SU+"/rest/v1/schools?select=id,name,conference,city,state,head_coach_name,espn_id&conference=not.is.null&order=name.asc&limit=2000",{headers:{apikey:SK,Authorization:"Bearer "+T,"Range-Unit":"items",Range:"0-1999"}}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SU+"/rest/v1/schools?select=id,name,conference,city,state,head_coach_name,espn_id,kenpom_rank,kenpom_adj_em,kenpom_adj_o,kenpom_adj_d,kenpom_tempo,kenpom_season,kenpom_team_id,kenpom_last_sync&conference=not.is.null&order=name.asc&limit=2000",{headers:{apikey:SK,Authorization:"Bearer "+T,"Range-Unit":"items",Range:"0-1999"}}).then(function(r){return r.json();}).catch(function(){return[];}),
     api("/rest/v1/crm_added?select=prospect_id").catch(function(){return[];}),
     api("/rest/v1/watchlist?select=prospect_id").catch(function(){return[];})
   ]).then(function(r){
@@ -1345,7 +1347,7 @@ window.loadData=function(){
     scoresMap={};(r[8]||[]).forEach(function(s){scoresMap[s.prospect_id]=s;});
     familyMap={};(r[9]||[]).forEach(function(f){if(!familyMap[f.prospect_id])familyMap[f.prospect_id]=[];familyMap[f.prospect_id].push(f);});
     reminders=r[10]||[];schools=r[11]||[];
-    schoolEspnMap={};schools.forEach(function(s){if(s.espn_id)schoolEspnMap[(s.name||"").toLowerCase()]=s.espn_id;});
+    schoolEspnMap={};schools.forEach(function(s){if(s.espn_id)schoolEspnMap[(s.name||"").toLowerCase()]=s.espn_id;});schoolKenPomMap={};schools.forEach(function(s){if(s.kenpom_rank!=null)schoolKenPomMap[(s.name||"").toLowerCase()]={rank:s.kenpom_rank,adjEm:s.kenpom_adj_em,adjO:s.kenpom_adj_o,adjD:s.kenpom_adj_d,tempo:s.kenpom_tempo,season:s.kenpom_season};});try{var _okp=schoolKenPomMap["oregon"];var _akp=schoolKenPomMap["arizona"];if(_okp&&NEXT_GAME&&NEXT_GAME.home)NEXT_GAME.home.kpom=_okp.rank;if(_akp&&NEXT_GAME&&NEXT_GAME.away)NEXT_GAME.away.kpom=_akp.rank;}catch(e){}
     ADDED_TO_CRM=new Set();(r[12]||[]).forEach(function(x){if(x&&x.prospect_id)ADDED_TO_CRM.add(x.prospect_id);});
     WATCHLIST=new Set();(r[13]||[]).forEach(function(x){if(x&&x.prospect_id)WATCHLIST.add(x.prospect_id);});
     var idMap={};prospects.forEach(function(p){idMap[p.id]=p.player_name;});
@@ -2337,7 +2339,7 @@ window.renderHome=function(c,portal,hs){
   h+='<div class="pulse-stats">';
   h+='<div><div class="pulse-l">On roster</div><div class="pulse-v">'+roster.length+'</div></div>';
   h+='<div><div class="pulse-l">Avg PPG (starters)</div><div class="pulse-v">'+(isNaN(startersAvg)?"—":startersAvg.toFixed(1))+'</div></div>';
-  h+='<div><div class="pulse-l">Depth score</div><div class="pulse-v" style="color:var(--pos)">B+</div></div>';
+  h+='<div><div class="pulse-l">Depth score</div><div class="pulse-v" style="color:var(--pos)">B+</div></div>';var _sRow=(schools.filter(function(s){return s.id===CURRENT_SCHOOL_ID;})[0])||{};var _sKP=(window.kenpomFor?window.kenpomFor(_sRow.name||""):{});var _kpTxt=(_sKP.rank!=null)?'#'+_sKP.rank:'—';var _kpSub=(_sKP.adjEm!=null)?((_sKP.adjEm>=0?'+':'')+Number(_sKP.adjEm).toFixed(2)+' AdjEM'):'KenPom';h+='<div><div class="pulse-l">'+_kpSub+'</div><div class="pulse-v">'+_kpTxt+'</div></div>';
   h+='</div>';
   h+='<div><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink-2);margin-bottom:6px"><span>NIL committed</span><span class="num" style="color:var(--ink);font-weight:500">'+fmt$(committed)+' <span style="color:var(--ink-3);font-weight:400">/ '+fmt$(totalCap)+'</span></span></div>';
   h+='<div class="prog-bar"><div class="prog-fill'+(capPct>90?" neg":capPct>75?" gold":"")+'" style="width:'+Math.min(100,capPct).toFixed(1)+'%"></div></div>';
