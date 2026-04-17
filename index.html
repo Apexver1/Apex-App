@@ -504,6 +504,7 @@ select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50
 .mat-row .mat-name{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mat-row .mat-meta{font-size:10px;color:var(--ink-2)}
 .mat-row .mat-views{font-size:10px;color:var(--ink-3);text-align:right;flex-shrink:0}
+.kp-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;background:rgba(46,134,193,0.10);color:var(--ink-2);white-space:nowrap;margin-left:6px;vertical-align:baseline;}.kp-chip .kp-rank{font-weight:700;color:var(--ink-1);}.kp-chip .kp-committed{opacity:.85;}
 </style>
 </head>
 <body>
@@ -946,7 +947,7 @@ var WATCHLIST=new Set();
 var crmExpanded=new Set();
 var crmStarFilter="ALL";   /* ALL / 5 / 4 / 3 / 2 */
 var patronTier="ALL";      /* ALL / champion / platinum / gold / silver / bronze */
-var schoolEspnMap={};var schoolKenPomMap={};
+var schoolEspnMap={};var schoolKenPomMap={};var schoolKenPomById={};
 var compareTarget=null;
 
 /* DONORS — 12 seeded with realistic profile */
@@ -1089,7 +1090,7 @@ window.schoolLogo=function(name,size){
   var px=size||20;
   return '<img src="https://a.espncdn.com/i/teamlogos/ncaa/500/'+eid+'.png" width="'+px+'" height="'+px+'" style="border-radius:3px;vertical-align:middle;object-fit:contain" alt="" onerror="this.style.display=\'none\'">';
 };
-window.kenpomFor=function(name){if(!name)return{};return schoolKenPomMap[(name||"").toLowerCase()]||{};};window.startCompare=function(id,kind){
+window.kenpomFor=function(name){if(!name)return{};return schoolKenPomMap[(name||"").toLowerCase()]||{};};window.kenpomById=function(id){if(!id)return{};return schoolKenPomById[id]||{};};window.kenpomChipHTML=function(p,isPr){try{if(!p)return"";var kp={};var prefix="";var lbl="";if(isPr===false){var _r=schools.filter(function(s){return s.id===CURRENT_SCHOOL_ID;})[0];if(_r)kp=kenpomFor(_r.name);}else{if(p.committed_to_school_id){var _ckp=kenpomById(p.committed_to_school_id);if(_ckp&&_ckp.rank!=null){kp=_ckp;prefix="Committed: ";lbl=_ckp.name||"";}}if((!kp||kp.rank==null)&&p.current_school){kp=kenpomFor(p.current_school);}}if(!kp||kp.rank==null)return"";var em=(kp.adjEm==null)?"":((kp.adjEm>=0?"+":"−")+Math.abs(Number(kp.adjEm)).toFixed(2)+" AdjEM");var body="<span class='kp-rank'>#"+kp.rank+"</span>"+(em?" · "+em:"")+(lbl?" "+lbl:"");return "<span class='kp-chip"+(prefix?" kp-committed":"")+"'>"+(prefix?prefix:"")+body+"</span>";}catch(e){return"";}};window.startCompare=function(id,kind){
   compareTarget={id:id,kind:kind};
   toast("Now tap another player to compare");
 };
@@ -1347,7 +1348,7 @@ window.loadData=function(){
     scoresMap={};(r[8]||[]).forEach(function(s){scoresMap[s.prospect_id]=s;});
     familyMap={};(r[9]||[]).forEach(function(f){if(!familyMap[f.prospect_id])familyMap[f.prospect_id]=[];familyMap[f.prospect_id].push(f);});
     reminders=r[10]||[];schools=r[11]||[];
-    schoolEspnMap={};schools.forEach(function(s){if(s.espn_id)schoolEspnMap[(s.name||"").toLowerCase()]=s.espn_id;});schoolKenPomMap={};schools.forEach(function(s){if(s.kenpom_rank!=null)schoolKenPomMap[(s.name||"").toLowerCase()]={rank:s.kenpom_rank,adjEm:s.kenpom_adj_em,adjO:s.kenpom_adj_o,adjD:s.kenpom_adj_d,tempo:s.kenpom_tempo,season:s.kenpom_season};});try{var _okp=schoolKenPomMap["oregon"];var _akp=schoolKenPomMap["arizona"];if(_okp&&NEXT_GAME&&NEXT_GAME.home)NEXT_GAME.home.kpom=_okp.rank;if(_akp&&NEXT_GAME&&NEXT_GAME.away)NEXT_GAME.away.kpom=_akp.rank;}catch(e){}
+    schoolEspnMap={};schools.forEach(function(s){if(s.espn_id)schoolEspnMap[(s.name||"").toLowerCase()]=s.espn_id;});schoolKenPomMap={};schoolKenPomById={};schools.forEach(function(s){if(s.kenpom_rank!=null){var _kp={rank:s.kenpom_rank,adjEm:s.kenpom_adj_em,adjO:s.kenpom_adj_o,adjD:s.kenpom_adj_d,tempo:s.kenpom_tempo,season:s.kenpom_season,name:s.name};schoolKenPomMap[(s.name||"").toLowerCase()]=_kp;schoolKenPomById[s.id]=_kp;}});try{var _okp=schoolKenPomMap["oregon"];var _akp=schoolKenPomMap["arizona"];if(_okp&&NEXT_GAME&&NEXT_GAME.home)NEXT_GAME.home.kpom=_okp.rank;if(_akp&&NEXT_GAME&&NEXT_GAME.away)NEXT_GAME.away.kpom=_akp.rank;}catch(e){}
     ADDED_TO_CRM=new Set();(r[12]||[]).forEach(function(x){if(x&&x.prospect_id)ADDED_TO_CRM.add(x.prospect_id);});
     WATCHLIST=new Set();(r[13]||[]).forEach(function(x){if(x&&x.prospect_id)WATCHLIST.add(x.prospect_id);});
     var idMap={};prospects.forEach(function(p){idMap[p.id]=p.player_name;});
@@ -1509,7 +1510,7 @@ window.openP=function(id,kind){
 
   var h='<div class="mbg" onclick="if(event.target===this)closeM()"><div class="mdl">';
   h+='<div class="mdl-grab"></div>';
-  h+='<div class="mdl-head"><div style="display:flex;align-items:center;gap:14px">'+photoAv(p.player_name,"hero",p.photo_url)+'<div><div class="mdl-title">'+esc(p.player_name)+'</div><div class="mdl-sub">'+schoolLogo(isPr?p.current_school:"Oregon",28)+' '+esc(p.position||"")+(cy?" · "+esc(cy):"")+(ht?" · "+ht:"")+(isPr&&p.current_school?" · "+esc(p.current_school):" · Oregon")+'</div></div></div><button class="mdl-close" onclick="closeM()" aria-label="Close"></button></div>';
+  h+='<div class="mdl-head"><div style="display:flex;align-items:center;gap:14px">'+photoAv(p.player_name,"hero",p.photo_url)+'<div><div class="mdl-title">'+esc(p.player_name)+'</div><div class="mdl-sub">'+schoolLogo(isPr?p.current_school:"Oregon",28)+' '+esc(p.position||"")+(cy?" · "+esc(cy):"")+(ht?" · "+ht:"")+(isPr&&p.current_school?" · "+esc(p.current_school):" · Oregon")+kenpomChipHTML(p,isPr)+'</div></div></div><button class="mdl-close" onclick="closeM()" aria-label="Close"></button></div>';
   h+='<div style="text-align:right;margin:-8px 0 8px"><button class="btn-sm btn-line" style="font-size:11px;padding:5px 10px;border-radius:6px;border:0.5px solid var(--line);background:var(--surface);cursor:pointer;font-family:inherit;color:var(--accent);font-weight:600" onclick="event.stopPropagation();closeM();startCompare(\''+p.id+'\',\''+kind+'\')">Compare \u2194</button></div>';
 
   if(isPr){
@@ -2496,7 +2497,7 @@ window._recCard=function(p){
   h+=photoAv(p.player_name,"lg",p.photo_url);
   h+='<div style="flex:1;min-width:0">';
   h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px"><div style="font-size:16px;font-weight:600;flex:1;min-width:0">'+esc(p.player_name)+'</div>'+wlStarBtn(p.id)+addCrmBtn(p.id)+'</div>';
-  h+='<div style="font-size:11px;color:var(--ink-2);margin-bottom:6px;display:flex;align-items:center;gap:4px">'+schoolLogo(p.current_school,24)+'<span>'+esc(p.current_school||"")+(p.current_conference?" \u00b7 "+esc(p.current_conference):"")+'</span></div>';
+  h+='<div style="font-size:11px;color:var(--ink-2);margin-bottom:6px;display:flex;align-items:center;gap:4px">'+schoolLogo(p.current_school,24)+'<span>'+esc(p.current_school||"")+(p.current_conference?" \u00b7 "+esc(p.current_conference):"")+kenpomChipHTML(p,true)+'</span></div>';
   h+='<div style="display:flex;gap:6px;flex-wrap:wrap">'+chip(p.position)+chip(p["class_year"],"chip-line")+(p.recruiting_class_year?chip("Class of "+p.recruiting_class_year,"chip-accent"):"")+chip((p.status||"").charAt(0).toUpperCase()+(p.status||"").slice(1),sc(p.status))+(p.priority_tier?chip("Tier "+p.priority_tier):"")+(lg.length?chip(lg.length+" logs","chip-accent"):"")+(scoreObj?chip("\u2605"+scoreObj.composite_score,"chip-gold"):"")+'</div>';
   h+='</div>';
   if(hasRank){
@@ -3467,7 +3468,7 @@ window.renderScout=function(c){
     aiResults.results.forEach(function(p){
       var ps=pStats[p.player_name]||{};
       var mv=p._mv||0;var market=p.nil_estimate||0;var delta=mv-market;
-      h+='<div class="card" style="cursor:pointer" onclick="openP(\''+p.id+'\',\'p\')"><div style="display:flex;justify-content:space-between"><div style="display:flex;gap:10px;align-items:flex-start;flex:1;min-width:0">'+photoAv(p.player_name,"sm",p.photo_url)+'<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px"><div style="font-size:15px;font-weight:600;flex:1;min-width:0">'+esc(p.player_name)+'</div>'+addCrmBtn(p.id)+'</div><div style="font-size:11px;color:var(--ink-2)">'+esc(p.current_school||"")+(p.current_conference?" \u00b7 "+esc(p.current_conference):"")+'</div><div style="display:flex;gap:6px;margin-top:6px">'+chip(p.position)+chip((p.source||"").toUpperCase().replace(/_/g," "),"chip-line")+'</div></div></div>';
+      h+='<div class="card" style="cursor:pointer" onclick="openP(\''+p.id+'\',\'p\')"><div style="display:flex;justify-content:space-between"><div style="display:flex;gap:10px;align-items:flex-start;flex:1;min-width:0">'+photoAv(p.player_name,"sm",p.photo_url)+'<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px"><div style="font-size:15px;font-weight:600;flex:1;min-width:0">'+esc(p.player_name)+'</div>'+addCrmBtn(p.id)+'</div><div style="font-size:11px;color:var(--ink-2)">'+esc(p.current_school||"")+(p.current_conference?" \u00b7 "+esc(p.current_conference):"")+kenpomChipHTML(p,true)+'</div><div style="display:flex;gap:6px;margin-top:6px">'+chip(p.position)+chip((p.source||"").toUpperCase().replace(/_/g," "),"chip-line")+'</div></div></div>';
       h+='<div style="text-align:right"><div style="font-size:14px;font-weight:600;color:var(--brand);font-variant-numeric:tabular-nums">'+fmt$(mv)+'</div><div style="font-size:10px;color:'+(delta>=0?"var(--pos)":"var(--neg)")+'">'+(delta>=0?"+":"\u2212")+fmt$(Math.abs(delta))+' vs mkt</div></div></div>';
       if(ps.ppg||ps.rpg||ps.three_pct){
         h+='<div style="display:flex;gap:12px;margin-top:8px;padding-top:8px;border-top:0.5px solid var(--line-2)">';
