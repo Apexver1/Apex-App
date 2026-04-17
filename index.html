@@ -616,6 +616,261 @@ var COACH_FALLBACK={
 var CURRENT_SCHOOL_ID="d4dd73c7-2ec6-49bf-b63b-5c4a333a2bf7";
 var CURRENT_SCHOOL_NAME="Oregon Ducks";
 
+/* ============================================
+   SESSION 2 — Per-school seed generators
+   Deterministic by school ID. Oregon falls through
+   to original hardcoded seeds (OREGON_SID check) so
+   the Oregon pilot demo is unchanged.
+   ============================================ */
+var OREGON_SID="d4dd73c7-2ec6-49bf-b63b-5c4a333a2bf7";
+
+/* deterministic PRNG seeded from school UUID — same school, same output every render */
+function s2hash(str){var h=2166136261;for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+function s2rng(seed){var s=seed>>>0||1;return function(){s^=s<<13;s^=s>>>17;s^=s<<5;return((s>>>0)%100000)/100000;};}
+function s2pick(arr,rng){return arr[Math.floor(rng()*arr.length)];}
+
+/* curated 25-school metadata — arena, mascot, city, conference-aware opponents */
+var SCHOOL_META={
+  /* Big Ten */
+  "Oregon Ducks":{arena:"Matthew Knight Arena",mascot:"Ducks",city:"Eugene, OR",state:"OR",conf:"Big Ten"},
+  "UCLA Bruins":{arena:"Pauley Pavilion",mascot:"Bruins",city:"Los Angeles, CA",state:"CA",conf:"Big Ten"},
+  "USC Trojans":{arena:"Galen Center",mascot:"Trojans",city:"Los Angeles, CA",state:"CA",conf:"Big Ten"},
+  "Washington Huskies":{arena:"Alaska Airlines Arena",mascot:"Huskies",city:"Seattle, WA",state:"WA",conf:"Big Ten"},
+  "Michigan Wolverines":{arena:"Crisler Center",mascot:"Wolverines",city:"Ann Arbor, MI",state:"MI",conf:"Big Ten"},
+  "Michigan State Spartans":{arena:"Breslin Center",mascot:"Spartans",city:"East Lansing, MI",state:"MI",conf:"Big Ten"},
+  "Purdue Boilermakers":{arena:"Mackey Arena",mascot:"Boilermakers",city:"West Lafayette, IN",state:"IN",conf:"Big Ten"},
+  "Illinois Fighting Illini":{arena:"State Farm Center",mascot:"Fighting Illini",city:"Champaign, IL",state:"IL",conf:"Big Ten"},
+  "Indiana Hoosiers":{arena:"Assembly Hall",mascot:"Hoosiers",city:"Bloomington, IN",state:"IN",conf:"Big Ten"},
+  "Wisconsin Badgers":{arena:"Kohl Center",mascot:"Badgers",city:"Madison, WI",state:"WI",conf:"Big Ten"},
+  /* ACC */
+  "Duke Blue Devils":{arena:"Cameron Indoor Stadium",mascot:"Blue Devils",city:"Durham, NC",state:"NC",conf:"ACC"},
+  "North Carolina Tar Heels":{arena:"Dean E. Smith Center",mascot:"Tar Heels",city:"Chapel Hill, NC",state:"NC",conf:"ACC"},
+  "Virginia Cavaliers":{arena:"John Paul Jones Arena",mascot:"Cavaliers",city:"Charlottesville, VA",state:"VA",conf:"ACC"},
+  "Louisville Cardinals":{arena:"KFC Yum! Center",mascot:"Cardinals",city:"Louisville, KY",state:"KY",conf:"ACC"},
+  /* Big 12 */
+  "Kansas Jayhawks":{arena:"Allen Fieldhouse",mascot:"Jayhawks",city:"Lawrence, KS",state:"KS",conf:"Big 12"},
+  "Houston Cougars":{arena:"Fertitta Center",mascot:"Cougars",city:"Houston, TX",state:"TX",conf:"Big 12"},
+  "Baylor Bears":{arena:"Foster Pavilion",mascot:"Bears",city:"Waco, TX",state:"TX",conf:"Big 12"},
+  "Iowa State Cyclones":{arena:"Hilton Coliseum",mascot:"Cyclones",city:"Ames, IA",state:"IA",conf:"Big 12"},
+  /* SEC */
+  "Kentucky Wildcats":{arena:"Rupp Arena",mascot:"Wildcats",city:"Lexington, KY",state:"KY",conf:"SEC"},
+  "Auburn Tigers":{arena:"Neville Arena",mascot:"Tigers",city:"Auburn, AL",state:"AL",conf:"SEC"},
+  "Tennessee Volunteers":{arena:"Thompson-Boling Arena",mascot:"Volunteers",city:"Knoxville, TN",state:"TN",conf:"SEC"},
+  /* Big East */
+  "UConn Huskies":{arena:"Gampel Pavilion",mascot:"Huskies",city:"Storrs, CT",state:"CT",conf:"Big East"},
+  "Villanova Wildcats":{arena:"Finneran Pavilion",mascot:"Wildcats",city:"Villanova, PA",state:"PA",conf:"Big East"},
+  /* WCC (audit-specific mid-majors) */
+  "Gonzaga Bulldogs":{arena:"McCarthey Athletic Center",mascot:"Bulldogs",city:"Spokane, WA",state:"WA",conf:"WCC"},
+  "Saint Mary's Gaels":{arena:"University Credit Union Pavilion",mascot:"Gaels",city:"Moraga, CA",state:"CA",conf:"WCC"}
+};
+
+/* conference opponents pool — used when picking a "next up" rival */
+var CONF_OPPONENTS={
+  "Big Ten":["Illinois","Indiana","Iowa","Maryland","Michigan","Michigan State","Minnesota","Nebraska","Northwestern","Ohio State","Oregon","Penn State","Purdue","Rutgers","UCLA","USC","Washington","Wisconsin"],
+  "ACC":["Boston College","Clemson","Duke","Florida State","Georgia Tech","Louisville","Miami","North Carolina","NC State","Notre Dame","Pittsburgh","Syracuse","Virginia","Virginia Tech","Wake Forest"],
+  "Big 12":["Arizona","Arizona State","Baylor","BYU","Cincinnati","Colorado","Houston","Iowa State","Kansas","Kansas State","Oklahoma State","TCU","Texas Tech","UCF","Utah","West Virginia"],
+  "SEC":["Alabama","Arkansas","Auburn","Florida","Georgia","Kentucky","LSU","Mississippi","Mississippi State","Missouri","Oklahoma","South Carolina","Tennessee","Texas","Texas A&M","Vanderbilt"],
+  "Big East":["Butler","Creighton","DePaul","Georgetown","Marquette","Providence","Seton Hall","St. John's","UConn","Villanova","Xavier"],
+  "WCC":["BYU","Gonzaga","LMU","Pacific","Pepperdine","Portland","Saint Mary's","San Diego","San Francisco","Santa Clara"],
+  "AAC":["Charlotte","East Carolina","Florida Atlantic","Memphis","North Texas","Rice","South Florida","Temple","Tulane","Tulsa","UAB","UTSA","Wichita State"],
+  "Mountain West":["Air Force","Boise State","Colorado State","Fresno State","Nevada","New Mexico","San Diego State","San Jose State","UNLV","Utah State","Wyoming"],
+  "MEAC":["Coppin State","Delaware State","Howard","Maryland Eastern Shore","Morgan State","Norfolk State","North Carolina Central","South Carolina State"],
+  "SWAC":["Alabama A&M","Alabama State","Alcorn State","Arkansas-Pine Bluff","Bethune-Cookman","Florida A&M","Grambling","Jackson State","Mississippi Valley State","Prairie View","Southern","Texas Southern"],
+  "CAA":["Campbell","Charleston","Delaware","Drexel","Elon","Hampton","Hofstra","Monmouth","NC A&T","Northeastern","Stony Brook","Towson","UNCW","William & Mary"],
+  "Patriot":["American","Army","Boston U","Bucknell","Colgate","Holy Cross","Lafayette","Lehigh","Loyola MD","Navy"],
+  "Ivy":["Brown","Columbia","Cornell","Dartmouth","Harvard","Penn","Princeton","Yale"]
+};
+
+/* lookup school meta by name, with graceful fallback using schools[] row */
+function s2meta(sid){
+  if(!sid)return null;
+  var row=null;try{row=schools.filter(function(s){return s.id===sid;})[0];}catch(e){}
+  var name=row&&row.name?row.name:(sid===CURRENT_SCHOOL_ID?CURRENT_SCHOOL_NAME:"");
+  var m=SCHOOL_META[name];
+  if(m)return Object.assign({name:name,curated:true},m);
+  /* generic fallback: derive what we can from the schools row */
+  var base=name?name.split(" ").slice(0,2).join(" "):"School"; /* strip nickname for cleaner display */
+  var mascotGuess=name&&name.indexOf(" ")>0?name.split(" ").slice(-1)[0]:"";
+  return {
+    name:name||"School",
+    curated:false,
+    arena:base+" Arena",
+    mascot:mascotGuess,
+    city:row&&row.city?(row.city+(row.state?", "+row.state:"")):"",
+    state:row&&row.state?row.state:"",
+    conf:row&&row.conference?row.conference:""
+  };
+}
+
+/* short name (strip nickname) for display in "vs X" contexts */
+function s2short(sid){
+  var m=s2meta(sid);if(!m)return"School";
+  /* If curated, strip mascot; if generic, already stripped in base */
+  if(m.curated){var parts=m.name.split(" ");return parts.slice(0,Math.max(1,parts.length-1)).join(" ");}
+  return m.name.split(" ").slice(0,2).join(" ");
+}
+
+/* pick a conference opponent deterministically, excluding self */
+function s2opponent(sid){
+  var m=s2meta(sid);var rng=s2rng(s2hash(sid||"x"));
+  var pool=(m&&m.conf&&CONF_OPPONENTS[m.conf])||null;
+  if(!pool)return"Conference Rival";
+  var self=s2short(sid);
+  var filtered=pool.filter(function(n){return n!==self&&m.name.indexOf(n)!==0;});
+  if(!filtered.length)return pool[0];
+  return s2pick(filtered,rng);
+}
+
+/* NEXT_GAME generator — same shape as hardcoded NEXT_GAME */
+function s2nextGame(sid){
+  if(sid===OREGON_SID)return NEXT_GAME; /* preserve pilot demo */
+  var m=s2meta(sid);var rng=s2rng(s2hash((sid||"x")+"nx"));
+  var dates=["Sat · Nov 8 · 7:00 PM","Tue · Nov 11 · 8:00 PM","Sat · Nov 15 · 2:00 PM","Wed · Nov 19 · 7:00 PM","Sat · Nov 22 · 6:00 PM"];
+  var homeKpom=20+Math.floor(rng()*60);
+  var awayKpom=15+Math.floor(rng()*60);
+  var winprob=35+Math.floor(rng()*30);
+  return{
+    date:s2pick(dates,rng)+" ET",
+    venue:"Home · "+m.arena,
+    home:{name:s2short(sid),kpom:homeKpom},
+    away:{name:s2opponent(sid),kpom:awayKpom},
+    winprob:winprob
+  };
+}
+
+/* NEWS generator — 4 items, mix of program-specific + league, deterministic */
+function s2news(sid){
+  if(sid===OREGON_SID)return NEWS_SEED;
+  var m=s2meta(sid);var rng=s2rng(s2hash((sid||"x")+"nw"));
+  var short=s2short(sid);var conf=m.conf||"the conference";
+  var rival=s2opponent(sid);
+  var prospectNames=["Kameron Ellis","Ryan Cross","Marcus Chen","DeAndre Wilkins","Tyrese Johnson","Julian Okafor","Cameron Reid","Elijah Brooks"];
+  var pA=s2pick(prospectNames,rng);var pB=s2pick(prospectNames.filter(function(n){return n!==pA;}),rng);
+  return[
+    {src:"ON3",age:"2h ago",
+     head:"Five-star wing "+pA+" narrows list to "+short+", Duke, Houston",
+     sum:"The top-10 prospect in the 2027 class will take officials this spring, with "+short+" landing an early visit."},
+    {src:"ESPN",age:"5h ago",
+     head:"Transfer portal tracker: 1,200+ players active as spring window closes Tuesday",
+     sum:"A breakdown of the biggest names still available and which programs need them most."},
+    {src:"CBS Sports",age:"9h ago",
+     head:conf+" coaches meeting: NIL cap enforcement, scheduling reform on the agenda",
+     sum:"League commissioners and head coaches meet this week to examine structural changes for the 2026\u201327 season."},
+    {src:"247Sports",age:"1d ago",
+     head:short+" lands commitment from top-50 2027 point guard "+pB,
+     sum:"The four-star chose "+short+" over "+rival+" and Gonzaga, citing development path and staff connection."}
+  ];
+}
+
+/* STAFF generator — HC from schools.head_coach_name, 3 generic assistants per school */
+var S2_ASSISTANT_POOL=[
+  {first:"Marcus",last:"Carter"},{first:"Jason",last:"Reeves"},{first:"David",last:"Brooks"},
+  {first:"Terrence",last:"Walker"},{first:"Ryan",last:"Mitchell"},{first:"Brandon",last:"Harris"},
+  {first:"Anthony",last:"Banks"},{first:"Chris",last:"Holloway"},{first:"Kevin",last:"Porter"},
+  {first:"Darius",last:"Green"},{first:"Michael",last:"Foster"},{first:"Jamal",last:"Reid"}
+];
+var S2_ASSISTANT_COLORS=["#1758E8","#B88A00","#0D7A3B","#7A2E8F","#C24A1F","#146E8A"];
+function s2staff(sid){
+  if(sid===OREGON_SID)return STAFF_SEED;
+  var row=null;try{row=schools.filter(function(s){return s.id===sid;})[0];}catch(e){}
+  var hcName=(row&&row.head_coach_name)||"Head Coach";
+  var hcParts=hcName.split(" ");
+  var hcIni=hcParts.map(function(p){return p[0]||"";}).join("").toUpperCase().slice(0,2)||"HC";
+  var rng=s2rng(s2hash((sid||"x")+"st"));
+  /* pick 3 assistants deterministically without repeats */
+  var pool=S2_ASSISTANT_POOL.slice();var picked=[];
+  for(var i=0;i<3&&pool.length;i++){var idx=Math.floor(rng()*pool.length);picked.push(pool.splice(idx,1)[0]);}
+  var roles=["Associate head coach","Assistant coach","Assistant coach"];
+  var arr=[{name:hcName,role:"Head coach",initials:hcIni,color:"#0B2540"}];
+  picked.forEach(function(a,i){
+    var ini=(a.first[0]+a.last[0]).toUpperCase();
+    arr.push({name:a.first+" "+a.last,role:roles[i],initials:ini,color:S2_ASSISTANT_COLORS[(i+s2hash(sid||"x"))%S2_ASSISTANT_COLORS.length]});
+  });
+  return arr;
+}
+
+/* VISITS generator — 2 visits, locations derived from school city/arena */
+function s2visits(sid){
+  if(sid===OREGON_SID)return VISITS_SEED.slice();
+  var m=s2meta(sid);var staffArr=s2staff(sid);
+  var rng=s2rng(s2hash((sid||"x")+"vs"));
+  var prospectNames=["Jalen Washington","Devonte Miles","Marcus Chen","Tyrese Johnson","DeAndre Wilkins","Julian Okafor","Cameron Reid","Elijah Brooks"];
+  var pA=s2pick(prospectNames,rng);var pB=s2pick(prospectNames.filter(function(n){return n!==pA;}),rng);
+  var schoolsPool=["Arkansas","Xavier","Kansas State","Memphis","Gonzaga","Marquette","Creighton","Texas Tech"];
+  var schA=s2pick(schoolsPool,rng);var schB=s2pick(schoolsPool.filter(function(n){return n!==schA;}),rng);
+  var hcLast=(staffArr[0].name||"").split(" ").slice(-1)[0]||"Coach";
+  var shortName=s2short(sid);
+  var initsA=staffArr.slice(0,3).map(function(s){return s.initials;});
+  var initsB=staffArr.slice(1,3).map(function(s){return s.initials;});
+  return[
+    {id:"v1",prospect_name:pA,pos:"G",school:schA,height:"6'3\"",cls:"Jr.",tier:"A",type:"official",
+     date_iso:"2026-04-25T12:30:00",date_display:"Sat, Apr 25",
+     location:m.city+" \u00b7 "+m.arena+" tour, team dinner at Coach "+hcLast+"'s residence, campus walkthrough",
+     staff:initsA,
+     itinerary:[
+       {time:"12:30",duration_min:60,title:"Arrival & lunch",location:shortName+" Athletic Center"},
+       {time:"14:00",duration_min:60,title:m.arena+" tour",location:m.arena},
+       {time:"15:00",duration_min:30,title:"Strength & conditioning facility",location:shortName+" Athletic Center"},
+       {time:"15:30",duration_min:60,title:"Meet with Coach "+hcLast+" + staff",location:"Coach's office, Athletic Center"},
+       {time:"16:30",duration_min:90,title:"Campus & academic tour",location:shortName+" campus"},
+       {time:"18:00",duration_min:120,title:"Team dinner",location:"Coach "+hcLast+"'s residence, "+m.city}
+     ],
+     materials:[
+      {name:pA+" \u2014 pitch deck.pptx",size:"4.2 MB",updated:"2d ago",type:"ppt"},
+      {name:"NIL package \u2014 Tier A.pdf",size:"1.1 MB",updated:"5d ago",type:"pdf"}
+     ]},
+    {id:"v2",prospect_name:pB,pos:"F",school:schB,height:"6'7\"",cls:"Jr.",tier:"A",type:"unofficial",
+     date_iso:"2026-04-29T11:00:00",date_display:"Tue, Apr 29",
+     location:"Coaching staff visits prospect at high school, meet with family",
+     staff:initsB,
+     itinerary:[
+       {time:"11:00",duration_min:15,title:"Coaches arrive at HS",location:pB.split(" ")[1]+" High School"},
+       {time:"11:15",duration_min:60,title:"Meeting with "+pB.split(" ")[0]+" & parents",location:"HS conference room"},
+       {time:"12:15",duration_min:60,title:"Lunch with family",location:"Local restaurant near campus"},
+       {time:"13:15",duration_min:60,title:"Watch "+pB.split(" ")[0]+"'s practice",location:"HS gym"},
+       {time:"14:15",duration_min:30,title:"Wrap-up with HS coach",location:"HS coach's office"}
+     ],
+     materials:[
+      {name:shortName+" program overview.pdf",size:"2.8 MB",updated:"1w ago",type:"pdf"}
+     ]}
+  ];
+}
+
+/* OPS_RECENT generator — 5 rows, staff initials + prospect names match this school */
+function s2opsRecent(sid){
+  if(sid===OREGON_SID)return OPS_RECENT;
+  var staffArr=s2staff(sid);var inits=staffArr.map(function(s){return s.initials;});
+  var rng=s2rng(s2hash((sid||"x")+"or"));
+  var prospects=["Marcus Chen","Tyrese Johnson","DeAndre Wilkins","Julian Okafor","Cameron Reid"];
+  var pA=s2pick(prospects,rng);var pB=s2pick(prospects.filter(function(n){return n!==pA;}),rng);
+  var m=s2meta(sid);
+  return[
+    {who:inits[1]||inits[0],what:"updated",item:pA+" \u2014 pitch deck v3.pptx",time:"12 min ago"},
+    {who:inits[0],what:"shared",item:"Family welcome packet \u2014 "+pB,time:"1h ago"},
+    {who:inits[2]||inits[0],what:"created",item:"Portal report \u2014 April 13 wave",time:"3h ago"},
+    {who:inits[3]||inits[1]||inits[0],what:"viewed",item:"NIL pitch \u2014 Tier A \u2014 2026.pdf",time:"4h ago"},
+    {who:inits[1]||inits[0],what:"uploaded",item:m.arena+" facility tour deck.pptx",time:"yesterday"}
+  ];
+}
+
+/* OPS_DECKS generator — 3 decks */
+function s2opsDecks(sid){
+  if(sid===OREGON_SID)return OPS_DECKS;
+  var staffArr=s2staff(sid);var inits=staffArr.map(function(s){return s.initials;});
+  var rng=s2rng(s2hash((sid||"x")+"od"));
+  var prospects=["Marcus Chen","Tyrese Johnson","DeAndre Wilkins","Julian Okafor","Cameron Reid","Elijah Brooks"];
+  var pA=s2pick(prospects,rng);var pB=s2pick(prospects.filter(function(n){return n!==pA;}),rng);var pC=s2pick(prospects.filter(function(n){return n!==pA&&n!==pB;}),rng);
+  return[
+    {name:pA+" \u2014 pitch deck v3.pptx",size:"4.2 MB",updated:"2d ago",author:inits[1]||inits[0],views:18,type:"ppt"},
+    {name:pB+" \u2014 official visit packet.pptx",size:"6.8 MB",updated:"5d ago",author:inits[0],views:12,type:"ppt"},
+    {name:pC+" \u2014 JR scouting deck.pptx",size:"3.1 MB",updated:"1w ago",author:inits[2]||inits[0],views:7,type:"ppt"}
+  ];
+}
+
+/* ============================================
+   END Session 2 module
+   ============================================ */
+
 /* seed data for modules not yet backend-wired */
 var NEWS_SEED=[
   {src:"ON3",age:"2h ago",head:"Five-star wing Kameron Ellis narrows list to Oregon, Duke, Houston",sum:"The No. 4 overall prospect in the 2027 class will take officials this spring, with Oregon landing the first visit."},
@@ -2064,13 +2319,14 @@ window.renderHome=function(c,portal,hs){
   h+='</div>';
 
   /* next game */
+  var nxg=s2nextGame(CURRENT_SCHOOL_ID);
   h+='<div class="sec-head"><span class="sec-title">Next up</span><span class="sec-link">Season schedule</span></div>';
   h+='<div class="game-hero mb-lg">';
-  h+='<div class="game-head"><span class="game-date">'+NEXT_GAME.date+'</span><span class="chip">'+NEXT_GAME.venue+'</span></div>';
-  h+='<div class="game-vs"><div class="game-team"><div class="game-team-name">'+NEXT_GAME.home.name+'</div><div class="game-team-meta">KenPom #'+NEXT_GAME.home.kpom+'</div></div>';
+  h+='<div class="game-head"><span class="game-date">'+nxg.date+'</span><span class="chip">'+nxg.venue+'</span></div>';
+  h+='<div class="game-vs"><div class="game-team"><div class="game-team-name">'+nxg.home.name+'</div><div class="game-team-meta">KenPom #'+nxg.home.kpom+'</div></div>';
   h+='<div class="game-sep">vs</div>';
-  h+='<div class="game-team away"><div class="game-team-name">'+NEXT_GAME.away.name+'</div><div class="game-team-meta">KenPom #'+NEXT_GAME.away.kpom+'</div></div></div>';
-  h+='<div class="game-foot"><span>Win probability</span><span style="color:var(--ink);font-weight:600" class="num">'+NEXT_GAME.winprob+'%</span></div>';
+  h+='<div class="game-team away"><div class="game-team-name">'+nxg.away.name+'</div><div class="game-team-meta">KenPom #'+nxg.away.kpom+'</div></div></div>';
+  h+='<div class="game-foot"><span>Win probability</span><span style="color:var(--ink);font-weight:600" class="num">'+nxg.winprob+'%</span></div>';
   h+='</div>';
 
   /* roster pulse */
@@ -2122,7 +2378,7 @@ window.renderHome=function(c,portal,hs){
 
   /* news feed */
   h+='<div class="sec-head"><span class="sec-title">College basketball</span><span class="sec-link">All news</span></div>';
-  NEWS_SEED.forEach(function(n){
+  s2news(CURRENT_SCHOOL_ID).forEach(function(n){
     h+='<div class="news-card">';
     h+='<div class="news-src">'+esc(n.src)+' · '+esc(n.age)+'</div>';
     h+='<div class="news-head">'+esc(n.head)+'</div>';
