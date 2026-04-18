@@ -275,7 +275,7 @@ select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50
 .pulse-v{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
 
 /* ai scout quick chips */
-.ai-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.apx-info{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:var(--ink-3);color:#fff;font-size:9px;font-weight:600;font-style:normal;cursor:pointer;margin-left:4px;vertical-align:middle;line-height:1;user-select:none;font-family:-apple-system,sans-serif}.apx-info:hover{background:var(--brand)}.apx-chip-tap{cursor:pointer}.apx-pop{position:fixed;z-index:10000;max-width:260px;background:var(--ink);color:#fff;border-radius:10px;padding:12px 14px;font-size:12px;line-height:1.5;box-shadow:0 8px 24px rgba(0,0,0,0.18);pointer-events:auto}.apx-mic{transition:background .2s,box-shadow .2s;}.apx-mic.listening{background:var(--brand)!important;box-shadow:0 0 0 0 rgba(10,37,64,0.45);animation:apxMicPulse 1.4s ease-out infinite;}@keyframes apxMicPulse{0%{box-shadow:0 0 0 0 rgba(10,37,64,0.55);}70%{box-shadow:0 0 0 12px rgba(10,37,64,0);}100%{box-shadow:0 0 0 0 rgba(10,37,64,0);}}.apx-pop-ttl{font-weight:600;font-size:12px;margin-bottom:4px;color:#fff}.apx-pop-acr{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;color:rgba(255,255,255,0.6);margin-bottom:6px}.apx-pop-body{color:rgba(255,255,255,0.9);font-size:11px;line-height:1.55}.apx-pop-val{margin-top:8px;padding-top:8px;border-top:0.5px solid rgba(255,255,255,0.18);font-size:11px;color:rgba(255,255,255,0.85)}.apx-pop-close{position:absolute;top:6px;right:8px;background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:14px;line-height:1;padding:2px 4px}.apx-pop-close:hover{color:#fff}
+.ai-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .ai-chip{background:var(--surface);border:0.5px solid var(--line);color:var(--ink-2);padding:8px 12px;border-radius:20px;font-size:12px;cursor:pointer;font-family:inherit}
 .ai-chip:active{background:var(--surface-3)}
 
@@ -932,7 +932,7 @@ var VISITS_SEED=[
 
 /* state */
 var budget=null,bRequests=[],scoresMap={},familyMap={},reminders=[],schools=[];
-var recSrc="portal",sortBy="rank",aiQuery="",aiResults=null,aiMode="llm",aiLoading=false,aiFilterSrc="ALL",aiSortBy="match";
+var recSrc="portal",sortBy="rank",aiQuery="",aiResults=null,aiMode="rules",aiLoading=false,aiFilterSrc="ALL",aiSortBy="match";
 var pickerState={q:"",pos:"ALL"};
 var roster=[],prospects=[],strategy=null,schols=[],pStats={},crmLogs={};
 var visits=VISITS_SEED.slice();
@@ -1090,7 +1090,7 @@ window.schoolLogo=function(name,size){
   var px=size||20;
   return '<img src="https://a.espncdn.com/i/teamlogos/ncaa/500/'+eid+'.png" width="'+px+'" height="'+px+'" style="border-radius:3px;vertical-align:middle;object-fit:contain" alt="" onerror="this.style.display=\'none\'">';
 };
-window.kenpomFor=function(name){if(!name)return{};return schoolKenPomMap[(name||"").toLowerCase()]||{};};window.kenpomById=function(id){if(!id)return{};return schoolKenPomById[id]||{};};window.torvikFor=function(name){if(!name)return{};return schoolTorvikMap[(name||"").toLowerCase()]||{};};window.torvikById=function(id){if(!id)return{};return schoolTorvikById[id]||{};};window.kenpomChipHTML=function(p,isPr){try{if(!p)return"";var kp={};var prefix="";var lbl="";if(isPr===false){var _r=schools.filter(function(s){return s.id===CURRENT_SCHOOL_ID;})[0];if(_r)kp=kenpomFor(_r.name);}else{if(p.committed_to_school_id){var _ckp=kenpomById(p.committed_to_school_id);if(_ckp&&_ckp.rank!=null){kp=_ckp;prefix="Committed: ";lbl=_ckp.name||"";}}if((!kp||kp.rank==null)&&p.current_school){kp=kenpomFor(p.current_school);}}if(!kp||kp.rank==null)return"";var em=(kp.adjEm==null)?"":((kp.adjEm>=0?"+":"−")+Math.abs(Number(kp.adjEm)).toFixed(2)+" AdjEM");var body="<span class='kp-rank'>#"+kp.rank+"</span>"+(em?" · "+em:"")+(lbl?" "+lbl:"");var _schoolTxt=lbl||kp.name||"";var _rankTxt=(kp.rank!=null)?"#"+kp.rank:"";var _emTxt=em||"";var _valLine=(_schoolTxt?_schoolTxt+": ":"")+[_emTxt,_rankTxt].filter(Boolean).join(" \u00b7 ");var _valEsc=_valLine.replace(/"/g,"&quot;").replace(/'/g,"&#39;");return "<span class='kp-chip apx-chip-tap'"+(prefix?" kp-committed":"")+"' onclick=\"window.apxShowInfo(event,'team_strength','"+_valEsc+"')\">"+(prefix?prefix:"")+body+" <span class='apx-info' aria-label='What is this?'>i</span></span>";}catch(e){return"";}};window.apxMetricInfo={"team_strength":{ttl:"Team strength",acr:"AdjEM",body:"KenPom’s measure of overall team strength. Offensive efficiency minus defensive efficiency, pace-adjusted. Higher is better."},"team_offense":{ttl:"Offense rating",acr:"AdjOE (team)",body:"KenPom’s adjusted offensive efficiency. Points a team scores per 100 possessions, adjusted for opponent strength. Higher is better."},"team_defense":{ttl:"Defense rating",acr:"AdjDE (team)",body:"KenPom’s adjusted defensive efficiency. Points a team allows per 100 possessions, adjusted for opponent strength. Lower is better."},"team_pace":{ttl:"Pace",acr:"Tempo",body:"KenPom tempo — number of possessions per 40 minutes. Higher means faster, more up-and-down basketball."},"team_winprob":{ttl:"Win probability",acr:"Barthag",body:"Probability this team would beat an average D1 team on a neutral court. Scaled 0 to 1."},"player_offense":{ttl:"Offense",acr:"AdjOE (player)",body:"Bart Torvik’s player-level offensive rating. Estimated points a player contributes per 100 possessions while on the floor. Higher is better."}};window.apxShowInfo=function(ev,key,extraVal){try{ev.stopPropagation();var m=(window.apxMetricInfo||{})[key];if(!m)return;document.querySelectorAll(".apx-pop").forEach(function(el){el.remove()});var pop=document.createElement("div");pop.className="apx-pop";var closeBtn='<button class="apx-pop-close" onclick="this.parentNode.remove();event.stopPropagation()" aria-label="Close">×</button>';var ttl='<div class="apx-pop-ttl">'+m.ttl+'</div>';var acr='<div class="apx-pop-acr">'+m.acr+'</div>';var body='<div class="apx-pop-body">'+m.body+'</div>';var valText=extraVal?String(extraVal).replace(/&#39;/g,"'").replace(/&quot;/g,'"'):"";var val=valText?'<div class="apx-pop-val">'+valText+'</div>':"";pop.innerHTML=closeBtn+ttl+acr+body+val;document.body.appendChild(pop);var t=ev.target||ev.currentTarget;var r=t.getBoundingClientRect();var pw=pop.offsetWidth;var ph=pop.offsetHeight;var x=r.left+r.width/2-pw/2;var y=r.bottom+8;if(x<8)x=8;if(x+pw>window.innerWidth-8)x=window.innerWidth-pw-8;if(y+ph>window.innerHeight-8)y=r.top-ph-8;pop.style.left=x+"px";pop.style.top=y+"px";setTimeout(function(){document.addEventListener("click",function h(e){if(!pop.contains(e.target)){pop.remove();document.removeEventListener("click",h)}})},10);}catch(e){}};window.startCompare=function(id,kind){
+window.kenpomFor=function(name){if(!name)return{};return schoolKenPomMap[(name||"").toLowerCase()]||{};};window.kenpomById=function(id){if(!id)return{};return schoolKenPomById[id]||{};};window.torvikFor=function(name){if(!name)return{};return schoolTorvikMap[(name||"").toLowerCase()]||{};};window.torvikById=function(id){if(!id)return{};return schoolTorvikById[id]||{};};window.kenpomChipHTML=function(p,isPr){try{if(!p)return"";var kp={};var prefix="";var lbl="";if(isPr===false){var _r=schools.filter(function(s){return s.id===CURRENT_SCHOOL_ID;})[0];if(_r)kp=kenpomFor(_r.name);}else{if(p.committed_to_school_id){var _ckp=kenpomById(p.committed_to_school_id);if(_ckp&&_ckp.rank!=null){kp=_ckp;prefix="Committed: ";lbl=_ckp.name||"";}}if((!kp||kp.rank==null)&&p.current_school){kp=kenpomFor(p.current_school);}}if(!kp||kp.rank==null)return"";var em=(kp.adjEm==null)?"":((kp.adjEm>=0?"+":"−")+Math.abs(Number(kp.adjEm)).toFixed(2)+" AdjEM");var body="<span class='kp-rank'>#"+kp.rank+"</span>"+(em?" · "+em:"")+(lbl?" "+lbl:"");return "<span class='kp-chip"+(prefix?" kp-committed":"")+"'>"+(prefix?prefix:"")+body+"</span>";}catch(e){return"";}};window.startCompare=function(id,kind){
   compareTarget={id:id,kind:kind};
   toast("Now tap another player to compare");
 };
@@ -1670,7 +1670,7 @@ window.openScoutPlayer=function(idx){
   if(data.usg_pct!=null)s3+='<div class="stat-box"><div class="l">USG%</div><div class="v">'+pctFmt(data.usg_pct)+'</div></div>';
   if(data.min_pct!=null)s3+='<div class="stat-box"><div class="l">MIN%</div><div class="v">'+pctFmt(data.min_pct)+'</div></div>';
   if(data.porpag!=null)s3+='<div class="stat-box"><div class="l">PORPAG</div><div class="v">'+(+data.porpag).toFixed(1)+'</div></div>';
-  if(data.adjoe!=null)s3+='<div class="stat-box"><div class="l">Offense <span class="apx-info" onclick="window.apxShowInfo(event,\'player_offense\',\'AdjOE: '+(+data.adjoe).toFixed(1)+'\')">i</span></div><div class="v">'+(+data.adjoe).toFixed(1)+'</div></div>';
+  if(data.adjoe!=null)s3+='<div class="stat-box"><div class="l">AdjOE</div><div class="v">'+(+data.adjoe).toFixed(1)+'</div></div>';
   if(data.ast_pct!=null)s3+='<div class="stat-box"><div class="l">AST%</div><div class="v">'+pctFmt(data.ast_pct)+'</div></div>';
   if(data.to_pct!=null)s3+='<div class="stat-box"><div class="l">TO%</div><div class="v">'+pctFmt(data.to_pct)+'</div></div>';
   if(s3)h+='<div style="font-size:11px;color:var(--ink-2);font-weight:600;margin-bottom:6px;letter-spacing:0.3px">ADVANCED \u00b7 BART TORVIK</div><div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px">'+s3+'</div>';
@@ -2134,25 +2134,21 @@ window.matIconLabel=function(type){
    AI SCOUT
    ============================================ */
 window.aiVoice=function(){
-  var btn=document.getElementById("micBtn");
-  if(window._apxRec){try{window._apxRec.stop();}catch(e){}window._apxRec=null;if(btn)btn.classList.remove("listening");return;}
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){toast("Voice not supported here. Try Safari.");return;}
   var rec=new SR();
   rec.lang="en-US";rec.interimResults=false;rec.maxAlternatives=1;
-  window._apxRec=rec;
-  if(btn)btn.classList.add("listening");
+  var btn=document.getElementById("micBtn");
+  if(btn){btn.textContent="Listening…";btn.style.background="var(--neg)";btn.style.color="#fff";}
   rec.onresult=function(e){
     var t=e.results[0][0].transcript;
-    var inp=document.getElementById("aiInput");
-    if(inp)inp.value=t;
+    document.getElementById("aiInput").value=t;
     aiQuery=t;
-    if(btn)btn.classList.remove("listening");
-    window._apxRec=null;
+    if(btn){btn.textContent="Mic";btn.style.background="";btn.style.color="";}
     aiRun();
   };
-  rec.onerror=function(){if(btn)btn.classList.remove("listening");window._apxRec=null;toast("Voice error");};
-  rec.onend=function(){if(btn)btn.classList.remove("listening");window._apxRec=null;};
+  rec.onerror=function(){if(btn){btn.textContent="Mic";btn.style.background="";btn.style.color="";}toast("Voice error");};
+  rec.onend=function(){if(btn&&btn.textContent.indexOf("Listening")>=0){btn.textContent="Mic";btn.style.background="";btn.style.color="";}};
   rec.start();
 };
 window.aiLLM=function(){
@@ -2200,7 +2196,7 @@ window.aiSearch=function(){
   render();
 };
 window.setAiMode=function(m){aiMode=m;render();};
-window.aiRun=function(){if(aiMode==="rules")aiSearch();else aiLLM();};
+window.aiRun=function(){if(aiMode==="llm")aiLLM();else aiSearch();};
 window.aiQuick=function(q){document.getElementById("aiInput").value=q;aiRun();};
 
 /* ============================================
@@ -2344,7 +2340,7 @@ window.renderHome=function(c,portal,hs){
   h+='<div class="pulse-stats">';
   h+='<div><div class="pulse-l">On roster</div><div class="pulse-v">'+roster.length+'</div></div>';
   h+='<div><div class="pulse-l">Avg PPG (starters)</div><div class="pulse-v">'+(isNaN(startersAvg)?"—":startersAvg.toFixed(1))+'</div></div>';
-  h+='<div><div class="pulse-l">Depth score</div><div class="pulse-v" style="color:var(--pos)">B+</div></div>';var _sRow=(schools.filter(function(s){return s.id===CURRENT_SCHOOL_ID;})[0])||{};var _sKP=(window.kenpomFor?window.kenpomFor(_sRow.name||""):{});var _kpTxt=(_sKP.rank!=null)?'#'+_sKP.rank:'-';var _kpSub=(_sKP.adjEm!=null)?((_sKP.adjEm>=0?'+':'')+Number(_sKP.adjEm).toFixed(2)+' AdjEM'):'KenPom';var _kpVal=(_sKP.adjEm!=null)?(_kpSub+' · '+_kpTxt):_kpTxt;var _kpPlain=(_sKP.adjEm!=null)?'Team strength <span class="apx-info" onclick="window.apxShowInfo(event,\'team_strength\',\''+_kpVal+'\')">i</span>':'KenPom';h+='<div><div class="pulse-l">'+_kpPlain+'</div><div class="pulse-v">'+_kpTxt+'</div></div>';
+  h+='<div><div class="pulse-l">Depth score</div><div class="pulse-v" style="color:var(--pos)">B+</div></div>';var _sRow=(schools.filter(function(s){return s.id===CURRENT_SCHOOL_ID;})[0])||{};var _sKP=(window.kenpomFor?window.kenpomFor(_sRow.name||""):{});var _kpTxt=(_sKP.rank!=null)?'#'+_sKP.rank:'—';var _kpSub=(_sKP.adjEm!=null)?((_sKP.adjEm>=0?'+':'')+Number(_sKP.adjEm).toFixed(2)+' AdjEM'):'KenPom';h+='<div><div class="pulse-l">'+_kpSub+'</div><div class="pulse-v">'+_kpTxt+'</div></div>';
   h+='</div>';
   h+='<div><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink-2);margin-bottom:6px"><span>NIL committed</span><span class="num" style="color:var(--ink);font-weight:500">'+fmt$(committed)+' <span style="color:var(--ink-3);font-weight:400">/ '+fmt$(totalCap)+'</span></span></div>';
   h+='<div class="prog-bar"><div class="prog-fill'+(capPct>90?" neg":capPct>75?" gold":"")+'" style="width:'+Math.min(100,capPct).toFixed(1)+'%"></div></div>';
@@ -3299,7 +3295,7 @@ window.renderScout=function(c){
   /* Pill input with inline mic icon */
   h+='<div style="position:relative;margin-bottom:22px;max-width:560px;margin-left:auto;margin-right:auto">';
   h+='<input id="aiInput" class="inp" style="width:100%;padding:14px 56px 14px 20px;border-radius:999px;font-size:14px;margin:0;box-sizing:border-box" placeholder="e.g. defensive PGs under $800K" value="'+esc(aiQuery||"")+'" onkeydown="if(event.key===\'Enter\'){aiRun();}">';
-  h+='<button id="micBtn" class="apx-mic" onclick="aiVoice()" aria-label="Voice input" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:50%;background:var(--brand);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">';
+  h+='<button id="micBtn" onclick="aiVoice()" aria-label="Voice input" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:50%;background:var(--brand);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">';
   h+='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>';
   h+='</button>';
   h+='</div>';
