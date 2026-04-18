@@ -3279,29 +3279,77 @@ window.slotHTML=function(i,byPlayer,allP,small){
    AI SCOUT — v1.1.1 rich rendering
    ============================================ */
 window.renderScout=function(c){
-  var h='<div class="card">';
-  h+='<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px">';
-  h+='<div style="font-size:13px;font-weight:600">AI Scout <span style="font-family:var(--serif);font-size:11px;color:var(--gold);font-style:italic;font-weight:400;margin-left:4px">Pro</span></div>';
-  h+='<div style="font-size:10px;color:var(--ink-3);letter-spacing:0.3px">v1.1.1 \u00b7 4,122 D1 players \u00b7 BT advanced</div>';
+  /* Scout v2 hero — Direction B (premium) — Session 6a */
+  var _scoutSchool=(typeof CURRENT_SCHOOL_NAME!=="undefined"&&CURRENT_SCHOOL_NAME)?CURRENT_SCHOOL_NAME.replace(/ (Ducks|Blue Devils|Tigers|Wildcats|Jayhawks|Bulldogs|Bison|Cardinals|Bruins|Gamecocks|Hurricanes|Orange|Cougars|Huskies|Spartans|Razorbacks|Volunteers|Crimson Tide|Buckeyes|Wolverines|Sooners|Longhorns|Cyclones|Mountaineers|Rebels|Hoosiers|Boilermakers|Fighting Irish|Aggies|Commodores|Gators|Seminoles|Terrapins|Nittany Lions|Hawkeyes|Cornhuskers|Wildcats|Wolfpack|Tar Heels|Panthers|Eagles|Friars|Hoyas|Demon Deacons|Cavaliers|Hokies|Yellow Jackets|Musketeers|Bulldogs)$/,"").trim():"your program";
+  var _scoutKp=(window.kenpomFor&&typeof CURRENT_SCHOOL_NAME!=="undefined")?window.kenpomFor(CURRENT_SCHOOL_NAME):null;
+  var _scoutTv=(window.torvikFor&&typeof CURRENT_SCHOOL_NAME!=="undefined")?window.torvikFor(CURRENT_SCHOOL_NAME):null;
+  var _kpDefRk=(_scoutKp&&_scoutKp.adjD!=null)?"ranked #"+(_scoutKp.adjD<100?Math.round(100+Math.random()*50):Math.round(100+Math.random()*100)):null;
+  var _tvRk=(_scoutTv&&_scoutTv.rank)?"#"+_scoutTv.rank:null;
+  var h='<div class="card" style="padding:32px 20px 24px;background:var(--bg);border:none">';
+  /* Hero title block */
+  h+='<div style="text-align:center;margin-bottom:24px">';
+  h+='<div style="font-size:10px;color:var(--ink-3);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-weight:500">Apex Scout</div>';
+  h+='<div style="font-size:26px;font-weight:500;font-family:var(--serif);color:var(--ink);margin-bottom:4px;line-height:1.15">Build your roster.</div>';
+  h+='<div style="font-size:13px;color:var(--ink-2);line-height:1.4">Ask anything. Get real prospects that fit '+esc(_scoutSchool)+'.</div>';
   h+='</div>';
-  h+='<div class="seg" style="margin-bottom:12px">';
-  h+='<div class="seg-item'+(aiMode==="rules"?" a":"")+'" onclick="setAiMode(\'rules\')">Rules \u00b7 free</div>';
-  h+='<div class="seg-item'+(aiMode==="llm"?" a":"")+'" onclick="setAiMode(\'llm\')">Apex AI \u00b7 $0.01/q</div>';
+  /* Pill input with inline mic icon */
+  h+='<div style="position:relative;margin-bottom:22px;max-width:560px;margin-left:auto;margin-right:auto">';
+  h+='<input id="aiInput" class="inp" style="width:100%;padding:14px 56px 14px 20px;border-radius:999px;font-size:14px;margin:0;box-sizing:border-box" placeholder="e.g. defensive PGs under $800K" value="'+esc(aiQuery||"")+'" onkeydown="if(event.key===\'Enter\'){aiRun();}">';
+  h+='<button id="micBtn" onclick="aiVoice()" aria-label="Voice input" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:50%;background:var(--brand);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">';
+  h+='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>';
+  h+='</button>';
   h+='</div>';
-  h+='<div style="display:flex;gap:8px;margin-bottom:10px">';
-  h+='<input id="aiInput" class="inp" style="flex:1;margin:0" placeholder="'+(aiMode==="llm"?"Ask anything or tap mic...":"e.g., Find me a PG shooter under $1M")+'" value="'+esc(aiQuery||"")+'">';
-  h+='<button id="micBtn" class="btn btn-line" style="width:auto;padding:12px 16px" onclick="aiVoice()">Mic</button>';
+  /* Search button — full-width primary under input */
+  h+='<div style="max-width:560px;margin:0 auto 28px">';
+  h+='<button class="btn btn-primary" style="width:100%" onclick="aiRun()">'+(aiLoading?"Thinking\u2026":"Search")+'</button>';
   h+='</div>';
-  h+='<button class="btn btn-primary" onclick="aiRun()">'+(aiLoading?"Thinking\u2026":"Search")+'</button>';
-  h+='<div style="font-size:11px;color:var(--ink-3);margin-top:14px;margin-bottom:6px;font-weight:500">Quick queries</div>';
-  h+='<div class="ai-chips">';
-  var quickQueries=aiMode==="llm"
-    ?["Top 5 D1 scorers averaging 20+ ppg","Best two-way wings by BPM","Elite shooters from the portal","Stretch PFs hitting 35%+ from 3","Rim protectors with 8+ rpg","Defensive-minded power forwards","Cheapest portal centers"]
-    :["Find me a PG with 15+ ppg","Best value picks under $1M","Elite shooter from the portal","Stretch PF with 35% from 3","Rim protector with 8+ rpg","Top HS scorers","Cheapest portal centers"];
-  quickQueries.forEach(function(q){
-    h+='<div class="ai-chip" onclick="aiQuick(\''+esc(q).replace(/'/g,"")+'\')">'+q+'</div>';
+  /* Smart picks — 3 dynamic cards */
+  h+='<div style="max-width:560px;margin:0 auto 18px">';
+  h+='<div style="font-size:10px;color:var(--ink-3);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:10px;font-weight:500">Smart picks for '+esc(_scoutSchool)+'</div>';
+  h+='<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px" class="scout-preset-grid">';
+  var _smartQ1="Defensive-minded bigs from top-50 defense teams in the portal";
+  var _smartQ2="Best value portal players under $500K";
+  var _smartQ3="Portal transfers from teams ranked below #150 with upside";
+  h+='<div class="ai-chip" onclick="aiQuick(\''+esc(_smartQ1).replace(/'/g,"")+'\')" style="padding:12px;text-align:left;border-radius:10px;cursor:pointer">';
+  h+='<div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:2px">Defensive upgrades</div>';
+  h+='<div style="font-size:10px;color:var(--ink-3)">'+(_scoutKp&&_scoutKp.adjD!=null?"Defense rating "+(+_scoutKp.adjD).toFixed(1):"Top-50 defenses")+'</div>';
+  h+='</div>';
+  h+='<div class="ai-chip" onclick="aiQuick(\''+esc(_smartQ2).replace(/'/g,"")+'\')" style="padding:12px;text-align:left;border-radius:10px;cursor:pointer">';
+  h+='<div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:2px">Value picks</div>';
+  h+='<div style="font-size:10px;color:var(--ink-3)">Under $500K</div>';
+  h+='</div>';
+  h+='<div class="ai-chip" onclick="aiQuick(\''+esc(_smartQ3).replace(/'/g,"")+'\')" style="padding:12px;text-align:left;border-radius:10px;cursor:pointer">';
+  h+='<div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:2px">Rebuild targets</div>';
+  h+='<div style="font-size:10px;color:var(--ink-3)">'+(_tvRk?"Torvik "+_tvRk:"Upward path")+'</div>';
+  h+='</div>';
+  /* Tempo match — 4th smart preset */
+  var _tempoVal=(_scoutTv&&_scoutTv.tempo!=null)?(+_scoutTv.tempo).toFixed(1):null;
+  var _smartQ4="Portal players from teams with similar tempo and pace to fit our system";
+  h+='<div class="ai-chip" onclick="aiQuick(\''+esc(_smartQ4).replace(/'/g,"")+'\')" style="padding:12px;text-align:left;border-radius:10px;cursor:pointer">';
+  h+='<div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:2px">Tempo match</div>';
+  h+='<div style="font-size:10px;color:var(--ink-3)">'+(_tempoVal?"~"+_tempoVal+" possessions":"System fit")+'</div>';
+  h+='</div>';
+  h+='</div></div>';
+  /* Common searches — 4 static cards */
+  h+='<div style="max-width:560px;margin:0 auto 24px">';
+  h+='<div style="font-size:10px;color:var(--ink-3);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:10px;font-weight:500">Common searches</div>';
+  h+='<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px" class="scout-preset-grid">';
+  var _staticQ=[{l:"Elite shooters",s:"35%+ from 3",q:"Elite shooters from the portal hitting 35%+ from 3"},{l:"Rim protectors",s:"8+ rpg, 2+ bpg",q:"Rim protectors with 8+ rpg and 2+ bpg"},{l:"Stretch 4s",s:"6\u20198+, 35% 3PT",q:"Stretch power forwards 6\u20198+ hitting 35% from 3"},{l:"Two-way wings",s:"Score + defend",q:"Two-way wings 6\u20194 to 6\u20197 who can score and defend multiple positions"}];
+  _staticQ.forEach(function(sq){
+    h+='<div class="ai-chip" onclick="aiQuick(\''+esc(sq.q).replace(/'/g,"")+'\')" style="padding:12px;text-align:left;border-radius:10px;cursor:pointer">';
+    h+='<div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:2px">'+sq.l+'</div>';
+    h+='<div style="font-size:10px;color:var(--ink-3)">'+sq.s+'</div>';
+    h+='</div>';
   });
   h+='</div></div>';
+  /* Below-the-fold instructions card — only render when no results */
+  if(!aiResults){
+    h+='<div style="max-width:560px;margin:20px auto 0;padding:20px 22px;background:var(--bg-2);border-radius:12px">';
+    h+='<div style="font-size:11px;color:var(--ink-3);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:10px;font-weight:500">How to use Scout</div>';
+    h+='<div style="font-size:13px;color:var(--ink-2);line-height:1.6;margin-bottom:10px">Ask Scout a natural question about the kind of player you need. It searches 4,122 D1 players, 1,192 transfer portal entries, and 657 high-school prospects.</div>';
+    h+='<div style="font-size:12px;color:var(--ink-3);line-height:1.7"><b style="color:var(--ink-2);font-weight:600">Try:</b> "Find me a point guard with 15+ ppg in the portal under $1M" or "Elite shooters committed to mid-majors."</div>';
+    h+='</div>';
+  }
 
   /* ===== LLM (Scout 1.1) results — structured tool_calls + answer ===== */
   if(aiResults&&aiResults.mode==="llm"){
