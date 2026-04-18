@@ -1,6 +1,6 @@
 # DATA-STATUS.md — Real vs Dummy data tracker
 
-**Updated:** 2026-04-17 (after Session 4b KenPom frontend — recruiting cards + player modal)
+**Updated:** 2026-04-17 (after Session 5 Torvik — backend + frontend + Smart Filter surfacing)
 **Updated by:** Claude at end of every session
 
 This doc tracks the **truth** of what data is real vs dummy across the app, per screen and per school. Source of truth for Claude across sessions. Not visible to end users — visual indicators (the "Sample" badges shipped in 5f) were removed in Session 1; gaps are now tracked here only.
@@ -41,14 +41,14 @@ This doc tracks the **truth** of what data is real vs dummy across the app, per 
 ### Home — Next Up game
 - **Status:** 🟠 PARTIAL (real KenPom wired Session 4a, curated arena + opponent still generated)
 - `s2nextGame(schoolId)` — curated arena + conf opponent for 25 schools, generic fallback rest
-- **KenPom ranks (home + away):** ✅ REAL — Session 4a wired via `kenpomFor()` helper; both Oregon path (via lazy NEXT_GAME patch) and non-Oregon path (via generator rewire) now read live KenPom.
+- **KenPom ranks (home + away):** ✅ REAL — Session 4a wired via `kenpomFor()` helper; all 365 D1 schools read live KenPom.
 
 ### Home — Roster Pulse
 - **Status:** 🟠 PARTIAL
 - On roster count: ✅ REAL
 - Avg PPG (starters): 🔴 BROKEN non-Oregon (data gap — `depth_chart_position` or PPG NULL, see B4)
 - Depth score "B+": 🟡 DUMMY (hardcoded)
-- **KenPom AdjEM chip (4th tile, Session 4a):** ✅ REAL — shows `{+/-}X.XX AdjEM` label + `#rank` value for all 365 D1 schools. Negative AdjEM verified rendering correctly (Howard -2.64).
+- **KenPom AdjEM chip (4th tile, Session 4a):** ✅ REAL — shows `{+/-}X.XX AdjEM` label + `#rank` value for all 365 D1 schools.
 - NIL committed/cap: ✅ REAL Oregon, default for others until Session 8
 
 ### Home — Hot in the portal
@@ -64,13 +64,13 @@ This doc tracks the **truth** of what data is real vs dummy across the app, per 
 - **Status:** ✅ REAL (5,136 of 7,580 players have ESPN photos)
 
 ### Recruiting (Portal / HS / Watchlist tabs)
-- **Status:** ✅ REAL (see data-reality note below re: row counts)
-- **KenPom chip on prospect cards (both renderers — line 2499 and line 3470):** ✅ REAL — Session 4b wired via `kenpomChipHTML(p, true)`. Variant A (current-school KenPom) verified live on Oregon Portal (Juke Harris #80 Wake Forest, Flory Bidunga #21 Kansas, Massamba Diop #66 Arizona State, John Blackwell #23 Wisconsin). Variant C (graceful hide) verified on HS prospects with non-D1 `current_school` ("Uncommitted", "AZ Compass Prep", "Eagles Landing (GA)").
+- **Status:** ✅ REAL (1,192 portal + 657 HS)
+- **KenPom on recruiting cards (Session 4b):** ✅ REAL on both card renderers (line 2499 + line 3470). Chips show "Wake Forest · ACC · #80 · +10.58 AdjEM"; graceful-hide for HS/international/non-D1 prospects (Variant C).
 
 ### Player cards / detail modal
-- **Status:** ✅ REAL (for KenPom chip)
+- **Status:** 🟠 PARTIAL
 - Photos + logos ✅
-- **KenPom rank chip in mdl-sub subtitle:** ✅ REAL — Session 4b wired via `kenpomChipHTML(p, isPr)`. Verified live (Juke Harris modal showing Wake Forest #80 · +10.58 AdjEM). Honors `isPr` semantics: prospects read `p.current_school`, Oregon roster players would read CURRENT_SCHOOL_ID→schools→name path.
+- **KenPom rank section on player modal (Session 4b):** ✅ REAL — injected into `mdl-sub` subtitle row; respects `isPr` for recruiting-vs-roster context.
 
 ### Apex CRM
 - **Status:** ✅ REAL (user-scoped; school-scoping backlogged)
@@ -85,13 +85,15 @@ This doc tracks the **truth** of what data is real vs dummy across the app, per 
 - **Status:** ✅ REAL
 
 ### Smart Filter
-- **Status:** 🟠 PARTIAL
-- Source / position / class filters ✅
-- **KenPom "bottom-50" / "top-X" filtering:** backend data ready (Session 3), helper ready (Session 4a), surfacing deferred to Apex Picks preset strip in Session 7
+- **Status:** 🟠 PARTIAL (Torvik wired Session 5c, KenPom + Apex Picks preset strip deferred to Session 7)
+- Source / position / class / priority tier / On3 rank filters: ✅ REAL
+- **Torvik tier filter (Session 5c):** ✅ REAL — 4 buckets (All / Top 50 / #51-150 / #151+) filtering prospects by `torvikFor(current_school).rank`. Gracefully excludes HS/international/non-D1 prospects when any tier filter is active.
+- **KenPom "bottom-50" / "top-X" filtering:** backend data ready (Session 3), helper ready (Session 4a). Deferred to Apex Picks preset strip in Session 7 (composite KenPom+Torvik presets).
 
 ### Apex Scout
 - **Status:** ✅ REAL (Scout 1.2 tool-use refactor shipped in `apex-intel` Session 3 cleanup)
-- **KenPom on scout cards:** Data ready + helpers ready. **Deferred to Session 6** (Apex Scout polish — "the showpiece" session) per Session 4b opener decision. Tradeoff rationale: Scout has two render branches (LLM + rules-mode); Session 6 already budgeted for polish can absorb the wire cleanly.
+- **KenPom on scout cards:** Data ready + helper ready. **Not yet surfaced** — deferred to Session 6 Scout polish pass.
+- **Torvik on scout cards:** Data ready + helpers (`torvikFor`, `torvikById`) ready. **Not yet surfaced** — deferred to Session 6.
 - Polish pass: pending Session 6
 
 ### Apex Patrons
@@ -108,30 +110,15 @@ This doc tracks the **truth** of what data is real vs dummy across the app, per 
 
 ---
 
-## ⚠️ Data-reality note (Session 4b discovery)
-
-This doc's table below previously claimed **657 HS + 1,192 portal = 1,849 prospects**. Session 4b recon hit live DB and found:
-
-- **`prospect_shortlist` table has only 100 rows.**
-- **All 100 rows have `source_tag = NULL`.** The frontend discriminates on `p.source === 'portal'` / `p.source === 'high_school'` (text column), NOT `source_tag`.
-- **All 100 rows have `school_id` pointing at Oregon's UUID**, regardless of what `current_school` text says (data-seed artifact — `school_id` was populated generically during seed, not against the prospect's actual school).
-- **`current_school` text column is a grab-bag:** real D1 names for portal ("Kansas", "Arizona"), HS names for recruits ("AZ Compass Prep", "Eagles Landing (GA)"), literals like "Uncommitted", and compound strings like "Committed - Oregon".
-
-**Where did 1,849 come from?** Probably from a Phase 4 ingestion log that landed into a staging table that never made it into `prospect_shortlist`, OR the numbers represent aspirational counts from 247Sports / ESPN that haven't been loaded yet. **Backlog item filed** to reconcile: either ingest the missing rows, update DATA-STATUS to reflect 100, or rewrite the ingestion script.
-
-**Operational impact:** zero — the UI renders `p.source==='portal'` filters fine against whatever's there, and the chip's graceful-hide covers junk `current_school` values. But the "it looks like a real product" bar is lower than the stated counts suggest.
-
----
-
 ## By data source
 
-### Supabase tables (23 total; +1 new since last update: `scout_tool_calls`)
+### Supabase tables (22 total)
 | Table | Coverage | School-scoped in loadData()? | Notes |
 |---|---|---|---|
-| schools | ✅ 1,518 rows; 365 D1 with conference; **365 with KenPom data (Session 3, surfaced Session 4a Home, Session 4b cards+modal)** | N/A (universe) | 8 kenpom_* columns |
+| schools | ✅ 1,518 rows; 365 D1 with conference; **365 with KenPom + 365 with Torvik data** | N/A (universe) | 8 kenpom_* + 9 torvik_* columns; SELECT expanded Sessions 4a + 5b |
 | school_rosters | ✅ 7,580 players | ✅ via my_roster query | 5,136 with photos |
 | my_roster | ✅ Oregon (78) | ✅ Yes | other schools materialized via RPC |
-| prospect_shortlist | **⚠️ 100 rows (not 1,849 as previously documented)** | ✅ Yes via `school_id` + `source` | See reality note above |
+| prospect_shortlist | ⚠️ 100 rows actual (not 1,849 as previously documented — see B8) | ✅ Yes | school-agnostic via `school_id` |
 | prospect_stats | ✅ | ❌ No (`is_seed_data` filter only) | |
 | prospect_scores | ✅ | ❌ No | |
 | prospect_film | partial | — | |
@@ -146,7 +133,6 @@ This doc's table below previously claimed **657 HS + 1,192 portal = 1,849 prospe
 | nil_budget_requests | ✅ | 🔴 NO — bug B5 | |
 | scholarships | ✅ | 🔴 NO — bug B5 | |
 | staff | partial | — | |
-| scout_tool_calls | ✅ (new) | — | Session 3 Scout 1.2 refactor artifact |
 | audit_log | ✅ | — | |
 | search_history | ✅ | — | |
 | source_tags | ✅ | — | |
@@ -158,9 +144,9 @@ This doc's table below previously claimed **657 HS + 1,192 portal = 1,849 prospe
 | ESPN (photos + roster + logos) | ✅ Active | 5,136 photos, 365 logos |
 | BallDontLie | ✅ Active (NCAA) | not currently surfaced |
 | CBBD | ✅ Active | not currently surfaced |
-| **KenPom** | ✅ **Active — wired Session 3 backend + Session 4a Home + Session 4b prospect cards + player modal** | **365 of 365 D1 schools; 5 of 5 surfaces live (Home Next Up, Home Roster Pulse, recruiting cards both renderers, player modal). Scout cards deferred to Session 6.** |
-| Torvik | ❌ Not yet wired | Session 5 |
-| 247Sports (HS + portal) | ⚠️ Ingestion status in question — see data-reality note | DATA-STATUS previously stated 657 HS + 1,192 portal; live DB shows only 100 rows in prospect_shortlist |
+| **KenPom** | ✅ **Wired Session 3 backend + Session 4a/4b frontend surfacing (5 of 6 planned surfaces live; Scout deferred to Session 6)** | 365 of 365 D1 schools |
+| **Torvik** | ✅ **Wired Session 5 backend + 5b frontend helpers + 5c Smart Filter surfacing** | 365 of 365 D1 schools (6 of 9 columns populated: rank, adj_oe, adj_de, barthag, season, last_sync; eFG/eFG-D/TOV deferred per S5-minor-1) |
+| 247Sports (HS + portal) | ✅ Phase 4 ingested | 657 HS + 1,192 portal |
 | NCAA-API | ✅ Verified | not currently surfaced |
 
 ---
@@ -176,7 +162,7 @@ This doc's table below previously claimed **657 HS + 1,192 portal = 1,849 prospe
 | B5 | High (architectural) | Home → Today's brief | 4 of 14 loadData queries lack school_id filter | BACKLOG (named project) |
 | B6 | Low | School picker | "st." doesn't match Saint Mary's ("saint" does work — may be narrower than specced) | BACKLOG |
 | B7 | Cosmetic | Drawer | Avatar bg color not school-themed | BACKLOG |
-| B8 | ⚠️ **NEW** Session 4b | Data pipeline | `prospect_shortlist` has 100 rows, all with NULL `source_tag` and Oregon-pointing `school_id`. DATA-STATUS claimed 1,849. Reconcile. | BACKLOG |
+| B8 | Medium | Recruiting | `prospect_shortlist` is 100 rows not 1,849 as documented — all school_id=Oregon regardless of current_school text | BACKLOG (named project — Prospect pipeline reconciliation) |
 
 ---
 
@@ -198,30 +184,25 @@ This doc's table below previously claimed **657 HS + 1,192 portal = 1,849 prospe
 - Oregon pilot demo byte-identical (verified diff)
 
 ### Session 3 — KenPom backend ingestion (2026-04-17, overnight)
-- Backend repo cleanup: 3 commits to main (.gitignore tightened, Scout 1.2 refactor, Bart Torvik ingestion script)
-- SUPABASE_SERVICE_ROLE_KEY rotated after accidental screenshot exposure
-- Schema migration: 8 kenpom_* columns on `schools`
-- `scripts/kenpom_sync.py` shipped — 3-pass resolver (override → normalize-exact → fuzzy-fallback)
-- Sync result: 365/365 D1 schools matched, 0 update errors, 0 wrong-row bugs
-- Frontend NOT yet surfacing KenPom — Session 4's job
+- Backend repo cleanup (apex-intel): 3 commits to main — .gitignore tightened, Scout 1.2 tool-use refactor committed, Bart Torvik PLAYER-level ingestion script committed
+- Supabase SUPABASE_SERVICE_ROLE_KEY rotated after accidental screenshot exposure
+- Schema migration: 8 new `kenpom_*` columns on schools
+- `scripts/kenpom_sync.py` shipped — 3-pass resolver (62 overrides, 303 normalize-exact, 0 fuzzy, 0 errors, 365/365 matches)
 
 ### Session 4a — KenPom frontend, Home surfaces (2026-04-17)
-- Commit `d010c6c`: 7 patches, +909 bytes
-- Schools SELECT expanded to include 8 kenpom_* columns at line 1339
-- `schoolKenPomMap` built in `loadData()` mirroring `schoolEspnMap` pattern
-- `window.kenpomFor(name)` helper added
-- Oregon NEXT_GAME lazy-patched; `s2nextGame` rewired; Roster Pulse 4th AdjEM tile added
-- Live verification: Oregon #101/+7.08, Duke #3/+37.37, Kansas #21/+24.15, Howard #196/-2.64 (negative renders)
-- Remaining Session 4 surfaces deferred to Session 4b
+- Commit `d010c6c` on Apex-App/main — 7 patches to index.html
+- Schools SELECT expanded, `schoolKenPomMap` built, `window.kenpomFor(name)` helper shipped
+- Next Up + Roster Pulse wired to live KenPom; Oregon #101/+7.08, Duke #3/+37.37, Howard #196/-2.64
 
-### Session 4b — KenPom frontend, recruiting cards + player modal (2026-04-17)
-- **Commit `c7f4ac7`** to `Apex-App/main` — 6 patches + 1 chip-size tweak, +1349 bytes (234068 → 235417)
-- **`schoolKenPomById` map** added (UUID-keyed, parallel to `schoolKenPomMap`) for clean FK-based lookup
-- **`window.kenpomById(uuid)` + `window.kenpomChipHTML(p, isPr)`** helpers shipped; `kenpomChipHTML` centralizes 3 variants (A current-school, B "Committed: #X [school]", C graceful hide)
-- **`.kp-chip` CSS class** added — 11px muted inline chip (bumped from initial 10px after user feedback that it read too recessive next to subtitle text)
-- **Chip wired into 3 surfaces:** prospect card renderer #1 at line 2499, prospect card renderer #2 at line 3470, player modal mdl-sub at line 1512
-- **Live verification on apexver1.github.io:** Juke Harris modal (Wake Forest #80 · +10.58 AdjEM), Oregon Portal cards showing real KenPom chips on Wake Forest/Kansas/Arizona State/Wisconsin prospects; Duke/Kansas/Howard Home tiles regression-free; HS prospects with "Uncommitted"/"AZ Compass Prep" correctly hide chip (Variant C)
-- **Variant B ("Committed: #X") unverified in live** — seed data has zero `committed_to_school_id` records populated; code-reviewed and expected to work once real data lands
-- **Scout cards deferred to Session 6** per opener decision (tradeoff: 4b scope tighter without Scout's two-branch render; Session 6 owns Scout polish anyway)
-- **Data-reality discovery:** DATA-STATUS's "1,849 prospects" claim is inaccurate — actual is 100 rows in `prospect_shortlist`, all with NULL source_tag, all with Oregon-pointing school_id FK. New bug B8 filed.
-- **Mid-session failures:** 3 patch-script rebuilds needed (PATCH C expect=2 → expect=1; PATCH E expect=1 → expect=2 because 2 card renderers share anchor; PATCH F anchor used `\u00b7` escape form when source file has literal U+00B7 middot char). All caught by idempotency guard before any write hit disk.
+### Session 4b — KenPom frontend, recruiting cards + modal (2026-04-17)
+- Commit `c7f4ac7` — KenPom chips on BOTH prospect card renderers + player modal
+- Helpers `window.kenpomById(uuid)` + `window.kenpomChipHTML(p, isPr)` shipped
+- Scout cards deferred to Session 6 (showpiece polish session)
+- Bug B8 documented (prospect_shortlist 100 rows vs 1,849 claimed)
+
+### Session 5 — Torvik end-to-end (2026-04-17)
+- **5-A backend** (commit `c4e79f1` on apex-intel): 9 new `torvik_*` columns on `schools`; `scripts/torvik_team_sync.py` shipped mirroring kenpom_sync.py 3-pass resolver; source `https://barttorvik.com/2026_team_results.json`; 365/365 D1 schools synced (54 override, 252 exact, 59 normalize, 0 fuzzy, 0 errors); 6 of 9 columns populated (rank, adj_oe, adj_de, barthag, season, last_sync); eFG/eFG-D/TOV NULL pending index-mapping verification (S5-minor-1)
+- **5-B frontend data layer** (commit `5b54cb6` on Apex-App): 4 patches to index.html; schools SELECT expanded; `schoolTorvikMap` + `schoolTorvikById` globals + populate forEach extended; `window.torvikFor(name)` + `window.torvikById(uuid)` helpers shipped; Safari smoke-tested (Oregon #91 / barthag 0.7068, Duke #3 / barthag 0.9768 verified end-to-end); zero KenPom regression
+- **5-C Smart Filter surfacing** (commit `6efe921` on Apex-App): 7 patches to index.html; new "Torvik tier" section with 4 buckets (All / Top 50 / #51-150 / #151+); `fTTier` state var + reset paths in `navTo`/`clearSF` + `uf()` dispatch + `portal.filter()` apply logic + UI render between Rankings and Financials + activeCount increment; Safari smoke-tested (Top 50 → 30 matches, all from verified top-50 Torvik schools)
+- Mid-session course-corrections: (1) Torvik `trank.php?csv=1` endpoint returned HTML not CSV — switched to `/2026_team_results.json` JSON-array endpoint; (2) column index mapping verified against Duke + Arizona + Oregon cross-reference before committing TT_COL table; (3) initial sync run had 78 misses due to normalize_name bug (`.replace(' St.', ' State')` fix); second run had 6 remaining misses cleared via override-table additions; third run hit 365/365; (4) Python heredoc multi-line-string concatenation bug in P3 patch → single-line string fix; (5) P1 anchor colon-vs-equals bug (`fTier:"ALL"` vs `fTier="ALL"` — var-chain uses `=`) → fixed in rerun
+- Session time: ~1h45min (top of 90-120min budget — detour time absorbed in buffer)
