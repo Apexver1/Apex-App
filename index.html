@@ -936,7 +936,7 @@ var recSrc="portal",sortBy="rank",aiQuery="",aiResults=null,aiMode="rules",aiLoa
 var pickerState={q:"",pos:"ALL"};
 var roster=[],prospects=[],strategy=null,schols=[],pStats={},crmLogs={};
 var visits=VISITS_SEED.slice();
-var tab="home",sq="",pf="ALL",sf="ALL",fPPG=0,fRPG=0,f3P=0,fP="ALL",cy="ALL",vSel=null,vMon=0,bldStatus="all",fSrc="ALL",fSrcCy="ALL",fMaxNil=0,fTopN=0,fStatus="ALL",fTier="ALL",fAPG=0,fSPG=0,fBPG=0,fHt=0,fComp="ALL";
+var tab="home",sq="",pf="ALL",sf="ALL",fPPG=0,fRPG=0,f3P=0,fP="ALL",cy="ALL",vSel=null,vMon=0,bldStatus="all",fSrc="ALL",fSrcCy="ALL",fMaxNil=0,fTopN=0,fStatus="ALL",fTier="ALL",fTTier="ALL",fAPG=0,fSPG=0,fBPG=0,fHt=0,fComp="ALL";
 var staff=STAFF_SEED.slice();
 
 /* ============================================
@@ -1416,8 +1416,8 @@ window.openDrawer=function(){
   if(active)active.classList.add("a");
 };
 window.closeDrawer=function(){document.getElementById("drawer").classList.remove("open");};
-window.navTo=function(t){tab=t;sq="";pf="ALL";sf="ALL";cy="ALL";vSel=null;vMon=0;bldStatus="all";fSrc="ALL";fSrcCy="ALL";fPPG=0;fRPG=0;f3P=0;fP="ALL";fMaxNil=0;fTopN=0;fStatus="ALL";fTier="ALL";fAPG=0;fSPG=0;fBPG=0;fHt=0;fComp="ALL";closeDrawer();window.scrollTo(0,0);render();};
-window.clearSF=function(){fSrc="ALL";fSrcCy="ALL";fP="ALL";fPPG=0;fRPG=0;f3P=0;fMaxNil=0;fTopN=0;fStatus="ALL";fTier="ALL";fAPG=0;fSPG=0;fBPG=0;fHt=0;fComp="ALL";render();};
+window.navTo=function(t){tab=t;sq="";pf="ALL";sf="ALL";cy="ALL";vSel=null;vMon=0;bldStatus="all";fSrc="ALL";fSrcCy="ALL";fPPG=0;fRPG=0;f3P=0;fP="ALL";fMaxNil=0;fTopN=0;fStatus="ALL";fTier="ALL";fTTier="ALL";fAPG=0;fSPG=0;fBPG=0;fHt=0;fComp="ALL";closeDrawer();window.scrollTo(0,0);render();};
+window.clearSF=function(){fSrc="ALL";fSrcCy="ALL";fP="ALL";fPPG=0;fRPG=0;f3P=0;fMaxNil=0;fTopN=0;fStatus="ALL";fTier="ALL";fTTier="ALL";fAPG=0;fSPG=0;fBPG=0;fHt=0;fComp="ALL";render();};
 window.go=navTo;
 
 /* ============================================
@@ -2212,7 +2212,7 @@ window.uf=function(k,v){
   if(k==="src"){fSrc=v;fSrcCy="ALL";}
   if(k==="srccy")fSrcCy=v;
   if(k==="maxnil")fMaxNil=+v;
-  if(k==="topn")fTopN=+v;
+  if(k==="topn")fTopN=+v;if(k==="ttier")fTTier=v;
   if(k==="status")fStatus=v;
   if(k==="tier")fTier=v;
   if(k==="apg")fAPG=+v;
@@ -2868,7 +2868,7 @@ window.renderFilter=function(c,portal){
       else if(fTier!=="UNTIERED"&&p.priority_tier!==fTier)return false;
     }
     if(fMaxNil>0&&p.nil_estimate&&p.nil_estimate>fMaxNil)return false;
-    if(fTopN>0&&(!p.on3_consensus_rank||p.on3_consensus_rank>fTopN))return false;
+    if(fTopN>0&&(!p.on3_consensus_rank||p.on3_consensus_rank>fTopN))return false;if(fTTier!=="ALL"){var _ttSch=p.current_school;var _tt=_ttSch&&window.torvikFor?window.torvikFor(_ttSch):{};var _ttR=_tt.rank;if(!_ttR)return false;if(fTTier==="TOP50"&&_ttR>50)return false;if(fTTier==="MID"&&(_ttR<=50||_ttR>150))return false;if(fTTier==="BOTTOM"&&_ttR<=150)return false;}
     if(fPPG>0&&(!ps.ppg||ps.ppg<fPPG))return false;
     if(fRPG>0&&(!ps.rpg||ps.rpg<fRPG))return false;
     if(fAPG>0&&(!ps.apg||ps.apg<fAPG))return false;
@@ -2892,7 +2892,7 @@ window.renderFilter=function(c,portal){
   if(fStatus!=="ALL")activeCount++;
   if(fTier!=="ALL")activeCount++;
   if(fMaxNil>0)activeCount++;
-  if(fTopN>0)activeCount++;
+  if(fTopN>0)activeCount++;if(fTTier!=="ALL")activeCount++;
   if(fPPG>0)activeCount++;
   if(fRPG>0)activeCount++;
   if(fAPG>0)activeCount++;
@@ -2954,6 +2954,15 @@ window.renderFilter=function(c,portal){
   h+='<div class="fbar">';
   [[0,"All"],[25,"Top 25"],[50,"Top 50"],[100,"Top 100"]].forEach(function(opt){
     h+='<button class="fb'+(fTopN===opt[0]?" a":"")+'" onclick="uf(\'topn\',\''+opt[0]+'\')">'+opt[1]+'</button>';
+  });
+  h+='</div>';
+
+  /* Torvik tier (school strength) */
+  h+=sectH("Torvik tier");
+  h+='<div style="font-size:10px;color:var(--ink-3);margin-bottom:6px;font-weight:500">School\'s current Torvik rank</div>';
+  h+='<div class="fbar">';
+  [["ALL","All"],["TOP50","Top 50"],["MID","#51-150"],["BOTTOM","#151+"]].forEach(function(opt){
+    h+='<button class="fb'+(fTTier===opt[0]?" a":"")+'" onclick="uf(\'ttier\',\''+opt[0]+'\')">'+opt[1]+'</button>';
   });
   h+='</div>';
 
