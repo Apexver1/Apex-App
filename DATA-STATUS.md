@@ -1,6 +1,6 @@
 # DATA-STATUS.md — Real vs Dummy data tracker
 
-**Updated:** 2026-04-18 (after Session 6 — Scout v2 hero + metric tooltips)
+**Updated:** 2026-04-18 (after Session 7 — Scout LLM-default emergency fix)
 **Updated by:** Claude at end of every session
 
 This doc tracks the **truth** of what data is real vs dummy across the app, per screen and per school. Source of truth for Claude across sessions. Not visible to end users — visual indicators (the "Sample" badges shipped in 5f) were removed in Session 1; gaps are now tracked here only.
@@ -22,13 +22,13 @@ This doc tracks the **truth** of what data is real vs dummy across the app, per 
 - Splash + "Build a Champion" button always renders
 
 ### Drawer / Navigation
-- **Status:** 🟠 PARTIAL (deferred to Session 7 Commit 2b)
+- **Status:** 🟠 PARTIAL (Commit 2b still deferred — Session 7 scope pivoted to Scout emergency)
 - Coach name per school: ✅ REAL (pulled from `schools.head_coach_name`, fallback to school initials)
 - Drawer badges (Home reminders, Recruiting count, CRM overdue): 🔴 BROKEN — globally counted, not school-scoped (see B5)
 - iPhone scroll: ✅ FIXED in Session 5f
-- "Logged in as · Coach Stewart · HC" indicator: ✅ in drawer (Session 1 — Option C row); **role label rewrite (HC → Assistant Coach, Title Case, muted gray) deferred to Session 7 Commit 2b**
-- **Drawer logo swap to 72px centered school logo: DEFERRED to Session 7 Commit 2b** — blocked in Session 6 by grep recon returning zero hits on dynamic text ("Dana Altman", "Coach Stewart", "Head coach", "Logged in as" are all built via JS string concatenation from variables). Next session starts with Safari DevTools inspection of the drawer header block to find the actual render function before patching.
-- **Gap (B3):** Howard `head_coach_name` is NULL — greeting reads "Good morning, Coach." Fix: data backfill OR more defensive fallback copy. Probably fold into Session 7 drawer work.
+- "Logged in as · Coach Stewart · HC" indicator: ✅ in drawer (Session 1 — Option C row); **role label rewrite (HC → Assistant Coach, Title Case, muted gray) STILL deferred post-Session-7**
+- **Drawer logo swap to 72px centered school logo: STILL DEFERRED** — Session 7 scope pivoted to Scout LLM-default emergency. Session 8 pickup.
+- **Gap (B3):** Howard `head_coach_name` is NULL — greeting reads "Good morning, Coach." STILL open.
 
 ### Home — Smart Suggestions
 - **Status:** ✅ REAL
@@ -43,14 +43,14 @@ This doc tracks the **truth** of what data is real vs dummy across the app, per 
 - **Status:** 🟠 PARTIAL (real KenPom wired Session 4a, curated arena + opponent still generated)
 - `s2nextGame(schoolId)` — curated arena + conf opponent for 25 schools, generic fallback rest
 - **KenPom ranks (home + away):** ✅ REAL — Session 4a wired via `kenpomFor()` helper; all 365 D1 schools read live KenPom.
-- **Metric tooltip:** ✅ NEW Session 6 — KenPom chips on Next Up now tappable, opens dark popover with plain-English "Team strength" + AdjEM explanation + values inline. Uses `window.apxShowInfo()` helper.
+- **Metric tooltip:** ✅ Session 6 — KenPom chips on Next Up tappable, opens dark popover with plain-English "Team strength" + AdjEM explanation.
 
 ### Home — Roster Pulse
 - **Status:** 🟠 PARTIAL (metric-translation shipped Session 6)
 - On roster count: ✅ REAL
 - Avg PPG (starters): 🔴 BROKEN non-Oregon (data gap — `depth_chart_position` or PPG NULL, see B4)
 - Depth score "B+": 🟡 DUMMY (hardcoded)
-- **4th tile (Session 6 Commit 2a):** ✅ NEW — label rewritten from `+7.08 AdjEM` to plain-English `Team strength ⓘ`. Value column still shows `#101` (KenPom rank). Tapping ⓘ opens popover with full metric explanation + Oregon's live values.
+- **4th tile (Session 6 Commit 2a):** ✅ label rewritten from `+7.08 AdjEM` to plain-English `Team strength ⓘ`.
 - NIL committed/cap: ✅ REAL Oregon, default for others until Session 8
 
 ### Home — Hot in the portal
@@ -67,15 +67,17 @@ This doc tracks the **truth** of what data is real vs dummy across the app, per 
 
 ### Recruiting (Portal / HS / Watchlist tabs)
 - **Status:** ✅ REAL (1,192 portal + 657 HS)
-- **KenPom on recruiting cards (Session 4b):** ✅ REAL on both card renderers. Chips show "Wake Forest · ACC · #80 · +10.58 AdjEM"; graceful-hide for HS/international/non-D1 prospects.
-- **Metric tooltip (Session 6 Commit 2a):** ✅ NEW — every KenPom chip across BOTH card renderers now has a tappable `ⓘ` icon + popover. Same treatment as Home chips.
+- **KenPom on recruiting cards (Session 4b):** ✅ REAL on both card renderers.
+- **Metric tooltip (Session 6 Commit 2a):** ✅ every KenPom chip across BOTH card renderers has tappable `ⓘ` + popover.
 
 ### Player cards / detail modal
 - **Status:** 🟠 PARTIAL
 - Photos + logos ✅
 - **KenPom rank section (Session 4b):** ✅ REAL — injected into `mdl-sub` subtitle row.
-- **Metric tooltip on subtitle chip (Session 6 Commit 2a):** ✅ NEW — the `#80 · +10.58 AdjEM` subtitle chip is now tappable; popover shows "Team strength" explanation.
-- **BART TORVIK ADVANCED stat-box AdjOE label (Session 6 Commit 2a):** ✅ NEW — label rewritten from `AdjOE` to plain-English `Offense ⓘ`. Tapping ⓘ opens popover with "Offense (AdjOE player-level)" explanation specific to Bart Torvik's player-level offensive rating.
+- **Metric tooltip on subtitle chip (Session 6 Commit 2a):** ✅ tappable popover.
+- **BART TORVIK ADVANCED stat-box AdjOE label (Session 6 Commit 2a):** ✅ label rewritten to plain-English `Offense ⓘ`.
+- **🔴 NEW GAP Session 7:** player cards show `ppg / rpg / apg / bpg / 3PT%` — blocks per game is near-zero for guards and misrepresents their defensive value. Should show SPG (steals) on guards instead of or alongside BPG. See BACKLOG → "Position-aware defensive stat on card display".
+- **🔴 NEW GAP Session 7:** cards don't show height or class (jr/sr) — Scout queries can filter on these, but cards can't display them. Not a Scout bug, a card-display bug.
 
 ### Apex CRM
 - **Status:** ✅ REAL (user-scoped; school-scoping backlogged)
@@ -92,26 +94,28 @@ This doc tracks the **truth** of what data is real vs dummy across the app, per 
 ### Smart Filter
 - **Status:** 🟠 PARTIAL (Torvik tier wired Session 5c)
 - Source / position / class / priority tier / On3 rank filters: ✅ REAL
-- **Torvik tier filter (Session 5c):** ✅ REAL — 4 buckets (All / Top 50 / #51-150 / #151+).
-- **KenPom "bottom-50" / "top-X" filtering:** backend + helper ready. Deferred to Apex Picks preset strip (Session 7-ish).
-- **No tooltips added in Session 6** — Torvik tier section is plain-English already ("Schools current Torvik rank" subhead).
+- **Torvik tier filter (Session 5c):** ✅ REAL — 4 buckets.
+- **KenPom "bottom-50" / "top-X" filtering:** backend + helper ready. Deferred to Apex Picks preset strip.
 
-### Apex Scout — hero (Session 6 Commit 1)
-- **Status:** ✅ REAL (redesigned Session 6 Commit 1)
-- **Hero redesign shipped (Direction B — premium):** serif "Build your roster." headline, dynamic "fit [School]" subhead, pill-shaped input with inline circular navy mic button, 2×2 preset grid per section (4 smart Torvik/KenPom-driven + 4 static evergreen), below-fold "How to use Scout" instructions card.
-- Engine toggle (`Rules · free / Apex AI · $0.01/q`) killed entirely — UI removed.
-- **aiMode JS state:** still defaults to rules internally (2c LLM-default attempted in Session 6 but reverted — see BACKLOG). Means current default engine is still rules regex-parser which returns mediocre matches on semantic queries.
+### Apex Scout — hero (Session 6 Commit 1, refined Session 7)
+- **Status:** ✅ REAL
+- Hero redesign: serif "Build your roster." headline, dynamic subhead, pill-shaped input with inline circular navy mic button, 2×2 preset grids, below-fold instructions.
+- Engine toggle UI killed.
+- **Session 7 Commit `9c0d90e` — aiMode default flipped from `rules` to `llm`.** Default engine is now LLM (Scout 1.1.1). The real root cause was NOT `aiMode` being undefined — it was the state initializer explicitly setting `aiMode="rules"` at page load. Patch: changed `aiResults=null,aiMode="rules",aiLoading=false` to `aiResults=null,aiMode="llm",aiLoading=false`.
+- **Session 7 — `aiRun` inverted:** `aiRun=function(){if(aiMode==="rules")aiSearch();else aiLLM();}` — default branch now LLM.
+- **Session 7 — mic button fixed:** no longer destroys the SVG icon by setting `textContent="Listening…"`, no longer turns ugly red via `--neg`. Now uses `.listening` class with subtle navy pulse animation + tap-to-cancel via `window._apxRec`.
 - Smart preset copy interpolates live values: Tempo match shows school's Torvik tempo, Rebuild targets shows school's Torvik rank, Defensive upgrades shows school's AdjDE.
 
 ### Apex Scout — results
-- **Status:** ✅ REAL (Scout 1.2 tool-use refactor shipped in `apex-intel` Session 3 cleanup)
-- LLM mode (Scout 1.2) with tool_calls + narrative answer renders correctly when engaged.
-- Rules mode (legacy regex parser) is the current default; returns loosely-matched results on semantic queries (e.g., "rim protectors" returns non-rim-protectors).
-- **KenPom chips on scout result cards (Session 6 Commit 2a):** ✅ Now tappable with plain-English popover, via `kenpomChipHTML` rewrite propagating to both LLM mode (~line 3271) and rules mode (~line 3460).
-- **Scout card polish pass from original Session 6 plan:** effectively shipped via the Commit 1 hero redesign — cards unchanged but the overall screen feels like the "showpiece" Sammy called out.
+- **Status:** ✅ REAL (LLM default, shipped Session 7 Commit 9c0d90e)
+- LLM mode (Scout 1.2 tool-use) is the default. Returns real agentic reasoning + Scout Analysis panel + iteration counts ("9 TOOL CALLS · 6 ITERATIONS").
+- **🟠 NEW GAP Session 7 (QA finding):** Scout's Edge Function prompt payload does NOT currently include KenPom team data, Torvik team data, or player-level AdjOE/AdjDE. Claude reasons over counting stats (ppg/rpg/apg/3pct) + apex_model score only. When asked "shooters from top-50 KenPom defenses" Claude responds "KenPom team efficiency data is not yet integrated" — which is WRONG at the data-layer level (it's in Supabase since Session 4) but CORRECT at the LLM-payload level (not being sent to Claude). See BACKLOG → "Scout Edge Function context sync" (new #1 named project post-Session-7).
+- **🟠 NEW GAP Session 7 (QA finding):** NIL data in `nil_estimate` column is dummy/partial. Claude correctly self-reports "NIL valuation data is not available yet" when asked "portal transfers under $500K". Great anti-hallucination behavior, but user-visible dollar amounts on cards (`$2.6M`, `$475K`) are rendered from `valueNil(p,ps).mid` — partially derived, not real NIL data.
+- Rules mode (legacy regex parser) is now non-default fallback; only fires when `aiMode==="rules"` is explicitly set.
 
 ### Apex Patrons
 - **Status:** 🟡 DUMMY (Oregon-only — Session 9 fixes for P5)
+- **Session 7 copy fix (commit `f68fb4f`):** header rewritten from "Donor & development" → "Donor Development". Small cosmetic polish.
 
 ### Apex Ops
 - **Status:** 🟡 DUMMY — `s2opsRecent` / `s2opsDecks` per-school generators (Session 2)
@@ -129,11 +133,11 @@ This doc tracks the **truth** of what data is real vs dummy across the app, per 
 ### Supabase tables (22 total)
 | Table | Coverage | School-scoped in loadData()? | Notes |
 |---|---|---|---|
-| schools | ✅ 1,518 rows; 365 D1 with conference; **365 with KenPom + 365 with Torvik data** | N/A (universe) | 8 kenpom_* + 9 torvik_* columns; SELECT expanded Sessions 4a + 5b |
+| schools | ✅ 1,518 rows; 365 D1 with conference; **365 with KenPom + 365 with Torvik data** | N/A (universe) | 8 kenpom_* + 9 torvik_* columns; **NOT piped into Scout Edge Function prompt** — see new BACKLOG project |
 | school_rosters | ✅ 7,580 players | ✅ via my_roster query | 5,136 with photos |
 | my_roster | ✅ Oregon (78) | ✅ Yes | other schools materialized via RPC |
 | prospect_shortlist | ⚠️ 100 rows actual (B8) | ✅ Yes | school-agnostic via `school_id` |
-| prospect_stats | ✅ | ❌ No (`is_seed_data` filter only) | Player-level Torvik AdjOE lives here |
+| prospect_stats | ✅ | ❌ No (`is_seed_data` filter only) | Player-level Torvik AdjOE lives here — **NOT piped into Scout Edge Function prompt** |
 | prospect_scores | ✅ | ❌ No | |
 | prospect_film | partial | — | |
 | prospect_family | partial | ❌ No | |
@@ -158,8 +162,8 @@ This doc tracks the **truth** of what data is real vs dummy across the app, per 
 | ESPN (photos + roster + logos) | ✅ Active | 5,136 photos, 365 logos |
 | BallDontLie | ✅ Active (NCAA) | not currently surfaced |
 | CBBD | ✅ Active | not currently surfaced |
-| **KenPom** | ✅ Wired end-to-end through Session 4b + now with tooltips (Session 6) | 365 of 365 D1 schools |
-| **Torvik** | ✅ Wired end-to-end through Session 5c (team-level); player-level lives in `prospect_stats` | 365 of 365 D1 schools (team) |
+| **KenPom** | ✅ Wired end-to-end through Session 4b + tooltips Session 6. **NOT yet in Scout LLM payload (Session 7 finding).** | 365 of 365 D1 schools |
+| **Torvik** | ✅ Wired Session 5c (team) + Session 6 tooltips. **Team data NOT yet in Scout LLM payload. Player AdjOE/AdjDE NOT yet in Scout LLM payload.** | 365 of 365 D1 schools (team) |
 | 247Sports (HS + portal) | ✅ Phase 4 ingested | 657 HS + 1,192 portal |
 | NCAA-API | ✅ Verified | not currently surfaced |
 
@@ -171,13 +175,15 @@ This doc tracks the **truth** of what data is real vs dummy across the app, per 
 |---|---|---|---|---|
 | B1 | High | Home → Next up | "Oregon vs Arizona" hardcoded on every school | ✅ RESOLVED Session 2 |
 | B2 | High | Visits | Jalen Washington + Oregon facilities show on every school | ✅ RESOLVED Session 2 |
-| B3 | Medium | Drawer / greeting | Howard shows blank head coach name (NULL in DB) — "Good morning, Coach." | BACKLOG → Session 7 drawer work |
+| B3 | Medium | Drawer / greeting | Howard shows blank head coach name (NULL in DB) | STILL OPEN — Session 8 drawer work (deferred from S7 pivot) |
 | B4 | Medium | Home → Roster pulse | Avg PPG = 0.0 on Duke/Kansas/Howard | BACKLOG |
 | B5 | High (architectural) | Home → Today's brief | 4 of 14 loadData queries lack school_id filter | BACKLOG (named project) |
 | B6 | Low | School picker | "st." doesn't match Saint Mary's | BACKLOG |
-| B7 | Cosmetic | Drawer | Avatar bg color not school-themed | ✅ Being replaced Session 7 by 72px logo (decision: scrap the avatar colors entirely) |
+| B7 | Cosmetic | Drawer | Avatar bg color not school-themed | Moot — being replaced by 72px logo in Commit 2b |
 | B8 | Medium | Recruiting | `prospect_shortlist` is 100 rows not 1,849 as documented | BACKLOG (named project) |
-| B9 | Medium (Sammy feedback) | Scout results | Rules mode returns semantically-bad matches (e.g., Juke Harris returned for "rim protectors") | BACKLOG (LLM-default engine — Commit 2c attempted Session 6, reverted due to JS parse break) |
+| B9 | Medium (Sammy feedback) | Scout results | Rules mode returns semantically-bad matches | ✅ **RESOLVED Session 7 commit `9c0d90e`** (aiMode default flipped to LLM) |
+| B10 | 🟠 NEW Session 7 | Player cards | Guard cards show BPG (near-zero, misleading) instead of SPG | BACKLOG — Position-aware defensive stat on card display |
+| B11 | 🟠 NEW Session 7 | Scout Edge Function | LLM payload missing KenPom team / Torvik team / player AdjOE advanced metrics | BACKLOG — Scout Edge Function context sync (#1 priority) |
 
 ---
 
@@ -215,9 +221,22 @@ This doc tracks the **truth** of what data is real vs dummy across the app, per 
 - 5-C Smart Filter: Torvik tier section with 4 buckets
 
 ### Session 6 — Scout v2 hero redesign + metric tooltips (2026-04-18)
-- **Commit 1 (Scout v2, commit d30a3ca):** Direction B premium redesign. Killed AI Scout / Pro badge, v1.1.1 meta, Rules/Apex AI engine toggle, flat quick-queries pill strip. Shipped serif "Build your roster." headline + dynamic "fit [School]" subhead, pill input with inline circular navy mic button, 2×2 preset grids (4 smart KenPom/Torvik-driven + 4 static evergreen), below-fold "How to use Scout" instructions card. Smart presets interpolate live values: Tempo match reads `torvikFor(school).tempo`, Rebuild targets reads `torvikFor(school).rank`, Defensive upgrades reads `kenpomFor(school).adjD`. Engine toggle killed entirely — aiMode defaults to rules internally.
-- **Commit 2a (metric tooltips, commit 7ee3241):** Plain-English translation across every KenPom chip site plus the player-level AdjOE stat-box. New CSS (`.apx-info`, `.apx-pop`, `.apx-chip-tap`). New JS: `window.apxMetricInfo` (6 metric definitions: team_strength, team_offense, team_defense, team_pace, team_winprob, player_offense) + `window.apxShowInfo(ev, key, extraVal)` (popover render + positioning + tap-outside-close + × button). `kenpomChipHTML` rewritten to emit tappable spans with trailing ⓘ — one rewrite propagates to Home Next Up, Recruiting (both renderers), Player modal subtitle, Scout results (LLM + rules modes). Home Roster Pulse 4th tile: label changed from `+7.08 AdjEM` to plain-English `Team strength` + inline ⓘ. Player modal BART TORVIK stat-box: `AdjOE` label changed to `Offense` + inline ⓘ.
-- **Committed then reverted:** Fix patch for 1a (popover value-line copy adding "Team · " prefix) + 2c (initializing `var aiMode="llm"` to default Scout to the better engine) broke auto-login and the app wouldn't load. Surgically reverted both changes — Commit 2a tooltips preserved intact, 1a + 2c filed to BACKLOG for fresh debugging. Root cause of 2c failure: injected `var aiMode="llm";` before a `setAiMode=function...` declaration that wasn't prefixed with `var` or `window.` — the injected `var` broke the outer statement context and JS failed to parse.
-- **Deferred to Session 7 Commit 2b:** drawer logo swap, role label rewrite, Howard blank-greeting fallback.
-- **Key lesson:** byte-extraction-for-anchors pattern added to CLAUDE.md — for any patch anchor containing nested quotes/escapes/unicode, extract bytes from live file via `python3 .find()` + save to `/tmp/` + read back in patch script. Burned Session 5 once (fTier colon/equals) and Session 6 four times. Now a working agreement.
-- Session time: ~3 hours across multiple back-and-forth cycles for recon; actual patch application once recon was solid was tight. Two clean commits shipped.
+- **Commit 1 (Scout v2, commit d30a3ca):** Direction B premium redesign, engine toggle killed, 2×2 preset grids shipped.
+- **Commit 2a (metric tooltips, commit 7ee3241):** plain-English translation across KenPom chips and player-level AdjOE stat-box.
+- **Attempted + reverted:** Commit 2c (aiMode LLM default) — broke app due to JS statement-context issue.
+- **Deferred to Session 7:** Commit 2b drawer work.
+
+### Session 7 — EMERGENCY PIVOT: Scout LLM-default + mic fix (2026-04-18)
+- **Planned target:** Commit 2b (drawer logo + role label + Howard fallback).
+- **Emergency pivot at ~11:30 AM:** Demo at 3:00 PM, Scout returning broken results. User reported Scout "no longer works" and "mic turns into weird red listening button."
+- **Shipped (Commit `9c0d90e`, 4 patches in one atomic commit):**
+  - P1 `aiRun` inverted: default branch is now LLM (`if(aiMode==="rules")aiSearch();else aiLLM()`)
+  - P5 `aiMode` state initializer flipped from `"rules"` to `"llm"` — this was the REAL root cause Session 6 Commit 2c missed
+  - P2 `aiVoice` rewritten: uses `.listening` class toggle instead of destroying `textContent`, adds tap-to-cancel via `window._apxRec`
+  - P3 mic button gets `apx-mic` class; P4 adds `.apx-mic.listening` pulse CSS
+- **Shipped (Commit `d1806d2`):** repo cleanup — removed 3 backup files accidentally tracked in `9c0d90e`, added `index.html.*-precommit-*` to `.gitignore`.
+- **Shipped (Commit `f68fb4f`):** cosmetic — "Donor & development" → "Donor Development" in Apex Patrons header.
+- **Resolved: B9** (Scout rules-mode bad matches).
+- **QA pass on deployed version:** 10 queries tested. 7 green, 2 yellow (revealed UI/Edge-Function gaps), 1 red (skip in demo). Full matrix in HANDOFF-2026-04-18-session7.md.
+- **New bugs logged:** B10 (guard cards show BPG not SPG), B11 (Scout Edge Function missing advanced-metric payload).
+- **Deferred to Session 8:** Commit 2b drawer work (original S7 target, now bumped).
