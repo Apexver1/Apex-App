@@ -205,6 +205,25 @@ Path A. Scout Edge Function context sync is the highest-leverage work — it mak
 
 Happened separately from the 3pm demo — a loose strategy conversation. Key themes captured:
 
+1. Claude Code vs chat workflow — mentor advocates switching for direct repo/db access. User decision: DEFER until MacBook upgrade (~1 week). Stay in chat-based workflow for now.
+2. Code-first vs design-first — mentor favors data-structure-first thinking. Noted but not actionable this cycle.
+3. Derived data layer — secondary signals built from primary data (fit score, undervaluation score, transfer risk, defensive ceiling). Directly reinforces the B11 / Scout Edge Function context sync project. High-value concept.
+4. Vectorization for Scout — embed prospects semantically, kNN search before Claude. Multi-session project.
+5. Product stories as structured data — promote BACKLOG from markdown to queryable schema.
+6. Apps vs services business model — strategic question, not technical. Deferred.
+7. Proprietary data moat — explicit definition of what data only Apex Intel has.
+8. Code hygiene — periodic scrape of dead code.
+
+User direction 2026-04-18: Stick to the original 14-day plan. Re-evaluate which mentor ideas to promote into the plan AFTER 14-day window ships (around 2026-04-30). Do not slip mentor concepts into active sessions in the meantime — discipline matters more than the ideas themselves right now.
+
+Implication for Session 8: Default to Path A (Scout Edge Function context sync) OR Path B (Commit 2b drawer) per the 14-day plan. Mentor concepts stay in BACKLOG as ideas, NOT promoted to active work.
+
+---
+
+## Post-session mentor meeting (2026-04-18, ~1pm)
+
+Happened separately from the 3pm demo — a loose strategy conversation. Key themes captured:
+
 1. **Claude Code vs chat workflow** — mentor advocates switching for direct repo/db access. User decision: DEFER until MacBook upgrade (~1 week). Stay in chat-based workflow for now.
 2. **Code-first vs design-first** — mentor favors data-structure-first thinking. Noted but not actionable this cycle.
 3. **Derived data layer** — secondary signals built from primary data (fit score, undervaluation score, transfer risk, defensive ceiling). Directly reinforces the B11 / Scout Edge Function context sync project. High-value concept.
