@@ -134,7 +134,7 @@ textarea.inp{resize:vertical;min-height:70px}
 .drawer-user-sub{font-size:11px;color:var(--ink-2);margin-top:2px}
 .drawer-meuser{margin:-16px 22px 18px;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--ink-3)}
 .drawer-meuser-label{letter-spacing:0.4px;text-transform:uppercase;font-size:10px}
-.drawer-meuser-val{color:var(--gold);font-weight:600}
+.drawer-meuser-val{color:var(--ink-2);font-weight:500}
 .drawer-group{padding:0 22px 6px}
 .drawer-group-title{font-size:10px;color:var(--ink-3);letter-spacing:0.6px;text-transform:uppercase;margin-bottom:8px;font-weight:600}
 .drawer-item{padding:12px 14px;font-size:15px;color:var(--ink);cursor:pointer;border-radius:10px;display:flex;align-items:center;justify-content:space-between;font-weight:500}
@@ -490,7 +490,7 @@ select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50
 .ic-pdf{background:#B42318}
 .ic-img{background:#0D7A3B}
 .ic-nil{background:var(--gold)}
-.ic-dd{background:var(--brand)}
+.ic-dd{background:var(--brand)}.av-xl{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:24px;overflow:hidden;flex-shrink:0;padding:6px;box-sizing:border-box}.av-xl img{width:100%;height:100%;object-fit:contain}
 .ic-doc{background:var(--accent)}
 .act-feed{background:var(--surface);border:0.5px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:14px}
 .act-row{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:0.5px solid var(--line-2);font-size:12px}
@@ -556,7 +556,7 @@ select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50
       <button class="drawer-close" onclick="closeDrawer()" aria-label="Close"></button>
     </div>
     <div class="drawer-user">
-      <div class="av av-lg" id="drwAv" style="background:var(--brand)">DA</div>
+      <div class="av av-xl" id="drwAv"></div>
       <div>
         <div class="drawer-user-name" id="drwName">Dana Altman</div>
         <div class="drawer-user-sub" id="drwRole">Head coach · Oregon</div>
@@ -564,7 +564,7 @@ select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50
     </div>
     <div class="drawer-meuser" id="drwMeUser">
       <span class="drawer-meuser-label">Logged in as</span>
-      <span class="drawer-meuser-val" id="drwMeUserVal">Coach Stewart · HC</span>
+      <span class="drawer-meuser-val" id="drwMeUserVal">Coach Stewart · Assistant Coach</span>
     </div>
     <div class="drawer-group">
       <div class="drawer-group-title">Main</div>
@@ -1373,9 +1373,9 @@ window.loadData=function(){
 };
 window.updateDrawerIdentity=function(){
   var c=coachFor(CURRENT_SCHOOL_ID);
-  document.getElementById("drwName").textContent=c.name;
-  document.getElementById("drwRole").textContent=c.role+" · "+CURRENT_SCHOOL_NAME.replace(/ Ducks| Wildcats| Tigers| Bulldogs| Eagles| Bears$/,"");
-  document.getElementById("drwAv").textContent=c.initials;
+  window.APEX_BRAND={oregon:{b:"#154733",i:"#FEE11A"},duke:{b:"#012169",i:"#FFFFFF"},howard:{b:"#E51937",i:"#FFFFFF"},arkansas:{b:"#9D2235",i:"#FFFFFF"},illinois:{b:"#13294B",i:"#E84A27"}};window.applySchoolTheme=function(n){var k=(n||"").toLowerCase().replace(/ ducks| wildcats| tigers| bulldogs| eagles| bears$/,"").trim();var c=window.APEX_BRAND[k]||{b:"#0B2540",i:"#FFFFFF"};document.documentElement.style.setProperty("--brand",c.b);document.documentElement.style.setProperty("--brand-ink",c.i);};document.getElementById("drwName").textContent=c.name||"Coach Stewart";
+  document.getElementById("drwRole").textContent=(c.role||"Welcome back")+" · "+CURRENT_SCHOOL_NAME.replace(/ Ducks| Wildcats| Tigers| Bulldogs| Eagles| Bears$/,"");
+  var _sn=CURRENT_SCHOOL_NAME.replace(/ Ducks| Wildcats| Tigers| Bulldogs| Eagles| Bears$/,"");window.applySchoolTheme(_sn);document.getElementById("drwAv").innerHTML=window.schoolLogo(_sn,72);
 };
 window.updateCrmBadge=function(){
   var overdue=countOverdueFollowups();
