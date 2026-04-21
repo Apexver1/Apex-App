@@ -376,14 +376,15 @@ select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50
 .stars.lg .st{font-size:17px}
 
 /* SMART SUGGESTIONS card */
-.smart-card{background:linear-gradient(135deg,var(--accent-bg) 0%,#F4F8FE 100%);border:0.5px solid rgba(23,88,232,0.18);border-radius:14px;padding:14px 16px;margin-bottom:18px}
+.smart-card{background:var(--surface-3);border:0.5px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:18px}
 .smart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.smart-title{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:0.5px;text-transform:uppercase}
-.smart-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:0.5px solid rgba(23,88,232,0.10);font-size:13px;cursor:pointer}
+.smart-title{font-size:11px;font-weight:700;color:var(--ink);letter-spacing:0.5px;text-transform:uppercase}
+.smart-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:0.5px solid var(--line-2);font-size:13px;cursor:pointer}
 .smart-row:first-of-type{border-top:none;padding-top:6px}
 .smart-row .sr-dot{width:7px;height:7px;border-radius:50%;background:var(--neg);flex-shrink:0}
 .sr-icon{font-size:14px;line-height:1;margin-right:6px;display:inline-block}
 .sr-demo{font-size:9px;font-weight:700;letter-spacing:0.5px;color:#999;background:#f0f0f0;padding:1px 5px;border-radius:3px;vertical-align:middle;margin-left:4px}
+.task-assigner{font-size:9px;font-weight:700;letter-spacing:0.3px;color:var(--brand-ink);background:var(--brand);padding:2px 6px;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:8px}
 .smart-row .sr-text{flex:1;color:var(--ink);line-height:1.35}
 .smart-row .sr-meta{color:var(--ink-3);font-size:11px;flex-shrink:0}
 
@@ -1351,6 +1352,46 @@ window.mockSmartSuggestions=function(){
       icon:"\ud83d\udcb0",
       demo:true,
       tapTarget:{type:"mock"}
+    }
+  ];
+};
+
+/* S12 prototype: hardcoded coach-assigned tasks mock for demo.
+   Will be replaced by real tasks query from `tasks` table in S13+. */
+window.coachTasks=function(){
+  return [
+    {
+      id:"task-1",
+      title:"Text Juke Harris (4\u2605 PG)",
+      assigner:"Stewart",
+      assigner_initials:"MS",
+      due_label:"Due Friday EOD",
+      due_urgency:"soon",
+      type:"text",
+      icon:"\ud83d\udccb",
+      demo:true
+    },
+    {
+      id:"task-2",
+      title:"Review 4 portal PGs and rank",
+      assigner:"Altman",
+      assigner_initials:"DA",
+      due_label:"Due today",
+      due_urgency:"today",
+      type:"review",
+      icon:"\ud83d\udcdd",
+      demo:true
+    },
+    {
+      id:"task-3",
+      title:"Schedule dinner for Detroit trip",
+      assigner:"Stewart",
+      assigner_initials:"MS",
+      due_label:"Due Thu",
+      due_urgency:"this-week",
+      type:"schedule",
+      icon:"\ud83d\udcc5",
+      demo:true
     }
   ];
 };
@@ -2390,6 +2431,8 @@ window.renderHome=function(c,portal,hs){
   h+=tileHTML("Open scholarships",openSchols,"Of 13 \u00b7 2026\u201327","","builder");
   h+=tileHTML("NIL requests",pending,"Pending approval",pending>0?"tile-warn":"","budget");
   h+=tileHTML("CRM follow-ups",followups,followups>0?"Overdue today":"All caught up",followups>0?"tile-alert":"","crm");
+  var taskCount=(typeof window.coachTasks==='function')?window.coachTasks().length:0;
+  h+=tileHTML("Tasks",taskCount,taskCount>0?"Assigned to you":"None assigned",taskCount>0?"tile-warn":"","crm");
   h+=tileHTML("Reminders today",remToday,remToday>0?"Next: "+nextRem:"None scheduled","","crm");
   h+=tileHTML("Portal churn \u00b7 24h","+"+portalChurn,"New entries","tile-info","recruiting");
   h+=tileHTML("Visits this week",visitsWk.length,officials+" official \u00b7 "+unofficials+" unofficial","","visits");
@@ -2639,6 +2682,26 @@ window.renderCRM=function(c){
       h+='<div class="smart-row" onclick="'+tap+'">';
       h+=icon;
       h+='<span class="sr-text">'+esc(s.action)+' <b>'+esc(s.name)+'</b> '+starsOrBadge+demoBadge+' \u2014 '+esc(s.meta)+'</span>';
+      h+='</div>';
+    });
+    h+='</div>';
+  }
+
+  /* S12 Coach Tasks card */
+  var tasks=(typeof window.coachTasks==='function')?window.coachTasks():[];
+  if(tasks.length){
+    h+='<div class="smart-card">';
+    h+='<div class="smart-head"><span class="smart-title">Coach Tasks</span><span style="font-size:11px;color:var(--ink-3)">'+tasks.length+' assigned</span></div>';
+    tasks.forEach(function(t){
+      var urgencyColor=(t.due_urgency==='today')?'var(--neg)':(t.due_urgency==='soon'?'var(--gold)':'var(--ink-3)');
+      var icon='<span class="sr-icon">'+t.icon+'</span>';
+      var demoBadge=t.demo?' <span class="sr-demo">DEMO</span>':'';
+      var assignerChip='<span class="task-assigner" title="Assigned by '+esc(t.assigner)+'">'+esc(t.assigner_initials)+'</span>';
+      h+='<div class="smart-row" onclick="void(0)">';
+      h+=icon;
+      h+='<span class="sr-text">'+esc(t.title)+demoBadge+'</span>';
+      h+='<span class="sr-meta" style="color:'+urgencyColor+'">'+esc(t.due_label)+'</span>';
+      h+=assignerChip;
       h+='</div>';
     });
     h+='</div>';
