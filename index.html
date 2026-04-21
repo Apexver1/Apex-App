@@ -1522,7 +1522,7 @@ window.openP=function(id,kind){
     h+='<div class="trio-item trio-mkt"><div class="trio-l">Market</div><div class="trio-v">'+fmt$(market)+'</div></div>';
     h+='<div class="trio-item '+(delta>=0?"trio-pos":"trio-neg")+'"><div class="trio-l">Delta</div><div class="trio-v">'+(delta>=0?"+":"−")+fmt$(Math.abs(delta))+'</div></div>';
     h+='</div>';
-  }
+  }else{/*S11:roster NIL tile*/var currentNil=Number(p.nil_salary)||0;h+='<div class="trio" style="grid-template-columns:1fr">';h+='<div class="trio-item trio-apex" style="text-align:left">';h+='<div class="trio-l">Current NIL \u00b7 '+(p.season||"2025-26")+'</div>';h+='<div class="trio-v" style="font-size:28px">'+fmt$(currentNil)+'</div>';h+='</div>';h+='</div>';}
 
   var stats='';
   if(ps.ppg||p.ppg)stats+='<div class="stat-box"><div class="l">PPG</div><div class="v">'+(ps.ppg||p.ppg)+'</div></div>';
@@ -2281,7 +2281,9 @@ window.renderHome=function(c,portal,hs){
   var unofficials=visitsWk.length-officials;
 
   var totalCap=budget?parseFloat(budget.total_budget):10000000;
-  var committed=budget?parseFloat(budget.committed_amount)||0:0;
+  /* S11: include current-roster signed NIL (my_roster.nil_salary) in committed total */
+  var rosterNilTotal=(roster||[]).reduce(function(s,p){return s+(Number(p.nil_salary)||0);},0);
+  var committed=(budget?parseFloat(budget.committed_amount)||0:0)+rosterNilTotal;
   var remCap=totalCap-committed;
   var capPct=totalCap>0?(committed/totalCap*100):0;
 
