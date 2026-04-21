@@ -5687,6 +5687,19 @@ window.renderCRM=function(c){
     var fam=familyMap[p.id]||[];
     var dummies=dummyContactsFor(p);
     var nestedCount=1+fam.length+dummies.length;
+    /* S12 Patch 7.1: mock rows compute count from the rich tree */
+    if(p._mock&&p._mockEntry){
+      var me=p._mockEntry;
+      var mcount=1; /* primary */
+      if(me.parent1)mcount++;
+      if(me.parent2)mcount++;
+      if(me.guardian)mcount++;
+      if(me.hs_coach)mcount++;
+      if(me.aau_coach)mcount++;
+      if(me.agent)mcount++;
+      if(me.siblings)mcount+=(me.siblings||[]).length;
+      nestedCount=mcount;
+    }
     var logs=crmLogs[p.id]||[];
     var lastLog=logs[0];
     var s=tierToStars(p.priority_tier);
@@ -5695,7 +5708,9 @@ window.renderCRM=function(c){
     var overdue=daysSince==null||daysSince>=threshold;
 
     h+='<div class="crm-player-card'+(isExp?" expanded":"")+'">';
-    h+='<div class="crm-player-row" onclick="toggleCrmExp(\''+p.id+'\')">';
+    /* S12 Patch 7.1: mock rows skip inline accordion and open rich modal directly */
+    var rowClick=p._mock?('openMockContactProfile(\''+p.id+'\')'):('toggleCrmExp(\''+p.id+'\')');
+    h+='<div class="crm-player-row" onclick="'+rowClick+'">';
     h+=photoAv(p.player_name,"lg",p.photo_url);
     h+='<div class="crm-pmain">';
     h+='<div class="crm-pname">'+esc(p.player_name)+(s>0?stars(s,"sm",true,"setStars.bind(null,\\\''+p.id+'\\\')"):"")+'</div>';
