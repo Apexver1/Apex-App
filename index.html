@@ -385,6 +385,14 @@ select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50
 .sr-icon{font-size:14px;line-height:1;margin-right:6px;display:inline-block}
 .sr-demo{font-size:9px;font-weight:700;letter-spacing:0.5px;color:#999;background:#f0f0f0;padding:1px 5px;border-radius:3px;vertical-align:middle;margin-left:4px}
 .task-assigner{font-size:9px;font-weight:700;letter-spacing:0.3px;color:var(--brand-ink);background:var(--brand);padding:2px 6px;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:8px}
+.cp-subcard{background:var(--surface-2);border:0.5px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px}
+.cp-sub-head{font-size:13px;color:var(--ink);margin-bottom:6px;line-height:1.3}
+.cp-rel{color:var(--ink-3);font-size:11px;font-weight:normal;margin-left:4px}
+.cp-sub-actions{display:flex;gap:6px;flex-wrap:wrap}
+.cp-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:var(--surface);border:0.5px solid var(--line);border-radius:14px;font-size:11px;color:var(--ink-2);text-decoration:none;cursor:pointer}
+.cp-chip:hover{background:var(--surface-3)}
+.cp-sib-row{padding:6px 0;border-top:0.5px solid var(--line-2);font-size:13px;line-height:1.4}
+.cp-sib-row:first-child{border-top:none;padding-top:2px}
 .smart-row .sr-text{flex:1;color:var(--ink);line-height:1.35}
 .smart-row .sr-meta{color:var(--ink-3);font-size:11px;flex-shrink:0}
 
@@ -949,6 +957,7 @@ var ADDED_TO_CRM=new Set();
 var WATCHLIST=new Set();
 var crmExpanded=new Set();
 var crmStarFilter="ALL";   /* ALL / 5 / 4 / 3 / 2 */
+var crmTypeFilter="ALL";   /* ALL / portal / hs / donor / staff_external */
 var patronTier="ALL";      /* ALL / champion / platinum / gold / silver / bronze */
 var schoolEspnMap={};var schoolKenPomMap={};var schoolKenPomById={};var schoolTorvikMap={};var schoolTorvikById={};
 var compareTarget=null;
@@ -1233,6 +1242,7 @@ window.crmCollapseAll=function(){
   render();
 };
 window.setCrmStarFilter=function(v){crmStarFilter=v;render();};
+window.setCrmTypeFilter=function(v){crmTypeFilter=v;render();};
 
 /* Auto-generated dummy contacts for prospects without real prospect_family rows.
    HS prospects get HS coach + AAU coach. Portal prospects get agent. */
@@ -1395,6 +1405,2846 @@ window.coachTasks=function(){
     }
   ];
 };
+
+/* S12 Patch 6: Full mock contacts dataset (49 entries).
+   Overlays realistic DEMO contact fields on real DB-sourced recruit data.
+   Will be suppressed/replaced by real crm_contacts reads in CRM v1 Phase A (S13). */
+window.mockContactsData=function(){
+  return [
+  {
+    "id": "mock-portal-54969d8f",
+    "contact_type": "portal",
+    "real_id": "54969d8f-27db-47ea-998e-cd1b6babed32",
+    "name": "Juke Harris",
+    "position": "SF",
+    "stars": 5,
+    "height": "6'7\"",
+    "weight": null,
+    "school": "Wake Forest",
+    "class_year": "SO",
+    "nil_estimate": 900000.0,
+    "rank_on3": 1,
+    "rank_247": 3,
+    "rank_rivals": null,
+    "fit_notes": "21.4 ppg, 6.5 rpg. ACC Most Improved. Three 30+ pt games. Also declaring for draft.",
+    "photo_url": "https://a.espncdn.com/i/headshots/mens-college-basketball/players/full/5142609.png",
+    "status": "visited",
+    "player_phone": "(704) 257-0509",
+    "player_email": "juke.harris@gmail.com",
+    "instagram": "@harris98",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Tanya Harris",
+      "phone": "(704) 372-1774",
+      "email": "tanya.harris@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Steven Harris",
+      "phone": "(704) 247-6324",
+      "email": "steven.harris@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "Pamela Harris",
+        "age": 10,
+        "notes": "Plays college ball at lower level"
+      },
+      {
+        "name": "David Harris",
+        "age": 10,
+        "notes": "Student at local community college"
+      }
+    ],
+    "hs_coach": {
+      "name": "Maurice Williams",
+      "phone": "(704) 487-3357",
+      "email": "maurice.williams@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Derrick Mitchell",
+      "program": "Brotherly Love (PA)",
+      "circuit": "Puma Pro16",
+      "phone": "(704) 342-0206",
+      "email": "derrick.mitchell@aau.org"
+    },
+    "agent": {
+      "name": "Mark King",
+      "agency": "Octagon",
+      "phone": "(704) 342-2647",
+      "email": "mark.king@octagonsports.com"
+    },
+    "shoe_affiliation": "Jordan Brand",
+    "demo": true
+  },
+  {
+    "id": "mock-portal-0410d426",
+    "contact_type": "portal",
+    "real_id": "0410d426-815d-41ba-bae9-f11752dbd3a1",
+    "name": "Flory Bidunga",
+    "position": "PF",
+    "stars": 5,
+    "height": "6'10\"",
+    "weight": null,
+    "school": "Kansas",
+    "class_year": "SO",
+    "nil_estimate": 850000.0,
+    "rank_on3": 2,
+    "rank_247": 4,
+    "rank_rivals": null,
+    "fit_notes": "13.3 ppg, 9.0 rpg, 2.6 bpg. Shot 64%. 13 double-doubles. DPOY finalist.",
+    "photo_url": null,
+    "status": "watching",
+    "player_phone": "(785) 249-5981",
+    "player_email": "flory.bidunga@gmail.com",
+    "instagram": "@bidunga88",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Latoya Bidunga",
+      "phone": "(785) 236-2903",
+      "email": "latoya.bidunga@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Maurice Bidunga",
+      "phone": "(785) 473-4110",
+      "email": "maurice.bidunga@gmail.com"
+    },
+    "guardian": {
+      "relationship": "Aunt",
+      "name": "Donna Taylor",
+      "phone": "(785) 240-9144",
+      "email": "donna.taylor@gmail.com"
+    },
+    "siblings": [
+      {
+        "name": "Sandra Bidunga",
+        "age": 19,
+        "notes": "Rising sophomore at HS"
+      }
+    ],
+    "hs_coach": {
+      "name": "David Thompson",
+      "phone": "(785) 348-1407",
+      "email": "david.thompson@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Marcus Robinson",
+      "program": "Team Takeover (DC)",
+      "circuit": "Adidas 3SSB",
+      "phone": "(785) 432-6077",
+      "email": "marcus.robinson@aau.org"
+    },
+    "agent": {
+      "name": "Mark Hall",
+      "agency": "Octagon",
+      "phone": "(785) 307-4474",
+      "email": "mark.hall@octagonsports.com"
+    },
+    "shoe_affiliation": "New Balance",
+    "demo": true
+  },
+  {
+    "id": "mock-portal-140c31e7",
+    "contact_type": "portal",
+    "real_id": "140c31e7-9195-489d-af05-681d8a0db84d",
+    "name": "Massamba Diop",
+    "position": "C",
+    "stars": 5,
+    "height": "7'1\"",
+    "weight": null,
+    "school": "Arizona State",
+    "class_year": "SO",
+    "nil_estimate": 750000.0,
+    "rank_on3": 3,
+    "rank_247": 6,
+    "rank_rivals": null,
+    "fit_notes": "7-1 center. Fluid athlete. Face-up jumper, pick-and-pop 3. All-League upside.",
+    "photo_url": "https://a.espncdn.com/i/headshots/mens-college-basketball/players/full/5311903.png",
+    "status": "watching",
+    "player_phone": "(602) 283-7673",
+    "player_email": "massamba.diop@gmail.com",
+    "instagram": "@diop96",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Crystal Diop",
+      "phone": "(602) 487-8930",
+      "email": "crystal.diop@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Anthony Diop",
+      "phone": "(602) 334-9677",
+      "email": "anthony.diop@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "Derrick Diop",
+        "age": 18,
+        "notes": ""
+      },
+      {
+        "name": "Robert Diop",
+        "age": 15,
+        "notes": ""
+      }
+    ],
+    "hs_coach": {
+      "name": "Kevin Young",
+      "phone": "(602) 337-1184",
+      "email": "kevin.young@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Kevin Martin",
+      "program": "WeAllCanGo (TX)",
+      "circuit": "Adidas 3SSB",
+      "phone": "(602) 455-6582",
+      "email": "kevin.martin@aau.org"
+    },
+    "agent": {
+      "name": "Cedric Lopez",
+      "agency": "Wasserman",
+      "phone": "(602) 335-2387",
+      "email": "cedric.lopez@wassermansports.com"
+    },
+    "shoe_affiliation": "Jordan Brand",
+    "demo": true
+  },
+  {
+    "id": "mock-portal-700ed8a7",
+    "contact_type": "portal",
+    "real_id": "700ed8a7-df84-4aa3-afb7-2ca77f58b9b1",
+    "name": "John Blackwell",
+    "position": "SG",
+    "stars": 5,
+    "height": "6'4\"",
+    "weight": null,
+    "school": "Wisconsin",
+    "class_year": "JR",
+    "nil_estimate": 750000.0,
+    "rank_on3": 4,
+    "rank_247": 7,
+    "rank_rivals": null,
+    "fit_notes": "19.1 ppg, 5.1 rpg. 39% from 3. Wants primary playmaker role.",
+    "photo_url": "https://a.espncdn.com/i/headshots/mens-college-basketball/players/full/5103630.png",
+    "status": "watching",
+    "player_phone": "(414) 419-9660",
+    "player_email": "john.blackwell@gmail.com",
+    "instagram": "@blackwell38",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Crystal Blackwell",
+      "phone": "(414) 422-2691",
+      "email": "crystal.blackwell@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Darius Blackwell",
+      "phone": "(414) 432-0153",
+      "email": "darius.blackwell@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "Denise Blackwell",
+        "age": 10,
+        "notes": ""
+      },
+      {
+        "name": "Steven Blackwell",
+        "age": 12,
+        "notes": ""
+      }
+    ],
+    "hs_coach": {
+      "name": "Jerome Roberts",
+      "phone": "(414) 232-6404",
+      "email": "jerome.roberts@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Derrick Adams",
+      "program": "I-10 Elite",
+      "circuit": "Puma Pro16",
+      "phone": "(414) 328-9164",
+      "email": "derrick.adams@aau.org"
+    },
+    "agent": {
+      "name": "Michael Taylor",
+      "agency": "Rosenhaus Sports",
+      "phone": "(414) 336-5673",
+      "email": "michael.taylor@rosenhaussports.com"
+    },
+    "shoe_affiliation": "Nike",
+    "demo": true
+  },
+  {
+    "id": "mock-portal-f5d670c4",
+    "contact_type": "portal",
+    "real_id": "f5d670c4-01f5-442f-8b79-3531ae91c744",
+    "name": "Jasper Johnson",
+    "position": "SG",
+    "stars": 5,
+    "height": "6'5\"",
+    "weight": null,
+    "school": "Oregon",
+    "class_year": "SO",
+    "nil_estimate": 700000.0,
+    "rank_on3": 5,
+    "rank_247": 6,
+    "rank_rivals": null,
+    "fit_notes": "16.9 ppg as freshman. All-Big 12 HM. Elite scoring instincts.",
+    "photo_url": null,
+    "status": "watching",
+    "player_phone": "(503) 334-8301",
+    "player_email": "jasper.johnson@gmail.com",
+    "instagram": "@johnson94",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Nicole Johnson",
+      "phone": "(503) 448-1233",
+      "email": "nicole.johnson@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Terrell Johnson",
+      "phone": "(503) 472-2160",
+      "email": "terrell.johnson@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "Latoya Johnson",
+        "age": 14,
+        "notes": "Younger brother, just started hooping"
+      }
+    ],
+    "hs_coach": {
+      "name": "Andre Adams",
+      "phone": "(503) 200-9913",
+      "email": "andre.adams@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Michael Taylor",
+      "program": "Meanstreets (IL)",
+      "circuit": "UAA (Under Armour)",
+      "phone": "(503) 385-5138",
+      "email": "michael.taylor@aau.org"
+    },
+    "agent": {
+      "name": "Steven Davis",
+      "agency": "Excel Sports",
+      "phone": "(503) 490-1390",
+      "email": "steven.davis@excelsports.com"
+    },
+    "shoe_affiliation": "Nike",
+    "demo": true
+  },
+  {
+    "id": "mock-portal-775ef9e8",
+    "contact_type": "portal",
+    "real_id": "775ef9e8-2758-411a-9428-7261c1e3f4f3",
+    "name": "Rob Wright",
+    "position": "PG",
+    "stars": 5,
+    "height": "6'0\"",
+    "weight": null,
+    "school": "BYU",
+    "class_year": "JR",
+    "nil_estimate": 650000.0,
+    "rank_on3": 6,
+    "rank_247": 4,
+    "rank_rivals": null,
+    "fit_notes": "18.1 ppg, 4.6 apg. 41% from 3. Third-team All-Big 12.",
+    "photo_url": null,
+    "status": "watching",
+    "player_phone": "(801) 265-7887",
+    "player_email": "rob.wright@gmail.com",
+    "instagram": "@wright9",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Donna Wright",
+      "phone": "(801) 216-5513",
+      "email": "donna.wright@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Mark Wright",
+      "phone": "(801) 236-8523",
+      "email": "mark.wright@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "Jerome Wright",
+        "age": 14,
+        "notes": ""
+      },
+      {
+        "name": "Stephanie Wright",
+        "age": 19,
+        "notes": "Student at local community college"
+      }
+    ],
+    "hs_coach": {
+      "name": "Derrick Taylor",
+      "phone": "(801) 326-3781",
+      "email": "derrick.taylor@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Michael Mitchell",
+      "program": "Brad Beal Elite",
+      "circuit": "Nike EYBL",
+      "phone": "(801) 483-3870",
+      "email": "michael.mitchell@aau.org"
+    },
+    "agent": {
+      "name": "Reggie Thompson",
+      "agency": "CAA Sports",
+      "phone": "(801) 236-1064",
+      "email": "reggie.thompson@caasports.com"
+    },
+    "shoe_affiliation": "Jordan Brand",
+    "demo": true
+  },
+  {
+    "id": "mock-portal-fd86b9e6",
+    "contact_type": "portal",
+    "real_id": "fd86b9e6-ab16-4068-ad54-141f134de19f",
+    "name": "Paulius Murauskas",
+    "position": "SF",
+    "stars": 5,
+    "height": "6'9\"",
+    "weight": 215,
+    "school": "St. Marys",
+    "class_year": "JR",
+    "nil_estimate": 650000.0,
+    "rank_on3": 7,
+    "rank_247": 7,
+    "rank_rivals": null,
+    "fit_notes": "18.4 ppg, 7.6 rpg. All-WCC both seasons. Coach left for AZ State.",
+    "photo_url": "https://a.espncdn.com/i/headshots/mens-college-basketball/players/full/5174955.png",
+    "status": "contacted",
+    "player_phone": "(310) 321-4662",
+    "player_email": "paulius.murauskas@gmail.com",
+    "instagram": "@murauskas55",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Linda Murauskas",
+      "phone": "(310) 293-4663",
+      "email": "linda.murauskas@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Paul Murauskas",
+      "phone": "(310) 436-4192",
+      "email": "paul.murauskas@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "Linda Murauskas",
+        "age": 23,
+        "notes": "Works in real estate"
+      },
+      {
+        "name": "Nicole Murauskas",
+        "age": 14,
+        "notes": "Plays at JUCO"
+      }
+    ],
+    "hs_coach": {
+      "name": "Darius King",
+      "phone": "(310) 410-7751",
+      "email": "darius.king@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "David Young",
+      "program": "Mac Irvin Fire (IL)",
+      "circuit": "Nike EYBL",
+      "phone": "(310) 373-1890",
+      "email": "david.young@aau.org"
+    },
+    "agent": {
+      "name": "Steven Harris",
+      "agency": "Excel Sports",
+      "phone": "(310) 474-7450",
+      "email": "steven.harris@excelsports.com"
+    },
+    "shoe_affiliation": "Jordan Brand",
+    "demo": true
+  },
+  {
+    "id": "mock-portal-014b6ba1",
+    "contact_type": "portal",
+    "real_id": "014b6ba1-2161-4599-a8e8-9f5990729333",
+    "name": "Dillon Haggerty",
+    "position": "SG",
+    "stars": 5,
+    "height": "6'3\"",
+    "weight": null,
+    "school": "Kansas State",
+    "class_year": "SR",
+    "nil_estimate": 600000.0,
+    "rank_on3": 8,
+    "rank_247": 9,
+    "rank_rivals": null,
+    "fit_notes": "23.4 ppg, 3.8 apg career highs. Fifth school in five years. Proven scorer.",
+    "photo_url": null,
+    "status": "watching",
+    "player_phone": "(785) 238-7360",
+    "player_email": "dillon.haggerty@gmail.com",
+    "instagram": "@haggerty90",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Donna Baker",
+      "phone": "(785) 484-8073",
+      "email": "donna.baker@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Robert Haggerty",
+      "phone": "(785) 279-3211",
+      "email": "robert.haggerty@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [],
+    "hs_coach": {
+      "name": "Steven Jackson",
+      "phone": "(785) 408-8056",
+      "email": "steven.jackson@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Marcus Davis",
+      "program": "Brotherly Love (PA)",
+      "circuit": "Puma Pro16",
+      "phone": "(785) 284-6309",
+      "email": "marcus.davis@aau.org"
+    },
+    "agent": {
+      "name": "Michael Allen",
+      "agency": "Roc Nation",
+      "phone": "(785) 432-4773",
+      "email": "michael.allen@rocnationsports.com"
+    },
+    "shoe_affiliation": "Under Armour",
+    "demo": true
+  },
+  {
+    "id": "mock-portal-3032ba26",
+    "contact_type": "portal",
+    "real_id": "3032ba26-20ab-4d83-a07d-dc23b22134b3",
+    "name": "Moustapha Thiam",
+    "position": "C",
+    "stars": 5,
+    "height": "7'2\"",
+    "weight": 245,
+    "school": "Cincinnati",
+    "class_year": "JR",
+    "nil_estimate": 600000.0,
+    "rank_on3": 9,
+    "rank_247": 6,
+    "rank_rivals": null,
+    "fit_notes": "12.8 ppg, 7.1 rpg. 23rd-best def rating nationally. Top-2 center in portal.",
+    "photo_url": "https://a.espncdn.com/i/headshots/mens-college-basketball/players/full/5149078.png",
+    "status": "contacted",
+    "player_phone": "(216) 351-3666",
+    "player_email": "moustapha.thiam@gmail.com",
+    "instagram": "@thiam41",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Lisa Thiam",
+      "phone": "(216) 333-3446",
+      "email": "lisa.thiam@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Reggie Thiam",
+      "phone": "(216) 360-4010",
+      "email": "reggie.thiam@gmail.com"
+    },
+    "guardian": {
+      "relationship": "Uncle",
+      "name": "David Davis",
+      "phone": "(216) 457-8801",
+      "email": "david.davis@gmail.com"
+    },
+    "siblings": [
+      {
+        "name": "Robert Thiam",
+        "age": 24,
+        "notes": "Younger brother, just started hooping"
+      }
+    ],
+    "hs_coach": {
+      "name": "James Roberts",
+      "phone": "(216) 234-3953",
+      "email": "james.roberts@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Reggie Garcia",
+      "program": "Brotherly Love (PA)",
+      "circuit": "Puma Pro16",
+      "phone": "(216) 496-9840",
+      "email": "reggie.garcia@aau.org"
+    },
+    "agent": {
+      "name": "David Wilson",
+      "agency": "BDA Sports",
+      "phone": "(216) 498-9360",
+      "email": "david.wilson@bdasports.com"
+    },
+    "shoe_affiliation": "Puma",
+    "demo": true
+  },
+  {
+    "id": "mock-portal-9d4b17a0",
+    "contact_type": "portal",
+    "real_id": "9d4b17a0-08ce-4f06-a2a8-b486e78b9348",
+    "name": "Liam McNeeley",
+    "position": "SF",
+    "stars": 5,
+    "height": "6'7\"",
+    "weight": 200,
+    "school": "UConn",
+    "class_year": "SO",
+    "nil_estimate": 600000.0,
+    "rank_on3": 10,
+    "rank_247": 13,
+    "rank_rivals": null,
+    "fit_notes": "Former top-10 recruit. UConn rotation wing. Shooting with length.",
+    "photo_url": null,
+    "status": "watching",
+    "player_phone": "(203) 335-6584",
+    "player_email": "liam.mcneeley@gmail.com",
+    "instagram": "@mcneeley14",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Stephanie McNeeley",
+      "phone": "(203) 483-2646",
+      "email": "stephanie.mcneeley@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Cedric McNeeley",
+      "phone": "(203) 339-4716",
+      "email": "cedric.mcneeley@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "John McNeeley",
+        "age": 8,
+        "notes": "Just finished middle school basketball"
+      },
+      {
+        "name": "Paul McNeeley",
+        "age": 10,
+        "notes": "Student at local community college"
+      },
+      {
+        "name": "Terrell McNeeley",
+        "age": 12,
+        "notes": ""
+      }
+    ],
+    "hs_coach": {
+      "name": "James Garcia",
+      "phone": "(203) 389-4769",
+      "email": "james.garcia@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Andre Rodriguez",
+      "program": "Las Vegas Prospects (NV)",
+      "circuit": "Adidas 3SSB",
+      "phone": "(203) 470-0228",
+      "email": "andre.rodriguez@aau.org"
+    },
+    "agent": {
+      "name": "Andre Rodriguez",
+      "agency": "Klutch Sports",
+      "phone": "(203) 268-4433",
+      "email": "andre.rodriguez@klutchsports.com"
+    },
+    "shoe_affiliation": "Nike",
+    "demo": true
+  },
+  {
+    "id": "mock-portal-bc835336",
+    "contact_type": "portal",
+    "real_id": "bc835336-f1c5-4da7-ba15-eb5c8d6cba22",
+    "name": "Braelon Haralson",
+    "position": "SF",
+    "stars": 4,
+    "height": "6'6\"",
+    "weight": null,
+    "school": "Notre Dame",
+    "class_year": "SO",
+    "nil_estimate": 600000.0,
+    "rank_on3": 11,
+    "rank_247": 10,
+    "rank_rivals": null,
+    "fit_notes": "Former McDonalds All-American. Double figures all but 3 games. Five 20+ pt games.",
+    "photo_url": null,
+    "status": "watching",
+    "player_phone": "(317) 307-5717",
+    "player_email": "braelon.haralson@gmail.com",
+    "instagram": "@haralson20",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Monica Haralson",
+      "phone": "(317) 479-0690",
+      "email": "monica.haralson@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Cedric Haralson",
+      "phone": "(317) 389-9643",
+      "email": "cedric.haralson@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "Robert Haralson",
+        "age": 10,
+        "notes": ""
+      }
+    ],
+    "hs_coach": {
+      "name": "Anthony Brown",
+      "phone": "(317) 201-5564",
+      "email": "anthony.brown@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Anthony Jackson",
+      "program": "City Rocks (NY)",
+      "circuit": "Adidas 3SSB",
+      "phone": "(317) 426-9138",
+      "email": "anthony.jackson@aau.org"
+    },
+    "agent": {
+      "name": "Jerome Nelson",
+      "agency": "CAA Sports",
+      "phone": "(317) 257-1332",
+      "email": "jerome.nelson@caasports.com"
+    },
+    "shoe_affiliation": "New Balance",
+    "demo": true
+  },
+  {
+    "id": "mock-portal-a6de7d4c",
+    "contact_type": "portal",
+    "real_id": "a6de7d4c-e4d5-4b29-b579-0c69141f0f69",
+    "name": "Tyler Nickel",
+    "position": "SF",
+    "stars": 3,
+    "height": "6'8\"",
+    "weight": 215,
+    "school": "Virginia",
+    "class_year": "JR",
+    "nil_estimate": 350000.0,
+    "rank_on3": 31,
+    "rank_247": 30,
+    "rank_rivals": null,
+    "fit_notes": "Sharpshooting wing. 40%+ from 3. ACC rotation looking for bigger role.",
+    "photo_url": "https://a.espncdn.com/i/headshots/mens-college-basketball/players/full/4838721.png",
+    "status": "watching",
+    "player_phone": "(703) 482-2526",
+    "player_email": "tyler.nickel@gmail.com",
+    "instagram": "@nickel26",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Pamela Hall",
+      "phone": "(703) 435-5828",
+      "email": "pamela.hall@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "John Nickel",
+      "phone": "(703) 356-3828",
+      "email": "john.nickel@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "James Nickel",
+        "age": 19,
+        "notes": "Plays football, not basketball"
+      },
+      {
+        "name": "Paul Nickel",
+        "age": 19,
+        "notes": ""
+      },
+      {
+        "name": "Nicole Nickel",
+        "age": 12,
+        "notes": ""
+      }
+    ],
+    "hs_coach": {
+      "name": "Steven Jackson",
+      "phone": "(703) 290-6855",
+      "email": "steven.jackson@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Kevin Hernandez",
+      "program": "Bradley Beal Elite (MO)",
+      "circuit": "Nike EYBL",
+      "phone": "(703) 327-4471",
+      "email": "kevin.hernandez@aau.org"
+    },
+    "agent": {
+      "name": "Mark Moore",
+      "agency": "BDA Sports",
+      "phone": "(703) 219-7811",
+      "email": "mark.moore@bdasports.com"
+    },
+    "shoe_affiliation": "Jordan Brand",
+    "demo": true
+  },
+  {
+    "id": "mock-portal-b4693578",
+    "contact_type": "portal",
+    "real_id": "b4693578-965a-4f52-b85f-d37514960b19",
+    "name": "Myles Rice",
+    "position": "SG",
+    "stars": 3,
+    "height": "6'5\"",
+    "weight": 195,
+    "school": "Washington State",
+    "class_year": "SR",
+    "nil_estimate": 350000.0,
+    "rank_on3": 32,
+    "rank_247": 33,
+    "rank_rivals": null,
+    "fit_notes": "PNW product. 15+ ppg scorer. Oregon geographic fit.",
+    "photo_url": "https://a.espncdn.com/i/headshots/mens-college-basketball/players/full/4709133.png",
+    "status": "contacted",
+    "player_phone": "(206) 314-0487",
+    "player_email": "myles.rice@gmail.com",
+    "instagram": "@rice67",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Monica Rice",
+      "phone": "(206) 475-3328",
+      "email": "monica.rice@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Marcus Rice",
+      "phone": "(206) 386-7166",
+      "email": "marcus.rice@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "Andre Rice",
+        "age": 19,
+        "notes": ""
+      },
+      {
+        "name": "Stephanie Rice",
+        "age": 18,
+        "notes": ""
+      },
+      {
+        "name": "Steven Rice",
+        "age": 16,
+        "notes": "Rising freshman in HS"
+      }
+    ],
+    "hs_coach": {
+      "name": "David Moore",
+      "phone": "(206) 422-5763",
+      "email": "david.moore@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Maurice Green",
+      "program": "Meanstreets (IL)",
+      "circuit": "UAA (Under Armour)",
+      "phone": "(206) 259-6411",
+      "email": "maurice.green@aau.org"
+    },
+    "agent": {
+      "name": "Reggie Harris",
+      "agency": "Roc Nation",
+      "phone": "(206) 222-7244",
+      "email": "reggie.harris@rocnationsports.com"
+    },
+    "shoe_affiliation": "Nike",
+    "demo": true
+  },
+  {
+    "id": "mock-portal-b70fc193",
+    "contact_type": "portal",
+    "real_id": "b70fc193-c8ae-4c52-aafa-88023fb3bbff",
+    "name": "Stefan Vaaks",
+    "position": "SF",
+    "stars": 3,
+    "height": "6'8\"",
+    "weight": 215,
+    "school": "SMU",
+    "class_year": "JR",
+    "nil_estimate": 350000.0,
+    "rank_on3": 33,
+    "rank_247": 30,
+    "rank_rivals": null,
+    "fit_notes": "Versatile wing with shooting touch. ACC rotation player.",
+    "photo_url": "https://a.espncdn.com/i/headshots/mens-college-basketball/players/full/5311991.png",
+    "status": "contacted",
+    "player_phone": "(713) 235-5509",
+    "player_email": "stefan.vaaks@gmail.com",
+    "instagram": "@vaaks75",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Denise Vaaks",
+      "phone": "(713) 364-7718",
+      "email": "denise.vaaks@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Robert Vaaks",
+      "phone": "(713) 426-7344",
+      "email": "robert.vaaks@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "Nicole Vaaks",
+        "age": 18,
+        "notes": "Rising freshman in HS"
+      }
+    ],
+    "hs_coach": {
+      "name": "Andre Anderson",
+      "phone": "(713) 298-6988",
+      "email": "andre.anderson@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Mark Carter",
+      "program": "I-10 Elite",
+      "circuit": "Puma Pro16",
+      "phone": "(713) 354-6753",
+      "email": "mark.carter@aau.org"
+    },
+    "agent": {
+      "name": "Andre Johnson",
+      "agency": "Roc Nation",
+      "phone": "(713) 346-3543",
+      "email": "andre.johnson@rocnationsports.com"
+    },
+    "shoe_affiliation": "Under Armour",
+    "demo": true
+  },
+  {
+    "id": "mock-portal-deca6256",
+    "contact_type": "portal",
+    "real_id": "deca6256-0cf6-4900-82fd-e740aa2f115a",
+    "name": "Cam Tiller",
+    "position": "PF",
+    "stars": 3,
+    "height": "6'9\"",
+    "weight": null,
+    "school": "Kansas",
+    "class_year": "SO",
+    "nil_estimate": 350000.0,
+    "rank_on3": 34,
+    "rank_247": 35,
+    "rank_rivals": null,
+    "fit_notes": "7.9 ppg, 6.1 rpg, 1.3 bpg. Started 31/35 games next to Bidunga.",
+    "photo_url": null,
+    "status": "watching",
+    "player_phone": "(785) 309-8475",
+    "player_email": "cam.tiller@gmail.com",
+    "instagram": "@tiller84",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Linda Tiller",
+      "phone": "(785) 202-1846",
+      "email": "linda.tiller@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Mark Tiller",
+      "phone": "(785) 417-3685",
+      "email": "mark.tiller@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "Sandra Tiller",
+        "age": 18,
+        "notes": "Plays football, not basketball"
+      },
+      {
+        "name": "Maurice Tiller",
+        "age": 15,
+        "notes": ""
+      }
+    ],
+    "hs_coach": {
+      "name": "John Williams",
+      "phone": "(785) 223-4111",
+      "email": "john.williams@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "James Lopez",
+      "program": "I-10 Elite",
+      "circuit": "Puma Pro16",
+      "phone": "(785) 412-9531",
+      "email": "james.lopez@aau.org"
+    },
+    "agent": {
+      "name": "Paul Allen",
+      "agency": "Priority Sports",
+      "phone": "(785) 404-4097",
+      "email": "paul.allen@prioritysports.com"
+    },
+    "shoe_affiliation": "Jordan Brand",
+    "demo": true
+  },
+  {
+    "id": "mock-portal-e1c274d6",
+    "contact_type": "portal",
+    "real_id": "e1c274d6-9b1f-4183-933c-0a28bf2eab3d",
+    "name": "Brandon Garrison",
+    "position": "C",
+    "stars": 3,
+    "height": "6'11\"",
+    "weight": 240,
+    "school": "Texas",
+    "class_year": "SO",
+    "nil_estimate": 350000.0,
+    "rank_on3": 35,
+    "rank_247": 36,
+    "rank_rivals": null,
+    "fit_notes": "Rim running big. Athletic lob threat. SEC tested.",
+    "photo_url": null,
+    "status": "watching",
+    "player_phone": "(713) 290-8586",
+    "player_email": "brandon.garrison@gmail.com",
+    "instagram": "@garrison82",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Sharon Garrison",
+      "phone": "(713) 341-8640",
+      "email": "sharon.garrison@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "David Garrison",
+      "phone": "(713) 448-4019",
+      "email": "david.garrison@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [],
+    "hs_coach": {
+      "name": "Derrick Anderson",
+      "phone": "(713) 437-8802",
+      "email": "derrick.anderson@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Maurice Green",
+      "program": "Meanstreets (IL)",
+      "circuit": "UAA (Under Armour)",
+      "phone": "(713) 418-9076",
+      "email": "maurice.green@aau.org"
+    },
+    "agent": {
+      "name": "Derrick Jackson",
+      "agency": "Priority Sports",
+      "phone": "(713) 430-4346",
+      "email": "derrick.jackson@prioritysports.com"
+    },
+    "shoe_affiliation": "Jordan Brand",
+    "demo": true
+  },
+  {
+    "id": "mock-portal-e83b941a",
+    "contact_type": "portal",
+    "real_id": "e83b941a-797f-44b8-960d-2c09e5c23707",
+    "name": "Elijah Saunders",
+    "position": "SF",
+    "stars": 3,
+    "height": "6'7\"",
+    "weight": 210,
+    "school": "USC",
+    "class_year": "JR",
+    "nil_estimate": 350000.0,
+    "rank_on3": 36,
+    "rank_247": 38,
+    "rank_rivals": null,
+    "fit_notes": "Athletic wing. Big Ten experience. Defensive versatility.",
+    "photo_url": "https://a.espncdn.com/i/headshots/mens-college-basketball/players/full/4870565.png",
+    "status": "watching",
+    "player_phone": "(310) 340-7306",
+    "player_email": "elijah.saunders@gmail.com",
+    "instagram": "@saunders97",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Michelle Saunders",
+      "phone": "(310) 399-6965",
+      "email": "michelle.saunders@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Brian Saunders",
+      "phone": "(310) 475-9047",
+      "email": "brian.saunders@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "Mark Saunders",
+        "age": 12,
+        "notes": "Plays at JUCO"
+      },
+      {
+        "name": "Brian Saunders",
+        "age": 14,
+        "notes": "Plays at JUCO"
+      }
+    ],
+    "hs_coach": {
+      "name": "Kevin Baker",
+      "phone": "(310) 438-6912",
+      "email": "kevin.baker@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Jerome Allen",
+      "program": "Oakland Soldiers (CA)",
+      "circuit": "Nike EYBL",
+      "phone": "(310) 499-0420",
+      "email": "jerome.allen@aau.org"
+    },
+    "agent": {
+      "name": "Reggie Allen",
+      "agency": "Priority Sports",
+      "phone": "(310) 203-5863",
+      "email": "reggie.allen@prioritysports.com"
+    },
+    "shoe_affiliation": "Adidas",
+    "demo": true
+  },
+  {
+    "id": "mock-portal-031c1f0d",
+    "contact_type": "portal",
+    "real_id": "031c1f0d-be91-4ce5-9652-5e81acd22bee",
+    "name": "Terrance Arceneaux",
+    "position": "SG",
+    "stars": 3,
+    "height": "6'6\"",
+    "weight": null,
+    "school": "Houston",
+    "class_year": "JR",
+    "nil_estimate": 320000.0,
+    "rank_on3": 37,
+    "rank_247": 39,
+    "rank_rivals": null,
+    "fit_notes": "Athletic wing. RS-Junior. Entered portal April 8. On3 NIL: $96K.",
+    "photo_url": null,
+    "status": "watching",
+    "player_phone": "(713) 312-8099",
+    "player_email": "terrance.arceneaux@gmail.com",
+    "instagram": "@arceneaux44",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Keisha Arceneaux",
+      "phone": "(713) 394-4658",
+      "email": "keisha.arceneaux@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Anthony Arceneaux",
+      "phone": "(713) 415-4233",
+      "email": "anthony.arceneaux@gmail.com"
+    },
+    "guardian": {
+      "relationship": "Uncle",
+      "name": "Marcus Jackson",
+      "phone": "(713) 265-8851",
+      "email": "marcus.jackson@gmail.com"
+    },
+    "siblings": [],
+    "hs_coach": {
+      "name": "Marcus Mitchell",
+      "phone": "(713) 488-0544",
+      "email": "marcus.mitchell@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "John Lopez",
+      "program": "Nightrydas Elite (FL)",
+      "circuit": "Nike EYBL",
+      "phone": "(713) 293-0923",
+      "email": "john.lopez@aau.org"
+    },
+    "agent": {
+      "name": "Anthony Allen",
+      "agency": "Octagon",
+      "phone": "(713) 308-7549",
+      "email": "anthony.allen@octagonsports.com"
+    },
+    "shoe_affiliation": "Adidas",
+    "demo": true
+  },
+  {
+    "id": "mock-portal-39c5a900",
+    "contact_type": "portal",
+    "real_id": "39c5a900-11ad-4a4b-b7df-842d951290d5",
+    "name": "Denzel Aberdeen",
+    "position": "PG",
+    "stars": 3,
+    "height": "6'2\"",
+    "weight": null,
+    "school": "Kentucky",
+    "class_year": "SR",
+    "nil_estimate": 300000.0,
+    "rank_on3": 38,
+    "rank_247": 37,
+    "rank_rivals": null,
+    "fit_notes": "13.5 ppg, 3.4 apg. 35.1% from 3. Florida + Kentucky experience.",
+    "photo_url": "https://a.espncdn.com/i/headshots/mens-college-basketball/players/full/5105527.png",
+    "status": "watching",
+    "player_phone": "(502) 241-7805",
+    "player_email": "denzel.aberdeen@gmail.com",
+    "instagram": "@aberdeen33",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Jennifer Walker",
+      "phone": "(502) 388-2849",
+      "email": "jennifer.walker@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Andre Aberdeen",
+      "phone": "(502) 258-2783",
+      "email": "andre.aberdeen@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [],
+    "hs_coach": {
+      "name": "Cedric Brown",
+      "phone": "(502) 215-4151",
+      "email": "cedric.brown@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Maurice Thomas",
+      "program": "Team Takeover (DC)",
+      "circuit": "Adidas 3SSB",
+      "phone": "(502) 322-2168",
+      "email": "maurice.thomas@aau.org"
+    },
+    "agent": {
+      "name": "Tyrone Taylor",
+      "agency": "Aaron Mintz Rep Group",
+      "phone": "(502) 311-7719",
+      "email": "tyrone.taylor@aaronmintzrepgroupsports.com"
+    },
+    "shoe_affiliation": "New Balance",
+    "demo": true
+  },
+  {
+    "id": "mock-portal-29cb17a8",
+    "contact_type": "portal",
+    "real_id": "29cb17a8-bc92-4eb9-bba2-e5e53c0f58d0",
+    "name": "Tahj Staveskie",
+    "position": "SG",
+    "stars": 2,
+    "height": "6'0\"",
+    "weight": null,
+    "school": "Uncommitted",
+    "class_year": null,
+    "nil_estimate": 0.0,
+    "rank_on3": null,
+    "rank_247": null,
+    "rank_rivals": null,
+    "fit_notes": "",
+    "photo_url": null,
+    "status": "watching",
+    "player_phone": "(503) 359-1871",
+    "player_email": "tahj.staveskie@gmail.com",
+    "instagram": "@staveskie56",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Sandra Staveskie",
+      "phone": "(503) 385-7632",
+      "email": "sandra.staveskie@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Michael Staveskie",
+      "phone": "(503) 278-7235",
+      "email": "michael.staveskie@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "Stephanie Staveskie",
+        "age": 14,
+        "notes": "Plays football, not basketball"
+      },
+      {
+        "name": "Paul Staveskie",
+        "age": 17,
+        "notes": ""
+      }
+    ],
+    "hs_coach": {
+      "name": "Maurice Taylor",
+      "phone": "(503) 489-0772",
+      "email": "maurice.taylor@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Jerome Hall",
+      "program": "Team Heat (FL)",
+      "circuit": "UAA (Under Armour)",
+      "phone": "(503) 235-8389",
+      "email": "jerome.hall@aau.org"
+    },
+    "agent": {
+      "name": "Cedric Lee",
+      "agency": "CAA Sports",
+      "phone": "(503) 415-8131",
+      "email": "cedric.lee@caasports.com"
+    },
+    "shoe_affiliation": "Nike",
+    "demo": true
+  },
+  {
+    "id": "mock-hs-75769fb2",
+    "contact_type": "hs",
+    "real_id": "75769fb2-ce62-49ed-8914-a702d145642c",
+    "name": "Tyran Stokes",
+    "position": "SF",
+    "stars": 5,
+    "height": "6'8\"",
+    "weight": null,
+    "school": "Rainier Beach HS (WA)",
+    "class_year": "2028",
+    "nil_estimate": 1000000.0,
+    "rank_on3": 1,
+    "rank_247": 1,
+    "rank_rivals": 4,
+    "fit_notes": "#1 overall 2026. PNW native - Oregon geographic angle. 37% from 3 EYBL.",
+    "photo_url": null,
+    "status": "contacted",
+    "player_phone": "(206) 290-8648",
+    "player_email": "tyran.stokes@gmail.com",
+    "instagram": "@stokes34",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Tanya Stokes",
+      "phone": "(206) 374-4681",
+      "email": "tanya.stokes@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Maurice Stokes",
+      "phone": "(206) 341-9206",
+      "email": "maurice.stokes@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "Tanya Stokes",
+        "age": 21,
+        "notes": ""
+      },
+      {
+        "name": "Kimberly Stokes",
+        "age": 16,
+        "notes": "Plays football, not basketball"
+      }
+    ],
+    "hs_coach": {
+      "name": "James Robinson",
+      "phone": "(206) 430-4095",
+      "email": "james.robinson@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Maurice Allen",
+      "program": "I-10 Elite",
+      "circuit": "Puma Pro16",
+      "phone": "(206) 372-0570",
+      "email": "maurice.allen@aau.org"
+    },
+    "agent": {
+      "name": "Tyrone Lewis",
+      "agency": "Wasserman",
+      "phone": "(206) 449-3575",
+      "email": "tyrone.lewis@wassermansports.com"
+    },
+    "shoe_affiliation": "Adidas",
+    "demo": true
+  },
+  {
+    "id": "mock-hs-8d6fd294",
+    "contact_type": "hs",
+    "real_id": "8d6fd294-88eb-4226-9242-d63c3908a1a7",
+    "name": "Koa Peat",
+    "position": "SF",
+    "stars": 5,
+    "height": "6'8\"",
+    "weight": 210,
+    "school": "Perry HS (AZ)",
+    "class_year": "2027",
+    "nil_estimate": 800000.0,
+    "rank_on3": 2,
+    "rank_247": 2,
+    "rank_rivals": 4,
+    "fit_notes": "2026 top 5. Elite 2-way wing. Physical. Arizona native, open recruitment.",
+    "photo_url": "https://a.espncdn.com/i/headshots/mens-college-basketball/players/full/5041953.png",
+    "status": "contacted",
+    "player_phone": "(602) 205-8564",
+    "player_email": "koa.peat@gmail.com",
+    "instagram": "@peat90",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Monica Peat",
+      "phone": "(602) 432-4538",
+      "email": "monica.peat@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "James Peat",
+      "phone": "(602) 356-4218",
+      "email": "james.peat@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "Tyrone Peat",
+        "age": 23,
+        "notes": ""
+      },
+      {
+        "name": "Denise Peat",
+        "age": 22,
+        "notes": ""
+      }
+    ],
+    "hs_coach": {
+      "name": "James Clark",
+      "phone": "(602) 313-6725",
+      "email": "james.clark@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Reggie Hall",
+      "program": "Mass Rivals (MA)",
+      "circuit": "Adidas 3SSB",
+      "phone": "(602) 442-9168",
+      "email": "reggie.hall@aau.org"
+    },
+    "agent": {
+      "name": "Terrell Walker",
+      "agency": "BDA Sports",
+      "phone": "(602) 481-5519",
+      "email": "terrell.walker@bdasports.com"
+    },
+    "shoe_affiliation": "Adidas",
+    "demo": true
+  },
+  {
+    "id": "mock-hs-cdf6e980",
+    "contact_type": "hs",
+    "real_id": "cdf6e980-4666-416b-9808-a4dc0c992494",
+    "name": "A.J. Williams",
+    "position": "SF",
+    "stars": 5,
+    "height": "6'6\"",
+    "weight": 195,
+    "school": "Eagles Landing (GA)",
+    "class_year": "2028",
+    "nil_estimate": 700000.0,
+    "rank_on3": 3,
+    "rank_247": 6,
+    "rank_rivals": 5,
+    "fit_notes": "#1 in 2028. Gold at FIBA U16. 20.4 ppg Peach Jam. Generational.",
+    "photo_url": null,
+    "status": "watching",
+    "player_phone": "(404) 318-2076",
+    "player_email": "aj.williams@gmail.com",
+    "instagram": "@williams97",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Monica Baker",
+      "phone": "(404) 451-1780",
+      "email": "monica.baker@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Kevin Williams",
+      "phone": "(404) 206-9505",
+      "email": "kevin.williams@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "Darius Williams",
+        "age": 14,
+        "notes": "Works in real estate"
+      },
+      {
+        "name": "Andre Williams",
+        "age": 24,
+        "notes": "Rising sophomore at HS"
+      }
+    ],
+    "hs_coach": {
+      "name": "Paul Clark",
+      "phone": "(404) 316-6012",
+      "email": "paul.clark@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Michael Baker",
+      "program": "Mass Rivals (MA)",
+      "circuit": "Adidas 3SSB",
+      "phone": "(404) 264-4594",
+      "email": "michael.baker@aau.org"
+    },
+    "agent": {
+      "name": "David Davis",
+      "agency": "Rosenhaus Sports",
+      "phone": "(404) 349-2168",
+      "email": "david.davis@rosenhaussports.com"
+    },
+    "shoe_affiliation": "New Balance",
+    "demo": true
+  },
+  {
+    "id": "mock-hs-f1f5a74f",
+    "contact_type": "hs",
+    "real_id": "f1f5a74f-f662-43ed-8d16-b501e59ba942",
+    "name": "Jordan Smith",
+    "position": "SG",
+    "stars": 5,
+    "height": "6'3\"",
+    "weight": 190,
+    "school": "Inglewood HS (CA)",
+    "class_year": "2027",
+    "nil_estimate": 700000.0,
+    "rank_on3": 4,
+    "rank_247": 7,
+    "rank_rivals": 7,
+    "fit_notes": "#2 overall 2026. Best on-ball defender in class. 37% from 3.",
+    "photo_url": null,
+    "status": "watching",
+    "player_phone": "(310) 345-7790",
+    "player_email": "jordan.smith@gmail.com",
+    "instagram": "@smith29",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Linda Smith",
+      "phone": "(310) 467-6332",
+      "email": "linda.smith@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Derrick Smith",
+      "phone": "(310) 430-7353",
+      "email": "derrick.smith@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "Yolanda Smith",
+        "age": 11,
+        "notes": ""
+      }
+    ],
+    "hs_coach": {
+      "name": "Marcus Scott",
+      "phone": "(310) 237-9553",
+      "email": "marcus.scott@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "John Carter",
+      "program": "Bradley Beal Elite (MO)",
+      "circuit": "Nike EYBL",
+      "phone": "(310) 355-1495",
+      "email": "john.carter@aau.org"
+    },
+    "agent": {
+      "name": "Steven Taylor",
+      "agency": "Rosenhaus Sports",
+      "phone": "(310) 413-9866",
+      "email": "steven.taylor@rosenhaussports.com"
+    },
+    "shoe_affiliation": "Puma",
+    "demo": true
+  },
+  {
+    "id": "mock-hs-6228e0b8",
+    "contact_type": "hs",
+    "real_id": "6228e0b8-f9f9-48af-b28b-ee7e6241620a",
+    "name": "Marcus Spears Jr.",
+    "position": "PF",
+    "stars": 5,
+    "height": "6'9\"",
+    "weight": null,
+    "school": "Uncommitted",
+    "class_year": "2028",
+    "nil_estimate": 600000.0,
+    "rank_on3": 5,
+    "rank_247": 3,
+    "rank_rivals": 8,
+    "fit_notes": "#1 in 2027. Early relationship building. Long-term priority.",
+    "photo_url": null,
+    "status": "watching",
+    "player_phone": "(503) 352-9742",
+    "player_email": "marcus.jr@gmail.com",
+    "instagram": "@jr70",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Pamela Jr",
+      "phone": "(503) 315-2541",
+      "email": "pamela.jr@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Brian Jr",
+      "phone": "(503) 336-2430",
+      "email": "brian.jr@gmail.com"
+    },
+    "guardian": {
+      "relationship": "Grandmother",
+      "name": "Monica Martin",
+      "phone": "(503) 241-2673",
+      "email": "monica.martin@gmail.com"
+    },
+    "siblings": [
+      {
+        "name": "Darius Jr",
+        "age": 10,
+        "notes": "Plays at JUCO"
+      }
+    ],
+    "hs_coach": {
+      "name": "Derrick Roberts",
+      "phone": "(503) 440-4871",
+      "email": "derrick.roberts@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Brian Clark",
+      "program": "Oakland Soldiers (CA)",
+      "circuit": "Nike EYBL",
+      "phone": "(503) 432-1266",
+      "email": "brian.clark@aau.org"
+    },
+    "agent": {
+      "name": "Steven Martinez",
+      "agency": "Aaron Mintz Rep Group",
+      "phone": "(503) 301-7065",
+      "email": "steven.martinez@aaronmintzrepgroupsports.com"
+    },
+    "shoe_affiliation": "Nike",
+    "demo": true
+  },
+  {
+    "id": "mock-hs-c4db0a02",
+    "contact_type": "hs",
+    "real_id": "c4db0a02-c464-4058-86a1-ef5c749d543a",
+    "name": "Cameron Miles",
+    "position": "PG",
+    "stars": 5,
+    "height": "6'2\"",
+    "weight": 175,
+    "school": "Link Academy (MO)",
+    "class_year": "2029",
+    "nil_estimate": 600000.0,
+    "rank_on3": 6,
+    "rank_247": 6,
+    "rank_rivals": 3,
+    "fit_notes": "2026 elite PG. Floor general with scoring. Top 10 nationally.",
+    "photo_url": null,
+    "status": "watching",
+    "player_phone": "(314) 236-1077",
+    "player_email": "cameron.miles@gmail.com",
+    "instagram": "@miles87",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Nicole Miles",
+      "phone": "(314) 494-9719",
+      "email": "nicole.miles@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Brian Miles",
+      "phone": "(314) 210-4515",
+      "email": "brian.miles@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "Keisha Miles",
+        "age": 11,
+        "notes": "Rising freshman in HS"
+      }
+    ],
+    "hs_coach": {
+      "name": "Marcus Robinson",
+      "phone": "(314) 456-8947",
+      "email": "marcus.robinson@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "James Roberts",
+      "program": "Grassroots Canada",
+      "circuit": "Puma Pro16",
+      "phone": "(314) 220-7178",
+      "email": "james.roberts@aau.org"
+    },
+    "agent": {
+      "name": "Kevin Roberts",
+      "agency": "Roc Nation",
+      "phone": "(314) 213-1596",
+      "email": "kevin.roberts@rocnationsports.com"
+    },
+    "shoe_affiliation": "Jordan Brand",
+    "demo": true
+  },
+  {
+    "id": "mock-hs-f9015e0a",
+    "contact_type": "hs",
+    "real_id": "f9015e0a-82b0-4ccd-b140-ea472f9e73ae",
+    "name": "Nate Johnson",
+    "position": "C",
+    "stars": 5,
+    "height": "7'0\"",
+    "weight": 230,
+    "school": "Montverde (FL)",
+    "class_year": "2027",
+    "nil_estimate": 550000.0,
+    "rank_on3": 7,
+    "rank_247": 7,
+    "rank_rivals": 5,
+    "fit_notes": "2026 rim protector with offensive polish. Top center in class.",
+    "photo_url": "https://a.espncdn.com/i/headshots/mens-college-basketball/players/full/4898278.png",
+    "status": "watching",
+    "player_phone": "(305) 495-0759",
+    "player_email": "nate.johnson@gmail.com",
+    "instagram": "@johnson59",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Nicole Johnson",
+      "phone": "(305) 245-5253",
+      "email": "nicole.johnson@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Tyrone Johnson",
+      "phone": "(305) 329-5396",
+      "email": "tyrone.johnson@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "Darius Johnson",
+        "age": 21,
+        "notes": ""
+      }
+    ],
+    "hs_coach": {
+      "name": "Tyrone Wilson",
+      "phone": "(305) 440-5800",
+      "email": "tyrone.wilson@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Kevin Moore",
+      "program": "Grassroots Canada",
+      "circuit": "Puma Pro16",
+      "phone": "(305) 282-5503",
+      "email": "kevin.moore@aau.org"
+    },
+    "agent": {
+      "name": "Jerome Scott",
+      "agency": "Roc Nation",
+      "phone": "(305) 405-9112",
+      "email": "jerome.scott@rocnationsports.com"
+    },
+    "shoe_affiliation": "Nike",
+    "demo": true
+  },
+  {
+    "id": "mock-hs-34501a1f",
+    "contact_type": "hs",
+    "real_id": "34501a1f-7c00-4871-932e-9e502dbdc76a",
+    "name": "Tounde Yessoufou",
+    "position": "SG",
+    "stars": 5,
+    "height": "6'5\"",
+    "weight": 190,
+    "school": "IMG Academy (FL)",
+    "class_year": "2029",
+    "nil_estimate": 500000.0,
+    "rank_on3": 8,
+    "rank_247": 10,
+    "rank_rivals": 11,
+    "fit_notes": "2026 international. Explosive athlete. Pro-level scoring instincts.",
+    "photo_url": "https://a.espncdn.com/i/headshots/mens-college-basketball/players/full/5095152.png",
+    "status": "watching",
+    "player_phone": "(305) 259-6722",
+    "player_email": "tounde.yessoufou@gmail.com",
+    "instagram": "@yessoufou12",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Kimberly Yessoufou",
+      "phone": "(305) 315-1958",
+      "email": "kimberly.yessoufou@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Michael Yessoufou",
+      "phone": "(305) 436-2024",
+      "email": "michael.yessoufou@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "Robert Yessoufou",
+        "age": 14,
+        "notes": "Just finished middle school basketball"
+      },
+      {
+        "name": "Denise Yessoufou",
+        "age": 22,
+        "notes": ""
+      }
+    ],
+    "hs_coach": {
+      "name": "Paul Robinson",
+      "phone": "(305) 481-2246",
+      "email": "paul.robinson@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Tyrone Taylor",
+      "program": "Meanstreets (IL)",
+      "circuit": "UAA (Under Armour)",
+      "phone": "(305) 214-4020",
+      "email": "tyrone.taylor@aau.org"
+    },
+    "agent": {
+      "name": "Mark Rodriguez",
+      "agency": "Rosenhaus Sports",
+      "phone": "(305) 207-9148",
+      "email": "mark.rodriguez@rosenhaussports.com"
+    },
+    "shoe_affiliation": "Under Armour",
+    "demo": true
+  },
+  {
+    "id": "mock-hs-3b1a161e",
+    "contact_type": "hs",
+    "real_id": "3b1a161e-d31d-4f21-913f-656c0fee857b",
+    "name": "Caleb Wilson",
+    "position": "PF",
+    "stars": 5,
+    "height": "6'9\"",
+    "weight": 210,
+    "school": "IMG Academy (FL)",
+    "class_year": "2028",
+    "nil_estimate": 500000.0,
+    "rank_on3": 9,
+    "rank_247": 12,
+    "rank_rivals": 8,
+    "fit_notes": "2026 athletic PF. Rim runner with developing perimeter game.",
+    "photo_url": "https://a.espncdn.com/i/headshots/mens-college-basketball/players/full/5095151.png",
+    "status": "watching",
+    "player_phone": "(305) 278-8265",
+    "player_email": "caleb.wilson@gmail.com",
+    "instagram": "@wilson69",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Yolanda Wilson",
+      "phone": "(305) 447-5754",
+      "email": "yolanda.wilson@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Terrell Wilson",
+      "phone": "(305) 370-9142",
+      "email": "terrell.wilson@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "Yolanda Wilson",
+        "age": 15,
+        "notes": "Younger brother, just started hooping"
+      },
+      {
+        "name": "Angela Wilson",
+        "age": 14,
+        "notes": ""
+      }
+    ],
+    "hs_coach": {
+      "name": "Terrell Anderson",
+      "phone": "(305) 235-4626",
+      "email": "terrell.anderson@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Terrell Robinson",
+      "program": "Grassroots Canada",
+      "circuit": "Puma Pro16",
+      "phone": "(305) 201-4734",
+      "email": "terrell.robinson@aau.org"
+    },
+    "agent": {
+      "name": "Brian Mitchell",
+      "agency": "Aaron Mintz Rep Group",
+      "phone": "(305) 450-2534",
+      "email": "brian.mitchell@aaronmintzrepgroupsports.com"
+    },
+    "shoe_affiliation": "Under Armour",
+    "demo": true
+  },
+  {
+    "id": "mock-hs-83ef8611",
+    "contact_type": "hs",
+    "real_id": "83ef8611-94a3-4266-a6e3-3a5e540dc8b3",
+    "name": "Marcus Reed",
+    "position": "SF",
+    "stars": 5,
+    "height": "6'7\"",
+    "weight": 200,
+    "school": "Oak Hill (VA)",
+    "class_year": "2027",
+    "nil_estimate": 500000.0,
+    "rank_on3": 10,
+    "rank_247": 11,
+    "rank_rivals": 10,
+    "fit_notes": "2026 versatile wing. Two-way player. Top 15 nationally.",
+    "photo_url": null,
+    "status": "watching",
+    "player_phone": "(703) 478-6280",
+    "player_email": "marcus.reed@gmail.com",
+    "instagram": "@reed13",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Sharon Reed",
+      "phone": "(703) 469-7586",
+      "email": "sharon.reed@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Kevin Reed",
+      "phone": "(703) 207-2461",
+      "email": "kevin.reed@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "Linda Reed",
+        "age": 20,
+        "notes": "Plays at JUCO"
+      }
+    ],
+    "hs_coach": {
+      "name": "David Lewis",
+      "phone": "(703) 442-6346",
+      "email": "david.lewis@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Cedric Thomas",
+      "program": "I-10 Elite",
+      "circuit": "Puma Pro16",
+      "phone": "(703) 453-0706",
+      "email": "cedric.thomas@aau.org"
+    },
+    "agent": {
+      "name": "John Green",
+      "agency": "Aaron Mintz Rep Group",
+      "phone": "(703) 369-1744",
+      "email": "john.green@aaronmintzrepgroupsports.com"
+    },
+    "shoe_affiliation": "Under Armour",
+    "demo": true
+  },
+  {
+    "id": "mock-hs-cbb351cf",
+    "contact_type": "hs",
+    "real_id": "cbb351cf-a524-4c58-a464-8ded3c9fd0de",
+    "name": "Braylon Mullins",
+    "position": "SG",
+    "stars": 4,
+    "height": "6'5\"",
+    "weight": 190,
+    "school": "Oak Hill (VA)",
+    "class_year": "2029",
+    "nil_estimate": 500000.0,
+    "rank_on3": 11,
+    "rank_247": 9,
+    "rank_rivals": 11,
+    "fit_notes": "2026 combo guard. EYBL standout. Scoring upside with defense.",
+    "photo_url": "https://a.espncdn.com/i/headshots/mens-college-basketball/players/full/5196916.png",
+    "status": "watching",
+    "player_phone": "(703) 409-2629",
+    "player_email": "braylon.mullins@gmail.com",
+    "instagram": "@mullins39",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Michelle Mullins",
+      "phone": "(703) 214-0853",
+      "email": "michelle.mullins@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Tyrone Mullins",
+      "phone": "(703) 366-1019",
+      "email": "tyrone.mullins@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "Stephanie Mullins",
+        "age": 10,
+        "notes": ""
+      },
+      {
+        "name": "Pamela Mullins",
+        "age": 20,
+        "notes": ""
+      }
+    ],
+    "hs_coach": {
+      "name": "Cedric Scott",
+      "phone": "(703) 477-0688",
+      "email": "cedric.scott@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Cedric Clark",
+      "program": "Oakland Soldiers (CA)",
+      "circuit": "Nike EYBL",
+      "phone": "(703) 316-1580",
+      "email": "cedric.clark@aau.org"
+    },
+    "agent": {
+      "name": "Jerome Moore",
+      "agency": "Klutch Sports",
+      "phone": "(703) 427-2825",
+      "email": "jerome.moore@klutchsports.com"
+    },
+    "shoe_affiliation": "New Balance",
+    "demo": true
+  },
+  {
+    "id": "mock-hs-2119ca98",
+    "contact_type": "hs",
+    "real_id": "2119ca98-774b-492a-b9da-05f69b2e44a7",
+    "name": "DeShawn Harris",
+    "position": "SG",
+    "stars": 4,
+    "height": "6'4\"",
+    "weight": 185,
+    "school": "Bishop Gorman (NV)",
+    "class_year": "2028",
+    "nil_estimate": 450000.0,
+    "rank_on3": 12,
+    "rank_247": 14,
+    "rank_rivals": 11,
+    "fit_notes": "2026 West Coast scorer. 3-level threat. Vegas product.",
+    "photo_url": null,
+    "status": "watching",
+    "player_phone": "(702) 350-5973",
+    "player_email": "deshawn.harris@gmail.com",
+    "instagram": "@harris82",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Latoya Adams",
+      "phone": "(702) 417-4197",
+      "email": "latoya.adams@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Jerome Harris",
+      "phone": "(702) 433-5049",
+      "email": "jerome.harris@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "Darius Harris",
+        "age": 13,
+        "notes": "Just finished middle school basketball"
+      },
+      {
+        "name": "Angela Harris",
+        "age": 15,
+        "notes": "Just finished middle school basketball"
+      }
+    ],
+    "hs_coach": {
+      "name": "John Thompson",
+      "phone": "(702) 436-4261",
+      "email": "john.thompson@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Michael Lopez",
+      "program": "Grassroots Canada",
+      "circuit": "Puma Pro16",
+      "phone": "(702) 347-9055",
+      "email": "michael.lopez@aau.org"
+    },
+    "agent": {
+      "name": "Mark Miller",
+      "agency": "Priority Sports",
+      "phone": "(702) 376-9726",
+      "email": "mark.miller@prioritysports.com"
+    },
+    "shoe_affiliation": "Adidas",
+    "demo": true
+  },
+  {
+    "id": "mock-hs-5f838dc5",
+    "contact_type": "hs",
+    "real_id": "5f838dc5-5046-4d3d-b77d-41379c2ff467",
+    "name": "Jaylen Thomas",
+    "position": "SG",
+    "stars": 3,
+    "height": "6'4\"",
+    "weight": 180,
+    "school": "Wheeler HS (GA)",
+    "class_year": "2028",
+    "nil_estimate": 350000.0,
+    "rank_on3": 31,
+    "rank_247": 29,
+    "rank_rivals": 30,
+    "fit_notes": "2026 shooting specialist. 40%+ from 3 on AAU circuit.",
+    "photo_url": null,
+    "status": "watching",
+    "player_phone": "(404) 301-6402",
+    "player_email": "jaylen.thomas@gmail.com",
+    "instagram": "@thomas75",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Linda Thomas",
+      "phone": "(404) 386-2253",
+      "email": "linda.thomas@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Robert Thomas",
+      "phone": "(404) 246-4935",
+      "email": "robert.thomas@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "Reggie Thomas",
+        "age": 17,
+        "notes": "Plays at JUCO"
+      },
+      {
+        "name": "Andre Thomas",
+        "age": 8,
+        "notes": "Plays college ball at lower level"
+      }
+    ],
+    "hs_coach": {
+      "name": "Maurice Scott",
+      "phone": "(404) 346-3870",
+      "email": "maurice.scott@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Cedric Harris",
+      "program": "Team Final (PA)",
+      "circuit": "UAA (Under Armour)",
+      "phone": "(404) 328-2340",
+      "email": "cedric.harris@aau.org"
+    },
+    "agent": {
+      "name": "Cedric Moore",
+      "agency": "CAA Sports",
+      "phone": "(404) 358-7322",
+      "email": "cedric.moore@caasports.com"
+    },
+    "shoe_affiliation": "Nike",
+    "demo": true
+  },
+  {
+    "id": "mock-hs-85cbb15c",
+    "contact_type": "hs",
+    "real_id": "85cbb15c-bb9e-4193-b01c-a183ba81efbb",
+    "name": "CJ Adams",
+    "position": "PG",
+    "stars": 3,
+    "height": "6'1\"",
+    "weight": 172,
+    "school": "Centennial HS (NV)",
+    "class_year": "2027",
+    "nil_estimate": 350000.0,
+    "rank_on3": 32,
+    "rank_247": 33,
+    "rank_rivals": 32,
+    "fit_notes": "2026 West Coast PG. Flashy passer with shooting. Vegas product.",
+    "photo_url": null,
+    "status": "watching",
+    "player_phone": "(702) 367-6907",
+    "player_email": "cj.adams@gmail.com",
+    "instagram": "@adams34",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Nicole Baker",
+      "phone": "(702) 474-2124",
+      "email": "nicole.baker@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Paul Adams",
+      "phone": "(702) 432-6138",
+      "email": "paul.adams@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "Crystal Adams",
+        "age": 24,
+        "notes": ""
+      }
+    ],
+    "hs_coach": {
+      "name": "Mark Martinez",
+      "phone": "(702) 446-4935",
+      "email": "mark.martinez@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Derrick Miller",
+      "program": "Team Loaded (VA)",
+      "circuit": "UAA (Under Armour)",
+      "phone": "(702) 272-3796",
+      "email": "derrick.miller@aau.org"
+    },
+    "agent": {
+      "name": "Marcus Nelson",
+      "agency": "Octagon",
+      "phone": "(702) 246-6564",
+      "email": "marcus.nelson@octagonsports.com"
+    },
+    "shoe_affiliation": "Nike",
+    "demo": true
+  },
+  {
+    "id": "mock-hs-ba7ce5fb",
+    "contact_type": "hs",
+    "real_id": "ba7ce5fb-4303-4873-8aa6-73849f1f22c9",
+    "name": "Myles Porter",
+    "position": "SF",
+    "stars": 3,
+    "height": "6'7\"",
+    "weight": 195,
+    "school": "Uncommitted",
+    "class_year": "2026",
+    "nil_estimate": 350000.0,
+    "rank_on3": 33,
+    "rank_247": 34,
+    "rank_rivals": 34,
+    "fit_notes": "2027 wing. Nike EYBL stock riser. Athletic with range.",
+    "photo_url": null,
+    "status": "watching",
+    "player_phone": "(503) 334-9677",
+    "player_email": "myles.porter@gmail.com",
+    "instagram": "@porter13",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Crystal Porter",
+      "phone": "(503) 450-6786",
+      "email": "crystal.porter@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Cedric Porter",
+      "phone": "(503) 343-0636",
+      "email": "cedric.porter@gmail.com"
+    },
+    "guardian": {
+      "relationship": "Grandfather",
+      "name": "Tyrone Williams",
+      "phone": "(503) 313-1135",
+      "email": "tyrone.williams@gmail.com"
+    },
+    "siblings": [
+      {
+        "name": "Tanya Porter",
+        "age": 17,
+        "notes": ""
+      },
+      {
+        "name": "Steven Porter",
+        "age": 12,
+        "notes": "Plays college ball at lower level"
+      }
+    ],
+    "hs_coach": {
+      "name": "Brian Scott",
+      "phone": "(503) 259-1692",
+      "email": "brian.scott@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "John Allen",
+      "program": "WeAllCanGo (TX)",
+      "circuit": "Adidas 3SSB",
+      "phone": "(503) 432-6178",
+      "email": "john.allen@aau.org"
+    },
+    "agent": {
+      "name": "Andre Hernandez",
+      "agency": "Aaron Mintz Rep Group",
+      "phone": "(503) 279-6897",
+      "email": "andre.hernandez@aaronmintzrepgroupsports.com"
+    },
+    "shoe_affiliation": "New Balance",
+    "demo": true
+  },
+  {
+    "id": "mock-hs-d777ae7e",
+    "contact_type": "hs",
+    "real_id": "d777ae7e-b573-465d-9499-d4745da0c810",
+    "name": "Miles Jackson",
+    "position": "SF",
+    "stars": 3,
+    "height": "6'8\"",
+    "weight": 205,
+    "school": "Uncommitted",
+    "class_year": "2028",
+    "nil_estimate": 350000.0,
+    "rank_on3": 34,
+    "rank_247": 34,
+    "rank_rivals": 31,
+    "fit_notes": "2027 versatile 6-8 wing. Can guard 1-4. Switch defender.",
+    "photo_url": null,
+    "status": "watching",
+    "player_phone": "(503) 389-3659",
+    "player_email": "miles.jackson@gmail.com",
+    "instagram": "@jackson17",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Sharon Jackson",
+      "phone": "(503) 489-3462",
+      "email": "sharon.jackson@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Derrick Jackson",
+      "phone": "(503) 235-9180",
+      "email": "derrick.jackson@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [],
+    "hs_coach": {
+      "name": "Darius Baker",
+      "phone": "(503) 383-1092",
+      "email": "darius.baker@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Paul Taylor",
+      "program": "Grassroots Canada",
+      "circuit": "Puma Pro16",
+      "phone": "(503) 432-1601",
+      "email": "paul.taylor@aau.org"
+    },
+    "agent": {
+      "name": "Paul Roberts",
+      "agency": "CAA Sports",
+      "phone": "(503) 225-5564",
+      "email": "paul.roberts@caasports.com"
+    },
+    "shoe_affiliation": "Jordan Brand",
+    "demo": true
+  },
+  {
+    "id": "mock-hs-1b36e5ff",
+    "contact_type": "hs",
+    "real_id": "1b36e5ff-2ebb-4566-8555-3ee715fb228a",
+    "name": "Ryan Foster",
+    "position": "PF",
+    "stars": 3,
+    "height": "6'9\"",
+    "weight": 205,
+    "school": "Uncommitted",
+    "class_year": "2027",
+    "nil_estimate": 300000.0,
+    "rank_on3": 35,
+    "rank_247": 33,
+    "rank_rivals": 37,
+    "fit_notes": "2028 skilled stretch 4. Passing ability. High basketball IQ.",
+    "photo_url": null,
+    "status": "watching",
+    "player_phone": "(503) 306-9707",
+    "player_email": "ryan.foster@gmail.com",
+    "instagram": "@foster6",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Monica Foster",
+      "phone": "(503) 466-5041",
+      "email": "monica.foster@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Steven Foster",
+      "phone": "(503) 434-0610",
+      "email": "steven.foster@gmail.com"
+    },
+    "guardian": {
+      "relationship": "Grandmother",
+      "name": "Tanya Foster",
+      "phone": "(503) 476-4206",
+      "email": "tanya.foster@gmail.com"
+    },
+    "siblings": [
+      {
+        "name": "Darius Foster",
+        "age": 11,
+        "notes": ""
+      },
+      {
+        "name": "David Foster",
+        "age": 12,
+        "notes": "Plays football, not basketball"
+      },
+      {
+        "name": "Kimberly Foster",
+        "age": 18,
+        "notes": "Rising freshman in HS"
+      }
+    ],
+    "hs_coach": {
+      "name": "David Anderson",
+      "phone": "(503) 415-8719",
+      "email": "david.anderson@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Tyrone Wright",
+      "program": "Mac Irvin Fire (IL)",
+      "circuit": "Nike EYBL",
+      "phone": "(503) 385-8508",
+      "email": "tyrone.wright@aau.org"
+    },
+    "agent": {
+      "name": "Reggie Moore",
+      "agency": "Priority Sports",
+      "phone": "(503) 457-3729",
+      "email": "reggie.moore@prioritysports.com"
+    },
+    "shoe_affiliation": "Puma",
+    "demo": true
+  },
+  {
+    "id": "mock-hs-1b37f4f3",
+    "contact_type": "hs",
+    "real_id": "1b37f4f3-89e0-4430-b300-a55afdd0e288",
+    "name": "Chris Robinson",
+    "position": "SG",
+    "stars": 3,
+    "height": "6'3\"",
+    "weight": 180,
+    "school": "Uncommitted",
+    "class_year": "2028",
+    "nil_estimate": 300000.0,
+    "rank_on3": 36,
+    "rank_247": 39,
+    "rank_rivals": 38,
+    "fit_notes": "2027 knockdown shooter. 42% from 3 in AAU.",
+    "photo_url": null,
+    "status": "watching",
+    "player_phone": "(503) 231-7947",
+    "player_email": "chris.robinson@gmail.com",
+    "instagram": "@robinson53",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Crystal Robinson",
+      "phone": "(503) 373-7530",
+      "email": "crystal.robinson@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Jerome Robinson",
+      "phone": "(503) 404-6915",
+      "email": "jerome.robinson@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "John Robinson",
+        "age": 10,
+        "notes": "Younger brother, just started hooping"
+      },
+      {
+        "name": "John Robinson",
+        "age": 12,
+        "notes": "Just finished middle school basketball"
+      }
+    ],
+    "hs_coach": {
+      "name": "Andre Lewis",
+      "phone": "(503) 395-9887",
+      "email": "andre.lewis@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Terrell Roberts",
+      "program": "Meanstreets (IL)",
+      "circuit": "UAA (Under Armour)",
+      "phone": "(503) 420-1724",
+      "email": "terrell.roberts@aau.org"
+    },
+    "agent": {
+      "name": "Robert Nelson",
+      "agency": "Excel Sports",
+      "phone": "(503) 420-7498",
+      "email": "robert.nelson@excelsports.com"
+    },
+    "shoe_affiliation": "Jordan Brand",
+    "demo": true
+  },
+  {
+    "id": "mock-hs-b0589602",
+    "contact_type": "hs",
+    "real_id": "b0589602-ef14-4388-968b-1e917e92ab3b",
+    "name": "Quinton Ariza",
+    "position": "SF",
+    "stars": 3,
+    "height": "6'7\"",
+    "weight": null,
+    "school": "Committed - Oregon",
+    "class_year": "2028",
+    "nil_estimate": 300000.0,
+    "rank_on3": 37,
+    "rank_247": 38,
+    "rank_rivals": 40,
+    "fit_notes": "OREGON COMMIT. Son of Trevor Ariza. High ceiling wing.",
+    "photo_url": null,
+    "status": "offered",
+    "player_phone": "(503) 248-5220",
+    "player_email": "quinton.ariza@gmail.com",
+    "instagram": "@ariza7",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Pamela Ariza",
+      "phone": "(503) 347-9937",
+      "email": "pamela.ariza@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Kevin Ariza",
+      "phone": "(503) 359-5861",
+      "email": "kevin.ariza@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [
+      {
+        "name": "Yolanda Ariza",
+        "age": 10,
+        "notes": "Rising sophomore at HS"
+      }
+    ],
+    "hs_coach": {
+      "name": "James King",
+      "phone": "(503) 249-6205",
+      "email": "james.king@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "David Mitchell",
+      "program": "WeAllCanGo (TX)",
+      "circuit": "Adidas 3SSB",
+      "phone": "(503) 487-9302",
+      "email": "david.mitchell@aau.org"
+    },
+    "agent": {
+      "name": "Kevin Taylor",
+      "agency": "BDA Sports",
+      "phone": "(503) 381-7029",
+      "email": "kevin.taylor@bdasports.com"
+    },
+    "shoe_affiliation": "New Balance",
+    "demo": true
+  },
+  {
+    "id": "mock-hs-b853569b",
+    "contact_type": "hs",
+    "real_id": "b853569b-565e-4200-94c9-00546a069b17",
+    "name": "Aiden Cooper",
+    "position": "PG",
+    "stars": 3,
+    "height": "6'1\"",
+    "weight": 170,
+    "school": "Uncommitted",
+    "class_year": "2028",
+    "nil_estimate": 300000.0,
+    "rank_on3": 38,
+    "rank_247": 37,
+    "rank_rivals": 41,
+    "fit_notes": "2027 floor general. West Coast PG with passing vision.",
+    "photo_url": null,
+    "status": "watching",
+    "player_phone": "(503) 253-9568",
+    "player_email": "aiden.cooper@gmail.com",
+    "instagram": "@cooper90",
+    "twitter": "",
+    "tiktok": "",
+    "parent1": {
+      "relationship": "Mother",
+      "name": "Kimberly Hill",
+      "phone": "(503) 358-5667",
+      "email": "kimberly.hill@gmail.com"
+    },
+    "parent2": {
+      "relationship": "Father",
+      "name": "Paul Cooper",
+      "phone": "(503) 379-0200",
+      "email": "paul.cooper@gmail.com"
+    },
+    "guardian": null,
+    "siblings": [],
+    "hs_coach": {
+      "name": "Darius Nelson",
+      "phone": "(503) 388-1982",
+      "email": "darius.nelson@hscoach.edu"
+    },
+    "aau_coach": {
+      "name": "Steven King",
+      "program": "Team Heat (FL)",
+      "circuit": "UAA (Under Armour)",
+      "phone": "(503) 487-9221",
+      "email": "steven.king@aau.org"
+    },
+    "agent": {
+      "name": "Michael Roberts",
+      "agency": "Roc Nation",
+      "phone": "(503) 214-3055",
+      "email": "michael.roberts@rocnationsports.com"
+    },
+    "shoe_affiliation": "Adidas",
+    "demo": true
+  },
+  {
+    "id": "mock-donor-001",
+    "contact_type": "donor",
+    "demo": true,
+    "name": "Dr. Patricia Chen",
+    "title": "Founder & CEO",
+    "organization": "PacWest Ventures",
+    "phone": "(503) 555-4127",
+    "email": "patricia.chen@pacwest.com",
+    "city": "Portland",
+    "state": "OR",
+    "champions_circle": "Diamond",
+    "total_given": "$425,000",
+    "last_gift": "$50,000",
+    "last_gift_date": "2026-01-15",
+    "largest_gift": "$125,000",
+    "capacity_estimate": "$500K-$1M",
+    "notes": "Tech founder, Oregon alum. Interested in NIL for international players."
+  },
+  {
+    "id": "mock-donor-002",
+    "contact_type": "donor",
+    "demo": true,
+    "name": "Marcus Haliburton",
+    "title": "Managing Partner",
+    "organization": "Cascade Capital",
+    "phone": "(503) 555-8349",
+    "email": "marcus.haliburton@cascade.com",
+    "city": "Eugene",
+    "state": "OR",
+    "champions_circle": "Platinum",
+    "total_given": "$275,000",
+    "last_gift": "$125,000",
+    "last_gift_date": "2026-03-02",
+    "largest_gift": "$125,000",
+    "capacity_estimate": "$300K-$500K",
+    "notes": "Local real estate. Season ticket holder 22 years. Big on facility upgrades."
+  },
+  {
+    "id": "mock-donor-003",
+    "contact_type": "donor",
+    "demo": true,
+    "name": "Catherine Walsh",
+    "title": "Partner",
+    "organization": "Walsh & Associates",
+    "phone": "(503) 555-2910",
+    "email": "cwalsh@walshlaw.com",
+    "city": "Lake Oswego",
+    "state": "OR",
+    "champions_circle": "Gold",
+    "total_given": "$95,000",
+    "last_gift": "$25,000",
+    "last_gift_date": "2025-12-20",
+    "largest_gift": "$40,000",
+    "capacity_estimate": "$100K-$250K",
+    "notes": "Attorney. Wife is Oregon alum (class of '94). Prefers academic-focused pitches."
+  },
+  {
+    "id": "mock-donor-004",
+    "contact_type": "donor",
+    "demo": true,
+    "name": "Ricky Thompson",
+    "title": "CEO",
+    "organization": "Thompson Logistics Group",
+    "phone": "(503) 555-6622",
+    "email": "r.thompson@thompsonlogistics.com",
+    "city": "Portland",
+    "state": "OR",
+    "champions_circle": "Silver",
+    "total_given": "$35,000",
+    "last_gift": "$10,000",
+    "last_gift_date": "2025-11-05",
+    "largest_gift": "$15,000",
+    "capacity_estimate": "$50K-$100K",
+    "notes": "Trucking/logistics. First-gen giver. Growing relationship."
+  },
+  {
+    "id": "mock-donor-005",
+    "contact_type": "donor",
+    "demo": true,
+    "name": "Harold Knight",
+    "title": "Retired Executive",
+    "organization": "Knight Family Foundation",
+    "phone": "(503) 555-0001",
+    "email": "h.knight@knightfam.org",
+    "city": "Portland",
+    "state": "OR",
+    "champions_circle": "Diamond",
+    "total_given": "$2,500,000",
+    "last_gift": "$500,000",
+    "last_gift_date": "2026-02-28",
+    "largest_gift": "$1,000,000",
+    "capacity_estimate": "$5M+",
+    "notes": "Anchor donor. Lifelong Oregon supporter. Direct line."
+  },
+  {
+    "id": "mock-staff-001",
+    "contact_type": "staff_external",
+    "demo": true,
+    "name": "Mike Irvin",
+    "title": "Founder / Director",
+    "organization": "Mac Irvin Fire AAU",
+    "staff_type": "AAU Director",
+    "phone": "(312) 555-4421",
+    "email": "mike@macirvinfire.com",
+    "territory": "Chicago / Midwest",
+    "notes": "Reps 4 top-100 kids including Cameron Miles. Tight gatekeeper \u2014 call first."
+  },
+  {
+    "id": "mock-staff-002",
+    "contact_type": "staff_external",
+    "demo": true,
+    "name": "Aaron Mintz",
+    "title": "Senior Agent",
+    "organization": "CAA Sports Basketball",
+    "staff_type": "Agent",
+    "phone": "(310) 555-7823",
+    "email": "amintz@caasports.com",
+    "territory": "West Coast / National",
+    "notes": "Reps 12 D1 seniors. Friendly to Oregon staff. Runs player camps in July."
+  },
+  {
+    "id": "mock-staff-003",
+    "contact_type": "staff_external",
+    "demo": true,
+    "name": "Dave Coughlin",
+    "title": "Director of Basketball",
+    "organization": "Nike EYBL",
+    "staff_type": "Shoe Rep",
+    "phone": "(503) 555-3344",
+    "email": "dave.coughlin@nike.com",
+    "territory": "National",
+    "notes": "Nike's grassroots contact for college staffs. Gatekeeper for EYBL access."
+  },
+  {
+    "id": "mock-staff-004",
+    "contact_type": "staff_external",
+    "demo": true,
+    "name": "Bruce Weber",
+    "title": "Head Coach",
+    "organization": "Montverde Academy",
+    "staff_type": "HS Network Coach",
+    "phone": "(407) 555-1290",
+    "email": "bweber@montverde.edu",
+    "territory": "Florida / National (prep school pipeline)",
+    "notes": "Sends 3-4 D1 kids per year. Multi-year relationship. Respects direct convos."
+  }
+];
+};
+
 
 /* Splash screen entry — shows after login + loadData, hidden by ?splash=1 override */
 window.enterApp=function(){
@@ -2640,10 +5490,45 @@ window._recCard=function(p){
    ============================================ */
 window.renderCRM=function(c){
   /* Filter by star rating */
-  var filtered=prospects.slice();
+  /* S12 Patch 6: mock contacts blended with real prospects */
+  var mockList=(typeof window.mockContactsData==='function')?window.mockContactsData():[];
+  /* Wrap mock entries to match the phonebook row shape */
+  var mockAsRows=mockList.map(function(m){
+    return {
+      id:m.id,
+      player_name:m.name,
+      position:m.position||(m.staff_type||m.title||""),
+      current_school:m.school||m.organization||"",
+      class_year:m.class_year||"",
+      priority_tier:null,
+      _stars:m.stars||0,
+      _contact_type:m.contact_type,
+      _mock:true,
+      _mockEntry:m
+    };
+  });
+  var combined;
+  if(crmTypeFilter==="ALL"){
+    combined=prospects.slice().concat(mockAsRows);
+  } else if(crmTypeFilter==="portal"){
+    combined=mockAsRows.filter(function(m){return m._contact_type==="portal";});
+  } else if(crmTypeFilter==="hs"){
+    combined=mockAsRows.filter(function(m){return m._contact_type==="hs";});
+  } else if(crmTypeFilter==="donor"){
+    combined=mockAsRows.filter(function(m){return m._contact_type==="donor";});
+  } else if(crmTypeFilter==="staff_external"){
+    combined=mockAsRows.filter(function(m){return m._contact_type==="staff_external";});
+  } else {
+    combined=mockAsRows;
+  }
+
+  var filtered=combined;
   if(crmStarFilter!=="ALL"){
     var min=parseInt(crmStarFilter);
-    filtered=filtered.filter(function(p){return tierToStars(p.priority_tier)>=min;});
+    filtered=filtered.filter(function(p){
+      var s=p._mock?(p._stars||0):tierToStars(p.priority_tier);
+      return s>=min;
+    });
   }
   if(sq){
     filtered=filtered.filter(function(p){return(p.player_name||"").toLowerCase().indexOf(sq)>=0;});
@@ -2658,9 +5543,20 @@ window.renderCRM=function(c){
   /* Total contacts count */
   var totalContacts=0;
   filtered.forEach(function(p){
-    totalContacts+=1; /* player */
-    totalContacts+=(familyMap[p.id]||[]).length;
-    totalContacts+=dummyContactsFor(p).length;
+    totalContacts+=1; /* player/entity */
+    if(!p._mock){
+      totalContacts+=(familyMap[p.id]||[]).length;
+      totalContacts+=dummyContactsFor(p).length;
+    } else {
+      var m=p._mockEntry;
+      if(m.parent1)totalContacts+=1;
+      if(m.parent2)totalContacts+=1;
+      if(m.guardian)totalContacts+=1;
+      if(m.hs_coach)totalContacts+=1;
+      if(m.aau_coach)totalContacts+=1;
+      if(m.agent)totalContacts+=1;
+      if(m.siblings)totalContacts+=(m.siblings||[]).length;
+    }
   });
 
   var h='';
@@ -2719,6 +5615,13 @@ window.renderCRM=function(c){
 
   /* Search */
   h+='<input class="inp mb-sm" placeholder="Search players..." oninput="onSearch(this.value)">';
+
+  /* Contact-type filter chips (S12 Patch 6) */
+  h+='<div class="fbar" style="margin-bottom:8px">';
+  [["ALL","All"],["portal","Portal"],["hs","High School"],["donor","Donors"],["staff_external","Staff External"]].forEach(function(t){
+    h+='<button class="fb'+(crmTypeFilter===t[0]?" a":"")+'" onclick="setCrmTypeFilter(\''+t[0]+'\')">'+t[1]+'</button>';
+  });
+  h+='</div>';
 
   /* Star filter chips */
   h+='<div class="fbar">';
@@ -2819,6 +5722,11 @@ window.renderCRM=function(c){
 
 /* Contact profile modal */
 window.openContactProfile=function(contactId,prospectId){
+  /* S12 Patch 6: mock entries route to rich render */
+  if(String(contactId).indexOf("mock-")===0){
+    window.openMockContactProfile(contactId);
+    return;
+  }
   var p=prospects.filter(function(x){return x.id===prospectId;})[0];
   if(!p)return;
   var isPlayer=String(contactId).indexOf("self-")===0;
@@ -2906,6 +5814,129 @@ window.openContactProfile=function(contactId,prospectId){
   if(isDummy){
     h+='<div style="margin-top:14px;padding:10px 12px;background:var(--surface-3);border-radius:8px;font-size:11px;color:var(--ink-3);text-align:center">Auto-generated contact \u2014 will be replaced when prospect_contacts schema lands</div>';
   }
+
+  h+='</div></div>';
+  document.getElementById("mc").innerHTML=h;
+};
+
+/* S12 Patch 6: rich rendering of mock contact entries */
+window.openMockContactProfile=function(mockId){
+  var all=(typeof window.mockContactsData==='function')?window.mockContactsData():[];
+  var m=all.filter(function(x){return x.id===mockId;})[0];
+  if(!m){console.error('mock id not found',mockId);return;}
+
+  function rowHTML(lbl,val){
+    if(!val)val='\u2014';
+    return '<div class="cp-row"><span class="cp-l">'+esc(lbl)+'</span><span class="cp-v">'+esc(String(val))+'</span></div>';
+  }
+  function contactBlock(title,c){
+    if(!c||!c.name)return'';
+    var h='<div class="cp-section-h">'+esc(title)+'</div>';
+    h+='<div class="cp-subcard">';
+    h+='<div class="cp-sub-head"><b>'+esc(c.name)+'</b>'+(c.relationship?' <span class="cp-rel">'+esc(c.relationship)+'</span>':'')+(c.agency?' <span class="cp-rel">'+esc(c.agency)+'</span>':'')+(c.program?' <span class="cp-rel">'+esc(c.program)+'</span>':'')+'</div>';
+    if(c.phone){
+      h+='<div class="cp-sub-actions">';
+      h+='<a href="tel:'+esc(c.phone)+'" class="cp-chip">\u260E '+esc(c.phone)+'</a>';
+      h+='<a href="sms:'+esc(c.phone)+'" class="cp-chip">Text</a>';
+      if(c.email)h+='<a href="mailto:'+esc(c.email)+'" class="cp-chip">\u2709 Email</a>';
+      h+='</div>';
+    } else if(c.email){
+      h+='<div class="cp-sub-actions"><a href="mailto:'+esc(c.email)+'" class="cp-chip">\u2709 '+esc(c.email)+'</a></div>';
+    }
+    h+='</div>';
+    return h;
+  }
+
+  var h='<div class="mbg" onclick="if(event.target===this)closeM()"><div class="mdl">';
+  h+='<div class="cp-header">';
+  h+='<button class="mdl-close cp-close" onclick="closeM()" aria-label="Close"></button>';
+
+  if(m.photo_url){
+    h+='<div class="cp-av-wrap"><div class="av av-photo av-hero" style="background-image:url('+esc(m.photo_url)+')"><span class="av-fallback">'+initialsOf(m.name)+'</span></div></div>';
+  } else {
+    h+='<div class="cp-av-wrap">'+photoAv(m.name,"hero")+'</div>';
+  }
+  h+='<div class="cp-name">'+esc(m.name)+'</div>';
+
+  var typeLabel=(m.contact_type==='portal')?'Portal recruit':(m.contact_type==='hs')?'HS recruit':(m.contact_type==='donor')?'Donor':(m.contact_type==='staff_external')?(m.staff_type||'External staff'):'Contact';
+  h+='<div class="cp-role">'+esc(typeLabel);
+  if(m.position)h+=' \u00b7 '+esc(m.position);
+  if(m.school)h+=' \u00b7 '+esc(m.school);
+  if(m.organization)h+=' \u00b7 '+esc(m.organization);
+  h+=' <span class="sr-demo">DEMO</span></div>';
+
+  if(m.stars>0){
+    h+='<div class="cp-stars">'+stars(m.stars,"lg")+'</div>';
+  }
+  h+='</div>';
+
+  h+='<div class="cp-actions">';
+  var primaryPhone=m.player_phone||m.phone||'';
+  var primaryEmail=m.player_email||m.email||'';
+  if(primaryPhone){
+    h+='<a class="cp-action" href="tel:'+esc(primaryPhone)+'"><span class="cp-ai">\u260E</span>Call</a>';
+    h+='<a class="cp-action" href="sms:'+esc(primaryPhone)+'"><span class="cp-ai">\u2709</span>Text</a>';
+  }
+  if(primaryEmail){
+    h+='<a class="cp-action" href="mailto:'+esc(primaryEmail)+'"><span class="cp-ai">@</span>Email</a>';
+  }
+  h+='</div>';
+
+  h+='<div class="cp-key">';
+  if(m.contact_type==='portal'||m.contact_type==='hs'){
+    h+=rowHTML('Phone',primaryPhone);
+    h+=rowHTML('Email',primaryEmail);
+    h+=rowHTML('Height',m.height);
+    if(m.weight)h+=rowHTML('Weight',m.weight+' lbs');
+    if(m.nil_estimate)h+=rowHTML('NIL estimate','$'+m.nil_estimate.toLocaleString());
+    if(m.rank_on3)h+=rowHTML('On3 rank','#'+m.rank_on3);
+    if(m.rank_247)h+=rowHTML('247 rank','#'+m.rank_247);
+    if(m.shoe_affiliation)h+=rowHTML('Shoe affiliation',m.shoe_affiliation);
+    if(m.instagram)h+=rowHTML('Instagram',m.instagram);
+  } else if(m.contact_type==='donor'){
+    h+=rowHTML('Phone',m.phone);
+    h+=rowHTML('Email',m.email);
+    h+=rowHTML('Location',(m.city||'')+(m.state?', '+m.state:''));
+    h+=rowHTML('Champions Circle',m.champions_circle);
+    h+=rowHTML('Total given',m.total_given);
+    h+=rowHTML('Last gift',m.last_gift+(m.last_gift_date?' on '+m.last_gift_date:''));
+    h+=rowHTML('Largest gift',m.largest_gift);
+    h+=rowHTML('Capacity',m.capacity_estimate);
+  } else if(m.contact_type==='staff_external'){
+    h+=rowHTML('Phone',m.phone);
+    h+=rowHTML('Email',m.email);
+    h+=rowHTML('Territory',m.territory);
+  }
+  h+='</div>';
+
+  if(m.fit_notes||m.notes){
+    h+='<div class="cp-section-h">'+((m.contact_type==='portal'||m.contact_type==='hs')?'Scouting':'Notes')+'</div>';
+    h+='<div style="font-size:13px;color:var(--ink-2);line-height:1.5;padding:4px 2px 12px">'+esc(m.fit_notes||m.notes)+'</div>';
+  }
+
+  if(m.contact_type==='portal'||m.contact_type==='hs'){
+    h+=contactBlock('Parent 1',m.parent1);
+    h+=contactBlock('Parent 2',m.parent2);
+    if(m.guardian)h+=contactBlock('Guardian',m.guardian);
+    h+=contactBlock('HS Coach',m.hs_coach);
+    h+=contactBlock('AAU Coach',m.aau_coach);
+    h+=contactBlock('Agent',m.agent);
+    if(m.siblings&&m.siblings.length){
+      h+='<div class="cp-section-h">Siblings</div>';
+      h+='<div class="cp-subcard">';
+      m.siblings.forEach(function(s){
+        h+='<div class="cp-sib-row"><b>'+esc(s.name)+'</b> <span class="cp-rel">age '+esc(String(s.age))+'</span>'+(s.notes?' <span style="color:var(--ink-3);font-size:12px">\u00b7 '+esc(s.notes)+'</span>':'')+'</div>';
+      });
+      h+='</div>';
+    }
+  }
+
+  h+='<div class="cp-foot-btns">';
+  h+='<button class="btn btn-line" onclick="toast(\'Edit \u2014 coming soon\')">Edit contact</button>';
+  h+='<button class="btn btn-line" onclick="toast(\'vCard exported\')">Export vCard</button>';
+  h+='</div>';
+
+  h+='<div style="margin-top:14px;padding:10px 12px;background:var(--surface-3);border-radius:8px;font-size:11px;color:var(--ink-3);text-align:center">DEMO entry \u2014 will be replaced by real crm_contacts data in CRM v1 (S13)</div>';
 
   h+='</div></div>';
   document.getElementById("mc").innerHTML=h;
