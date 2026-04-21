@@ -2383,25 +2383,7 @@ window.renderHome=function(c,portal,hs){
   var _cln=coach.name?(coach.name.split(" ").slice(-1)[0]):"";if(_cln.toLowerCase()==="coach")_cln="";h+='<div class="greet-line">'+greet+", Coach"+(_cln?" "+_cln:"")+'.</div>';
   h+='</div>';
 
-  /* SMART SUGGESTIONS */
-  var sugg=computeSmartSuggestions();
-  if(sugg.length){
-    h+='<div class="smart-card">';
-    h+='<div class="smart-head"><span class="smart-title">Smart Suggestions</span><span style="font-size:11px;color:var(--ink-3);cursor:pointer" onclick="navTo(\'crm\')">Open CRM \u2192</span></div>';
-    sugg.forEach(function(s){
-      var tap=(s.tapTarget&&s.tapTarget.type==="prospect")?'openP(\''+s.tapTarget.id+'\',\'p\')':'navTo(\'crm\')';
-      var icon=s.icon?('<span class="sr-icon">'+s.icon+'</span>'):'<span class="sr-dot"></span>';
-      var starsOrBadge=(s.stars>0)?stars(s.stars,"sm"):'';
-      var demoBadge=s.demo?' <span class="sr-demo">DEMO</span>':'';
-      h+='<div class="smart-row" onclick="'+tap+'">';
-      h+=icon;
-      h+='<span class="sr-text">'+esc(s.action)+' <b>'+esc(s.name)+'</b> '+starsOrBadge+demoBadge+'</span>';
-      h+='<span class="sr-meta">'+esc(s.meta)+'</span>';
-      h+='</div>';
-    });
-    h+='</div>';
-  }
-
+  
   /* today's brief */
   h+='<div class="sec-head"><span class="sec-title">Today\'s brief</span><span style="font-size:12px;color:var(--ink-3)">'+new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})+'</span></div>';
   h+='<div class="tile-grid mb-lg">';
