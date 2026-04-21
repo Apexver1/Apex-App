@@ -2267,7 +2267,7 @@ window.renderHome=function(c,portal,hs){
   var greet=greetingText();
   var openSchols=(schols.filter(function(s){return s.season==="2026-27";})[0]||{}).available_count||0;
   var pending=bRequests.filter(function(r){return r.status==="pending";}).length;
-  var followups=countOverdueFollowups();
+  /*S11:CRM follow-ups tile reads same engine as CRM page*/var followups=(typeof computeSmartSuggestions==='function')?computeSmartSuggestions().length:countOverdueFollowups();
   var remToday=countRemindersToday();
   var nextRem=nextReminderTime();
 
