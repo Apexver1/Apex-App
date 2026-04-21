@@ -382,6 +382,8 @@ select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50
 .smart-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:0.5px solid rgba(23,88,232,0.10);font-size:13px;cursor:pointer}
 .smart-row:first-of-type{border-top:none;padding-top:6px}
 .smart-row .sr-dot{width:7px;height:7px;border-radius:50%;background:var(--neg);flex-shrink:0}
+.sr-icon{font-size:14px;line-height:1;margin-right:6px;display:inline-block}
+.sr-demo{font-size:9px;font-weight:700;letter-spacing:0.5px;color:#999;background:#f0f0f0;padding:1px 5px;border-radius:3px;vertical-align:middle;margin-left:4px}
 .smart-row .sr-text{flex:1;color:var(--ink);line-height:1.35}
 .smart-row .sr-meta{color:var(--ink-3);font-size:11px;flex-shrink:0}
 
@@ -1251,6 +1253,7 @@ window.dummyContactsFor=function(p){
 window.computeSmartSuggestions=function(){
   var out=[];
   var now=new Date();
+  /* Real: contact decay rules reading crmLogs */
   prospects.forEach(function(p){
     var s=tierToStars(p.priority_tier);
     if(s<3)return;
@@ -1268,11 +1271,88 @@ window.computeSmartSuggestions=function(){
       stars:s,
       meta:stext,
       urgency:urgency,
-      action:daysSince>=999?"Reach out":"Follow up"
+      action:daysSince>=999?"Reach out":"Follow up",
+      kind:"contact_decay",
+      icon:"\u23f0",
+      tapTarget:{type:"prospect",id:p.id}
     });
   });
   out.sort(function(a,b){if(b.stars!==a.stars)return b.stars-a.stars;return b.urgency-a.urgency;});
-  return out.slice(0,3);
+  /* S12 prototype: blend in mock suggestions when real data is thin */
+  if(out.length<5 && typeof window.mockSmartSuggestions==='function'){
+    var mocks=window.mockSmartSuggestions();
+    for(var i=0;i<mocks.length && out.length<5;i++){
+      out.push(mocks[i]);
+    }
+  }
+  return out.slice(0,5);
+};
+
+/* S12 prototype: hardcoded mock Smart Suggestions for Oregon demo.
+   Will be replaced by real engine rules in S13+. */
+window.mockSmartSuggestions=function(){
+  return [
+    {
+      id:"mock-reece",
+      name:"Jalen Reece (PG)",
+      stars:5,
+      meta:"Just entered portal \u00b7 We need a PG",
+      urgency:10,
+      action:"Make contact",
+      kind:"portal_new_no_contact",
+      icon:"\u23f0",
+      demo:true,
+      tapTarget:{type:"mock"}
+    },
+    {
+      id:"mock-phoenix-trip",
+      name:"Phoenix trip (Fri-Sun)",
+      stars:0,
+      meta:"3 contacts nearby \u00b7 Diop \u00b7 Bidunga \u00b7 Dr. Chen",
+      urgency:15,
+      action:"View",
+      kind:"context_trip",
+      icon:"\ud83d\udccd",
+      demo:true,
+      tapTarget:{type:"mock"}
+    },
+    {
+      id:"mock-task-juke",
+      name:"Juke Harris",
+      stars:4,
+      meta:"Stewart asked \u00b7 due Friday EOD \u00b7 6h left",
+      urgency:20,
+      action:"Text",
+      kind:"task",
+      icon:"\ud83d\udccb",
+      demo:true,
+      tapTarget:{type:"mock"}
+    },
+    {
+      id:"mock-phillips-portal",
+      name:"Jamari Phillips",
+      stars:4,
+      meta:"Entered portal \u00b7 3 days no contact \u00b7 Retention risk",
+      urgency:12,
+      action:"Schedule exit conversation with",
+      kind:"roster_portal_exit",
+      icon:"\ud83d\udccd",
+      demo:true,
+      tapTarget:{type:"mock"}
+    },
+    {
+      id:"mock-donor-chen",
+      name:"Dr. Patricia Chen",
+      stars:0,
+      meta:"Donor \u00b7 90d since touch \u00b7 $50K last gift \u00b7 Portland OR",
+      urgency:8,
+      action:"Call",
+      kind:"donor_decay",
+      icon:"\ud83d\udcb0",
+      demo:true,
+      tapTarget:{type:"mock"}
+    }
+  ];
 };
 
 /* Splash screen entry — shows after login + loadData, hidden by ?splash=1 override */
@@ -2309,9 +2389,13 @@ window.renderHome=function(c,portal,hs){
     h+='<div class="smart-card">';
     h+='<div class="smart-head"><span class="smart-title">Smart Suggestions</span><span style="font-size:11px;color:var(--ink-3);cursor:pointer" onclick="navTo(\'crm\')">Open CRM \u2192</span></div>';
     sugg.forEach(function(s){
-      h+='<div class="smart-row" onclick="openP(\''+s.id+'\',\'p\')">';
-      h+='<span class="sr-dot"></span>';
-      h+='<span class="sr-text">'+s.action+' with <b>'+esc(s.name)+'</b> '+stars(s.stars,"sm")+'</span>';
+      var tap=(s.tapTarget&&s.tapTarget.type==="prospect")?'openP(\''+s.tapTarget.id+'\',\'p\')':'navTo(\'crm\')';
+      var icon=s.icon?('<span class="sr-icon">'+s.icon+'</span>'):'<span class="sr-dot"></span>';
+      var starsOrBadge=(s.stars>0)?stars(s.stars,"sm"):'';
+      var demoBadge=s.demo?' <span class="sr-demo">DEMO</span>':'';
+      h+='<div class="smart-row" onclick="'+tap+'">';
+      h+=icon;
+      h+='<span class="sr-text">'+esc(s.action)+' <b>'+esc(s.name)+'</b> '+starsOrBadge+demoBadge+'</span>';
       h+='<span class="sr-meta">'+esc(s.meta)+'</span>';
       h+='</div>';
     });
@@ -2566,9 +2650,13 @@ window.renderCRM=function(c){
     h+='<div class="smart-card">';
     h+='<div class="smart-head"><span class="smart-title">Smart Suggestions</span><span style="font-size:11px;color:var(--ink-3)">Top '+sugg.length+'</span></div>';
     sugg.forEach(function(s){
-      h+='<div class="smart-row" onclick="openP(\''+s.id+'\',\'p\')">';
-      h+='<span class="sr-dot"></span>';
-      h+='<span class="sr-text">Time to text <b>'+esc(s.name)+'</b> '+stars(s.stars,"sm")+' \u2014 '+esc(s.meta)+'</span>';
+      var tap=(s.tapTarget&&s.tapTarget.type==="prospect")?'openP(\''+s.tapTarget.id+'\',\'p\')':'void(0)';
+      var icon=s.icon?('<span class="sr-icon">'+s.icon+'</span>'):'<span class="sr-dot"></span>';
+      var starsOrBadge=(s.stars>0)?stars(s.stars,"sm"):'';
+      var demoBadge=s.demo?' <span class="sr-demo">DEMO</span>':'';
+      h+='<div class="smart-row" onclick="'+tap+'">';
+      h+=icon;
+      h+='<span class="sr-text">'+esc(s.action)+' <b>'+esc(s.name)+'</b> '+starsOrBadge+demoBadge+' \u2014 '+esc(s.meta)+'</span>';
       h+='</div>';
     });
     h+='</div>';
