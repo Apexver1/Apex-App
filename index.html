@@ -376,7 +376,9 @@ select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50
 .stars.lg .st{font-size:17px}
 
 /* SMART SUGGESTIONS card */
-.smart-card{background:var(--surface-3);border:0.5px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:18px}
+.smart-card{background:var(--surface-3);border:0.5px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:18px;transition:border-color 0.2s}
+.smart-card.has-items{border-color:var(--neg)}
+.smart-card.empty{border-color:var(--pos)}
 .smart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .smart-title{font-size:11px;font-weight:700;color:var(--ink);letter-spacing:0.5px;text-transform:uppercase}
 .smart-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:0.5px solid var(--line-2);font-size:13px;cursor:pointer}
@@ -2672,7 +2674,7 @@ window.renderCRM=function(c){
   /* Smart Suggestions */
   var sugg=computeSmartSuggestions();
   if(sugg.length){
-    h+='<div class="smart-card">';
+    h+='<div class="smart-card has-items">';
     h+='<div class="smart-head"><span class="smart-title">Smart Suggestions</span><span style="font-size:11px;color:var(--ink-3)">Top '+sugg.length+'</span></div>';
     sugg.forEach(function(s){
       var tap=(s.tapTarget&&s.tapTarget.type==="prospect")?'openP(\''+s.tapTarget.id+'\',\'p\')':'void(0)';
@@ -2685,12 +2687,17 @@ window.renderCRM=function(c){
       h+='</div>';
     });
     h+='</div>';
+  } else {
+    h+='<div class="smart-card empty">';
+    h+='<div class="smart-head"><span class="smart-title">Smart Suggestions</span><span style="font-size:11px;color:var(--pos)">All caught up</span></div>';
+    h+='<div class="smart-row" style="color:var(--ink-3);cursor:default">No suggestions right now \u2014 check back later.</div>';
+    h+='</div>';
   }
 
   /* S12 Coach Tasks card */
   var tasks=(typeof window.coachTasks==='function')?window.coachTasks():[];
   if(tasks.length){
-    h+='<div class="smart-card">';
+    h+='<div class="smart-card has-items">';
     h+='<div class="smart-head"><span class="smart-title">Coach Tasks</span><span style="font-size:11px;color:var(--ink-3)">'+tasks.length+' assigned</span></div>';
     tasks.forEach(function(t){
       var urgencyColor=(t.due_urgency==='today')?'var(--neg)':(t.due_urgency==='soon'?'var(--gold)':'var(--ink-3)');
@@ -2704,6 +2711,11 @@ window.renderCRM=function(c){
       h+=assignerChip;
       h+='</div>';
     });
+    h+='</div>';
+  } else {
+    h+='<div class="smart-card empty">';
+    h+='<div class="smart-head"><span class="smart-title">Coach Tasks</span><span style="font-size:11px;color:var(--pos)">All clear</span></div>';
+    h+='<div class="smart-row" style="color:var(--ink-3);cursor:default">No tasks assigned right now.</div>';
     h+='</div>';
   }
 
