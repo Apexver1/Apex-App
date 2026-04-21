@@ -5078,6 +5078,8 @@ window.staffByInitials=function(i){
   return staff.filter(function(s){return s.initials===i;})[0]||{name:i,initials:i,color:"var(--ink-3)"};
 };
 window.staffBlock=function(initials){
+  /* S12 Patch 6.2: guard against mock rows that lack initials array */
+  if(!initials||typeof initials.forEach!=='function')return '';
   var avs='<div class="visit-staff-avs">';
   var names=[];
   initials.forEach(function(i){
