@@ -5429,12 +5429,12 @@ window.renderRoster=function(c){
     var adjEmTone=adjEm>=4?'adj-strong':(adjEm>=0?'adj-mid':'adj-weak');
     var risk=null,riskClass='';
     var ppg=p.ppg||0;
-    var clsYr=p.recruiting_class_year?parseInt(p.recruiting_class_year):null;
-    var yrsIn=clsYr?(2026-clsYr):0;
     var srcU=(p.source||'').toUpperCase();
     if(srcU==='TRANSFER'||srcU==='PORTAL'){risk='transfer risk';riskClass='risk-warn';}
-    else if(apexN<=2&&ppg<6&&yrsIn>=1){risk='underused';riskClass='risk-danger';}
-    else if(apexN>=4&&ppg>10){risk='breakout';riskClass='risk-info';}
+    else if(apexN<=2&&ppg<8){risk='retain priority';riskClass='risk-info';}
+    else if(apexN===3&&ppg<5){risk='watch list';riskClass='risk-warn';}
+    else if(apexN>=4&&ppg>=4){risk='breakout';riskClass='risk-info';}
+    else if(apexN>=4&&ppg<2){risk='underused';riskClass='risk-danger';}
     h+='<div class="card" style="cursor:pointer" onclick="openP(\''+p.id+'\',\'r\')">';
     h+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">';
     h+=photoAv(p.player_name,"lg",p.photo_url);
