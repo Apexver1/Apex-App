@@ -5299,13 +5299,12 @@ window.renderHome=function(c,portal,hs){
   h+='<div class="sec-head"><span class="sec-title">Today\'s brief</span><span style="font-size:12px;color:var(--ink-3)">'+new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})+'</span></div>';
   h+='<div class="tile-grid mb-lg">';
   h+=tileHTML("Open scholarships",openSchols,"Of 13 \u00b7 2026\u201327","","builder");
-  h+=tileHTML("NIL requests",pending,"Pending approval",pending>0?"tile-warn":"","budget");
-  h+=tileHTML("CRM follow-ups",followups,followups>0?"Overdue today":"All caught up",followups>0?"tile-alert":"","crm");
+  h+=tileHTML("NIL requests",pending,"Pending approval",pending>0?"tile-warn":"","builder");
+  h+=tileHTML("CRM follow-ups",followups,followups>0?(followups+" overdue"+(nextRem&&nextRem!=="None"?" · next "+nextRem:"")):"All caught up",followups>0?"tile-alert":"","crm");
   var taskCount=(typeof window.coachTasks==='function')?window.coachTasks().length:0;
   h+=tileHTML("Tasks",taskCount,taskCount>0?"Assigned to you":"None assigned",taskCount>0?"tile-warn":"","crm");
-  h+=tileHTML("Reminders today",remToday,remToday>0?"Next: "+nextRem:"None scheduled","","crm");
-  h+=tileHTML("Portal churn \u00b7 24h","+"+portalChurn,"New entries","tile-info","recruiting");
-  h+=tileHTML("Visits this week",visitsWk.length,officials+" official \u00b7 "+unofficials+" unofficial","","visits");
+  h+=tileHTML("Portal Activity","+"+portalChurn,"New entries","tile-info","recruiting");
+  h+=tileHTML("Upcoming Visits",visitsWk.length,officials+" official \u00b7 "+unofficials+" unofficial","","visits");
   h+='</div>';
 
   /* next game */
