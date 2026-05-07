@@ -1059,7 +1059,7 @@ window.toast=function(msg,kind){
   setTimeout(function(){c.innerHTML="";},2400);
 };
 window.esc=function(s){if(s==null)return"";return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");};
-window.fmt$=function(n){if(n==null||isNaN(n))return"—";if(n>=1000000)return"$"+(n/1000000).toFixed(1)+"M";if(n>=1000)return"$"+Math.round(n/1000)+"K";return"$"+n;};
+window.fmt$=function(n){if(n==null||isNaN(n))return"—";var neg=n<0;n=Math.abs(n);var s;if(n>=1000000)s="$"+(n/1000000).toFixed(1)+"M";else if(n>=1000)s="$"+Math.round(n/1000)+"K";else s="$"+n;return neg?"-"+s:s;};
 window.coachFor=function(schoolId){
   return COACH_FALLBACK[schoolId]||{name:"Coach",role:"Head coach",initials:"C"};
 };
@@ -6057,7 +6057,7 @@ window.openMockContactProfile=function(mockId){
   h+='<button class="btn btn-line" onclick="toast(\'vCard exported\')">Export vCard</button>';
   h+='</div>';
 
-  h+='<div class="cp-demo-footer">DEMO entry \u2014 will be replaced by real crm_contacts data in CRM v1 (S13)</div>';
+  h+='<div class="cp-demo-footer">Sample contact \u2014 real records load when you connect your CRM</div>';
 
   h+='</div></div>';
   document.getElementById("mc").innerHTML=h;
